@@ -1,5 +1,8 @@
 ﻿using HrInternWebApp.Models;
 using Microsoft.AspNetCore.Mvc;
+using NHibernate;
+using NHibernate.Cfg;
+using NHSession = NHibernate.ISession;//if directly use ISession, do not know refer to Hibernate or AspNetCore.ISession
 
 namespace HrInternWebApp.Controllers
 {
@@ -12,20 +15,39 @@ namespace HrInternWebApp.Controllers
         }
 
         [HttpPost]
-        //used to submit data, Login is triggered when user submit login form
+        //used to submit data
         public IActionResult Login(LogIn model)
         {
             if (ModelState.IsValid)
             {
-                if (model.Username == "admin" && model.Password == "123")//hardcode the info
-                {
-                    return RedirectToAction("Index", "Home");
-                }
+                ISessionFactory factory = new Configuration().Configure().BuildSessionFactory();
 
-                //If credential are incorrect, add error to ModelState
-                ModelState.AddModelError(string.Empty, "Invalid username or password.");
+                using (NHSession session = factory.OpenSession())
+                {
+                    var employee = AuthenticateUser(session, model.username, model.password);
+
+                    if (employee != null) //if user found
+                    {
+                        //Save employee details in session
+                        HttpContext.Session.SetInt32("UserId", employee.empId);
+                        HttpContext.Session.SetString("Username", employee.username);
+
+                        // after successful login 
+                        return RedirectToAction("Home", "Leave");
+                    }
+                    //if credential invald, show error message
+                    ModelState.AddModelError(string.Empty, "Invalid username or password");
+                }
+                factory.Close();
             }
-            return View(model);
+            return View(model);//if validation fail, return to log in view
         }
+
+        private Employee AuthenticateUser(NHSession session, string username, string password)
+        {
+            var employee = session.Query<Employee>().FirstOrDefault(employee => employee.username == username && employee.password == password);
+            return employee;//return employee if found
+        }
+
     }
 }
