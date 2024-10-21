@@ -1,9 +1,10 @@
-﻿namespace HrInternWebApp.Models
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace HrInternWebApp.Models
 {
-      public class LogIn
+    public class LogIn
     {
-        public string username { get; set; }
-        public string password { get; set; }
-        public Boolean rememberMe { get; set; }
+        [Required] public virtual string Username { get; set; }
+        [Required] public virtual string Password { get; set; }
     }
 }

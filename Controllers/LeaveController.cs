@@ -1,12 +1,29 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using HrInternWebApp.Models;
+using NHibernate;
+using ISession = NHibernate.ISession; 
 
-namespace HrInternWebApp.Controllers
+public class LeaveController : Controller
 {
-    public class LeaveController: Controller
+    private readonly ISession _session;
+
+    public LeaveController(ISession session)
     {
-        public IActionResult Index()
+        _session = session;
+    }
+
+    public IActionResult ViewLeave() => View(_session.Query<Leave>().ToList());
+
+    public IActionResult ApplyLeave() => View();
+
+    [HttpPost]
+    public IActionResult ApplyLeave(Leave leave)
+    {
+        if (ModelState.IsValid)
         {
-            return View();
+            _session.SaveOrUpdate(leave);
+            return RedirectToAction("ViewLeave");
         }
+        return View(leave);
     }
 }

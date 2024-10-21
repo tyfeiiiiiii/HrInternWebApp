@@ -1,12 +1,15 @@
-﻿using Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.Blazor;
+﻿using HrInternWebApp.Models;
+using System.ComponentModel.DataAnnotations;
 
-namespace HrInternWebApp.Models
+public class Employee
 {
-    public class Employee
-    {
-        public virtual int empId { get; set; }
-        public virtual string username { get; set; }
-        public virtual string password { get; set; }
-        public virtual IList<Leave> Leave { get; set; }  // One employee can have many leaves
-    }
+    public virtual int  EmpId { get; set; }
+
+    [Required(ErrorMessage = "Username is required.")]
+    public virtual string Username { get; set; } 
+
+    [Required(ErrorMessage = "Password is required.")]
+    public virtual string Password { get; set; } 
+
+    public virtual IList<Leave> Leave { get; set; } = new List<Leave>(); 
 }

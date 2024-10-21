@@ -1,5 +1,4 @@
-﻿using FluentNHibernate.Conventions.Helpers;
-using FluentNHibernate.Mapping;
+﻿using FluentNHibernate.Mapping;
 
 namespace HrInternWebApp.Models
 {
@@ -9,9 +8,9 @@ namespace HrInternWebApp.Models
         {
             Table("Employee");
 
-            Id(emp => emp.empId);
-            Map(emp => emp.username);
-            Map(emp => emp.password);
+            Id(emp => emp.EmpId);
+            Map(emp => emp.Username);
+            Map(emp => emp.Password);
 
             HasMany(emp => emp.Leave)
                 .KeyColumn("empId")          // Define FK in the Leave table

@@ -1,0 +1,14 @@
+﻿<hibernate-configuration xmlns="urn:nhibernate-configuration-2.2">
+	<session-factory>
+		<property name="connection.driver_class">NHibernate.Driver.SqlClientDriver</property>
+		<property name="connection.connection_string">
+			Data Source=(localdb)\Local;Initial Catalog=HRManagementSystem;Integrated Security=True;
+		</property>
+
+		<property name="dialect">NHibernate.Dialect.MsSql2012Dialect</property>
+
+		<property name="show_sql">true</property>
+
+		<mapping assembly="HrInternWebApp" />
+	</session-factory>
+</hibernate-configuration>

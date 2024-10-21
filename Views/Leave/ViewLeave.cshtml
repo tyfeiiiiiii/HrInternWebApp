@@ -1,0 +1,38 @@
+﻿@model IEnumerable<HrInternWebApp.Models.Leave>
+
+<div class="container-fluid" style="background-color: #0E3B31; height: 100vh;">
+    <div class="row h-100">
+
+        <div class="col-md-3 p-3" style="background-color: #1A3E37;">
+            @await Html.PartialAsync("Sidebar") 
+        </div>
+
+        <div class="col-md-9" style="background-color: white; padding: 20px;">
+            <h2>Leave Applications</h2>
+            <table class="table table-bordered">
+                <thead>
+                    <tr>
+                        <th>Leave Type</th>
+                        <th>Start Date</th>
+                        <th>End Date</th>
+                        <th>Reason</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var leave in Model)
+                    {
+                        <tr>
+                            <td>@leave.LeaveType</td>
+                            <td>@leave.StartDate.ToShortDateString()</td>
+                            <td>@leave.EndDate.ToShortDateString()</td>
+                            <td>@leave.Reason</td>
+                            <td>@leave.Status</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+
+    </div>
+</div>

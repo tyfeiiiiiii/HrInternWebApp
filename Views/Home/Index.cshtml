@@ -1,0 +1,21 @@
+﻿@inject IHttpContextAccessor HttpContextAccessor
+
+<div class="container-fluid" style="background-color: #0E3B31; height: 100vh;">
+    <div class="row h-100">
+
+        <div class="col-md-3 p-3" style="background-color: #1A3E37;">
+            @await Html.PartialAsync("Sidebar")
+        </div>
+
+        <div class="col-md-9 d-flex justify-content-center align-items-center" style="background-color: white; padding: 20px;">
+            <div class="col-md-8 bg-light p-5 rounded" style="min-height: 70vh;">
+                <h2 class="text-center">Welcome, @HttpContextAccessor.HttpContext.Session.GetString("Username")</h2>
+                <div class="d-flex justify-content-center mt-4">
+                    <a class="btn btn-primary me-3" href="@Url.Action("ApplyLeave", "Leave")">Apply for Leave</a>
+                    <a class="btn btn-secondary" href="@Url.Action("ViewLeave", "Leave")">View Leave Applications</a>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>

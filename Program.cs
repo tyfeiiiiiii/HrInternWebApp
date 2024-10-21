@@ -1,3 +1,8 @@
+using FluentNHibernate.Cfg;
+using FluentNHibernate.Cfg.Db;
+using NHibernate;
+using HrInternWebApp.Models;  
+
 namespace HrInternWebApp
 {
     public class Program
@@ -5,15 +10,13 @@ namespace HrInternWebApp
         public static void Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
-
-            // Add services to the container.
+  
             builder.Services.AddControllersWithViews();
 
-            // Adds HttpContextAccessor service
-            builder.Services.AddHttpContextAccessor(); 
+ 
+            builder.Services.AddHttpContextAccessor();
 
 
-            // Add session services
             builder.Services.AddDistributedMemoryCache();
             builder.Services.AddSession(options =>
             {
@@ -21,6 +24,13 @@ namespace HrInternWebApp
                 options.Cookie.HttpOnly = true;
                 options.Cookie.IsEssential = true;
             });
+
+            // Create NHibernate session factory
+            var sessionFactory = CreateSessionFactory();
+            builder.Services.AddSingleton<ISessionFactory>(sessionFactory);  // Register session factory as a singleton service
+
+            // Add NHibernate session management
+            builder.Services.AddScoped(factory => sessionFactory.OpenSession());  // Inject NHibernate sessions
 
             var app = builder.Build();
 
@@ -41,10 +51,29 @@ namespace HrInternWebApp
             app.UseAuthorization();
 
             app.MapControllerRoute(
-                name: "default",
+              name: "login",
+              pattern: "{controller=LogIn}/{action=Login}/{id?}");
+
+            app.MapControllerRoute(
+                name: "home",
                 pattern: "{controller=Home}/{action=Index}/{id?}");
 
             app.Run();
+
+        }
+
+        // NHibernate configuration
+        public static ISessionFactory CreateSessionFactory()
+        {
+            return Fluently.Configure()
+                .Database(MsSqlConfiguration.MsSql2012
+                    .ConnectionString(@"Server=(localdb)\Local;Database=HRManagementSystem;Trusted_Connection=True;"))
+                .Mappings(m =>
+                {
+                    m.FluentMappings.AddFromAssemblyOf<EmployeeMap>();  
+                    m.FluentMappings.AddFromAssemblyOf<LeaveMap>();    
+                })
+                .BuildSessionFactory();
         }
     }
 }
