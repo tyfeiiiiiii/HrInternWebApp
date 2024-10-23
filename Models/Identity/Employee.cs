@@ -1,4 +1,4 @@
-﻿using HrInternWebApp.Models;
+﻿using HrInternWebApp.Models.Identity;
 using System.ComponentModel.DataAnnotations;
 
 public class Employee
@@ -12,4 +12,7 @@ public class Employee
     public virtual string Password { get; set; } 
 
     public virtual IList<Leave> Leave { get; set; } = new List<Leave>(); 
+
+    //Add a role session to check whether admin or user
+    public virtual string Role { get; set; }
 }

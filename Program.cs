@@ -1,7 +1,8 @@
 using FluentNHibernate.Cfg;
 using FluentNHibernate.Cfg.Db;
 using NHibernate;
-using HrInternWebApp.Models;  
+using HrInternWebApp.Models.Map;
+using HrInternWebApp.Services;  
 
 namespace HrInternWebApp
 {
@@ -10,13 +11,12 @@ namespace HrInternWebApp
         public static void Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
-  
+
+            // Add services to the container.
             builder.Services.AddControllersWithViews();
 
- 
+            // Add session and session timeout configurations
             builder.Services.AddHttpContextAccessor();
-
-
             builder.Services.AddDistributedMemoryCache();
             builder.Services.AddSession(options =>
             {
@@ -25,12 +25,18 @@ namespace HrInternWebApp
                 options.Cookie.IsEssential = true;
             });
 
-            // Create NHibernate session factory
+            // NHibernate session factory setup
             var sessionFactory = CreateSessionFactory();
-            builder.Services.AddSingleton<ISessionFactory>(sessionFactory);  // Register session factory as a singleton service
+            builder.Services.AddSingleton<ISessionFactory>(sessionFactory);  // Register session factory as singleton
 
-            // Add NHibernate session management
-            builder.Services.AddScoped(factory => sessionFactory.OpenSession());  // Inject NHibernate sessions
+            // NHibernate session management per request
+            builder.Services.AddScoped(factory => sessionFactory.OpenSession());  // Inject NHibernate session
+
+            // Register the LeaveService for dependency injection
+            builder.Services.AddScoped<LeaveService>();
+
+            // You can register other services like UserService here if needed
+            // builder.Services.AddScoped<UserService>();
 
             var app = builder.Build();
 
@@ -38,31 +44,27 @@ namespace HrInternWebApp
             if (!app.Environment.IsDevelopment())
             {
                 app.UseExceptionHandler("/Home/Error");
-                // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
                 app.UseHsts();
             }
 
             app.UseHttpsRedirection();
             app.UseStaticFiles();
             app.UseSession();
-
             app.UseRouting();
-
             app.UseAuthorization();
 
             app.MapControllerRoute(
-              name: "login",
-              pattern: "{controller=LogIn}/{action=Login}/{id?}");
+                name: "login",
+                pattern: "{controller=LogIn}/{action=Login}/{id?}");
 
             app.MapControllerRoute(
-                name: "home",
+                name: "default",
                 pattern: "{controller=Home}/{action=Index}/{id?}");
 
             app.Run();
-
         }
 
-        // NHibernate configuration
+        // Fluent NHibernate configuration for the session factory
         public static ISessionFactory CreateSessionFactory()
         {
             return Fluently.Configure()
@@ -70,8 +72,8 @@ namespace HrInternWebApp
                     .ConnectionString(@"Server=(localdb)\Local;Database=HRManagementSystem;Trusted_Connection=True;"))
                 .Mappings(m =>
                 {
-                    m.FluentMappings.AddFromAssemblyOf<EmployeeMap>();  
-                    m.FluentMappings.AddFromAssemblyOf<LeaveMap>();    
+                    m.FluentMappings.AddFromAssemblyOf<EmployeeMap>();  // Employee Map
+                    m.FluentMappings.AddFromAssemblyOf<LeaveMap>();     // Leave Map
                 })
                 .BuildSessionFactory();
         }

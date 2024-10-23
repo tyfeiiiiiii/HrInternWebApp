@@ -1,9 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using HrInternWebApp.Models;
 using NHibernate;
 using ISession = NHibernate.ISession;
-using Microsoft.AspNetCore.Authentication;
-using Microsoft.AspNetCore.Authentication.Cookies;
+using HrInternWebApp.Models.Identity;
 
 public class AuthenticationController : Controller
 {
@@ -23,8 +21,11 @@ public class AuthenticationController : Controller
                                .FirstOrDefault(e => e.Username == loginModel.Username && e.Password == loginModel.Password);
         if (employee != null)
         {
-            // Set username 
+            // Set username and role in session
             HttpContext.Session.SetString("Username", employee.Username);
+            HttpContext.Session.SetString("Role", employee.Role);  // Store the user role in session
+            HttpContext.Session.SetString("EmployeeId", employee.EmpId.ToString());  // Store EmployeeId
+
             return RedirectToAction("Index", "Home");
         }
 
@@ -35,6 +36,6 @@ public class AuthenticationController : Controller
     public IActionResult Logout()
     {
         HttpContext.Session.Clear();
-        return RedirectToAction("Login", "Authentication");
+        return RedirectToAction(nameof(AuthenticationController.Login));
     }
 }

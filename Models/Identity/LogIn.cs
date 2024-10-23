@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace HrInternWebApp.Models
+namespace HrInternWebApp.Models.Identity
 {
     public class LogIn
     {

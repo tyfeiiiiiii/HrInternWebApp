@@ -1,4 +1,4 @@
-﻿@model HrInternWebApp.Models.Leave
+﻿@model HrInternWebApp.Models.Identity.Leave 
 
 <div class="container-fluid" style="background-color: #0E3B31; height: 100vh;">
     <div class="row h-100">
@@ -24,7 +24,7 @@
                         <label asp-for="StartDate" class="col-sm-3 col-form-label">Duration:</label>
                         <div class="col-sm-4">
                             <input asp-for="StartDate" class="form-control" type="date" />
-                            <span asp-validation-for="StartDate" class="text-danger"></span>
+                             <span asp-validation-for="StartDate" class="text-danger"></span>
                         </div>
                         <div class="col-sm-1 text-center">to</div>
                         <div class="col-sm-4">

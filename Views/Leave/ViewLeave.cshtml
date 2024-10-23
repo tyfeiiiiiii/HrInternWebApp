@@ -1,12 +1,15 @@
-﻿@model IEnumerable<HrInternWebApp.Models.Leave>
+﻿@model IEnumerable<HrInternWebApp.Models.Identity.Leave>
+@inject IHttpContextAccessor HttpContextAccessor
 
 <div class="container-fluid" style="background-color: #0E3B31; height: 100vh;">
     <div class="row h-100">
 
+        <!-- Sidebar Section -->
         <div class="col-md-3 p-3" style="background-color: #1A3E37;">
-            @await Html.PartialAsync("Sidebar") 
+            @await Html.PartialAsync("Sidebar")
         </div>
 
+        <!-- Main Content Section -->
         <div class="col-md-9" style="background-color: white; padding: 20px;">
             <h2>Leave Applications</h2>
             <table class="table table-bordered">
@@ -17,6 +20,12 @@
                         <th>End Date</th>
                         <th>Reason</th>
                         <th>Status</th>
+
+                        <!-- Only show Action column if the user is an admin -->
+                        @if (HttpContextAccessor.HttpContext.Session.GetString("Role") == "Admin")
+                        {
+                            <th>Action</th>
+                        }
                     </tr>
                 </thead>
                 <tbody>
@@ -24,10 +33,25 @@
                     {
                         <tr>
                             <td>@leave.LeaveType</td>
-                            <td>@leave.StartDate.ToShortDateString()</td>
-                            <td>@leave.EndDate.ToShortDateString()</td>
+                            <td>@leave.StartDate</td>
+                            <td>@leave.EndDate</td>
                             <td>@leave.Reason</td>
                             <td>@leave.Status</td>
+
+                            <!-- Only show action buttons if the user is an admin -->
+                            @if (HttpContextAccessor.HttpContext.Session.GetString("Role") == "Admin")
+                            {
+                                <td>
+                                    <form asp-action="UpdateLeaveStatus" method="post">
+                                        <input type="hidden" name="leaveId" value="@leave.LeaveId" />
+                                        <select name="status">
+                                            <option value="Approved">Approved</option>
+                                            <option value="Rejected">Rejected</option>
+                                        </select>
+                                        <button type="submit" class="btn btn-primary">Update Status</button>
+                                    </form>
+                                </td>
+                            }
                         </tr>
                     }
                 </tbody>

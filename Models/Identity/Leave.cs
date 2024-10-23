@@ -1,20 +1,22 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace HrInternWebApp.Models
+namespace HrInternWebApp.Models.Identity
 {
     public class Leave
     {
-        public virtual int LeaveId { get; set; } 
+        public virtual int LeaveId { get; set; }
 
+
+        [Required(ErrorMessage = "Please fill in you leave type.")]
         public virtual string LeaveType { get; set; }
 
         [Required(ErrorMessage = "Please fill in start data of your leave.")]
         [DataType(DataType.Date)]
-        public virtual DateTime StartDate { get; set; }
+        public virtual DateTime? StartDate { get; set; }
 
         [Required(ErrorMessage = "Please fill in end data of your leave.")]
         [DataType(DataType.Date)]
-        public virtual DateTime EndDate { get; set; }
+        public virtual DateTime? EndDate { get; set; }
 
         [Required(ErrorMessage = "Please fill in you reason.")]
         [StringLength(255)]
