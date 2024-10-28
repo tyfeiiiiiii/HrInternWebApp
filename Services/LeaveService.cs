@@ -1,79 +1,55 @@
-﻿using NHibernate;
-using HrInternWebApp.Models.Identity;
-using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using HrInternWebApp.Models.Identity;
+using Microsoft.AspNetCore.Http;
+using NHibernate;
+using ISession = NHibernate.ISession;
 
-namespace HrInternWebApp.Services
+public class LeaveService
 {
-    public class LeaveService
+    private readonly ISession _session;
+
+    public LeaveService(ISession session)
     {
-        private readonly NHibernate.ISession _session;
+        _session = session;
+    }
 
-        public LeaveService(NHibernate.ISession session)
+    // Fetch all leave applications by employee ID (for normal employees)
+    public IList<Leave> GetLeavesByEmployee(int employeeId)
+    {
+        return _session.Query<Leave>()
+                       .Where(l => l.Employee.EmpId == employeeId)
+                       .ToList();
+    }
+
+    // Fetch all leave applications (for admin)
+    public IList<Leave> GetAllLeaves()
+    {
+        return _session.Query<Leave>().ToList();
+    }
+
+    // Apply for a new Leave
+    public void ApplyLeave(Leave leave, int employeeId)
+    {
+        leave.Employee = _session.Get<Employee>(employeeId);  // Associate employee
+        using (ITransaction transaction = _session.BeginTransaction())
         {
-            _session = session;
+            _session.Save(leave);
+            transaction.Commit();
         }
+    }
 
-        // Fetch all Leave applications by Employee ID
-        public IList<Leave> GetLeavesByEmployee(int employeeId)
+    // Update leave status (for admin)
+    public void UpdateLeaveStatus(int leaveId, string newStatus, string approver)
+    {
+        var leave = _session.Get<Leave>(leaveId);
+        if (leave != null)
         {
-            return _session.Query<Leave>()
-                           .Where(l => l.Employee.EmpId == employeeId)
-                           .ToList();
-        }
+            leave.Status = newStatus;
+            leave.Approver = approver;
 
-        // Apply for a new Leave
-        public void ApplyLeave(Leave leave, int employeeId)
-        {
-            leave.Employee = _session.Get<Employee>(employeeId); // Link Employee to Leave
             using (ITransaction transaction = _session.BeginTransaction())
             {
-                _session.SaveOrUpdate(leave);
+                _session.Update(leave);
                 transaction.Commit();
-            }
-        }
-
-        // Fetch all leaves (for admin or reporting purposes)
-        public IList<Leave> GetAllLeaves()
-        {
-            return _session.Query<Leave>().ToList();
-        }
-
-        // Update Leave status (e.g., Approve or Reject)
-        public void UpdateLeaveStatus(int leaveId, string newStatus, string approver)
-        {
-            var leave = _session.Get<Leave>(leaveId);
-            if (leave != null)
-            {
-                leave.Status = newStatus;
-                leave.Approver = approver;
-
-                using (ITransaction transaction = _session.BeginTransaction())
-                {
-                    _session.Update(leave);
-                    transaction.Commit();
-                }
-            }
-        }
-
-        // Get Leave by ID
-        public Leave GetLeaveById(int leaveId)
-        {
-            return _session.Get<Leave>(leaveId);
-        }
-
-        // Delete Leave (optional functionality)
-        public void DeleteLeave(int leaveId)
-        {
-            var leave = _session.Get<Leave>(leaveId);
-            if (leave != null)
-            {
-                using (ITransaction transaction = _session.BeginTransaction())
-                {
-                    _session.Delete(leave);
-                    transaction.Commit();
-                }
             }
         }
     }

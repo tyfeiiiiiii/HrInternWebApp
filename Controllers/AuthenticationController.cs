@@ -13,6 +13,22 @@ public class AuthenticationController : Controller
     }
 
     public IActionResult Login() => View();
+    public IActionResult SignUp() => View();
+
+    [HttpPost]
+    public IActionResult Signup(Employee employee)
+    {
+        if (ModelState.IsValid)
+        {
+            using (ITransaction transaction = _session.BeginTransaction())
+            {
+                _session.Save(employee);
+                transaction.Commit();
+            }
+            return RedirectToAction("Login");
+        }
+        return View(employee);  
+    }
 
     [HttpPost]
     public IActionResult Login(LogIn loginModel)

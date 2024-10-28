@@ -1,0 +1,51 @@
+﻿@model HrInternWebApp.Models.Identity.Employee;
+
+@{
+    ViewData["Title"] = "Sign Up";
+}
+
+<div class="container-fluid" style="background-color: #0E3B31;height:100vh">
+    <div class="row h-100">
+        <div class="col-md-5 d-flex flex-column justify-content-center align-items-center" style="background-color:white;">
+            <div class="text-center">
+                <h1>Sign Up</h1>
+            </div>
+        </div>
+        <div class="col-md-7 d-flex flex-column justify-content-center align-items-center" style="background-color:#0E3B31;">
+            <div class="signup-content p-5">
+                <form asp-action="Signup" method="post">
+
+                    <div class="form-group mb-4">
+                        <label for="Username" class="text-white">Username</label>
+                        <input type="text" id="username" name="Username" class="form-control" placeholder="Enter Username" />
+                    </div>
+
+                    <div class="form-group mb-4">
+                        <label for="Employee ID" class="text-white">Employee ID</label>
+                        <input type="text" id="empId" name="EmpId" class="form-control" placeholder="Enter Employee ID" />
+                    </div>
+
+                    <div class="form-group mb-4">
+                        <label for="Password" class="text-white">Password</label>
+                        <input type="password" id="password" name="Password" class="form-control" placeholder="Enter Password" />
+                    </div>
+
+                    <div class="form-group mb-4">
+                        <label for="Role" class="text-white">Role</label>
+                        <select id="role" name="Role" class="form-control">
+                            <option value="Admin">Admin</option>
+                            <option value="User">User</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group mb-4">
+                        <label for="Department" class="text-white">Department</label>
+                        <input type="text" id="department" name="Department" class="form-control" placeholder="Enter Department" />
+                    </div>
+
+                    <button type="submit" class="btn btn-primary w-100">Register</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

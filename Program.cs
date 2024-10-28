@@ -2,7 +2,6 @@ using FluentNHibernate.Cfg;
 using FluentNHibernate.Cfg.Db;
 using NHibernate;
 using HrInternWebApp.Models.Map;
-using HrInternWebApp.Services;  
 
 namespace HrInternWebApp
 {
@@ -60,6 +59,10 @@ namespace HrInternWebApp
             app.MapControllerRoute(
                 name: "default",
                 pattern: "{controller=Home}/{action=Index}/{id?}");
+
+            app.MapControllerRoute(
+                name: "signup",
+                pattern: "{controller=Authentication}/{action=Signup}");
 
             app.Run();
         }

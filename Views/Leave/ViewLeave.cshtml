@@ -3,7 +3,6 @@
 
 <div class="container-fluid" style="background-color: #0E3B31; height: 100vh;">
     <div class="row h-100">
-
         <!-- Sidebar Section -->
         <div class="col-md-3 p-3" style="background-color: #1A3E37;">
             @await Html.PartialAsync("Sidebar")
@@ -15,11 +14,14 @@
             <table class="table table-bordered">
                 <thead>
                     <tr>
+                        <th>Leave ID</th>
+                        <th>Employee ID</th>
                         <th>Leave Type</th>
                         <th>Start Date</th>
                         <th>End Date</th>
                         <th>Reason</th>
                         <th>Status</th>
+                        <th>Approver</th>
 
                         <!-- Only show Action column if the user is an admin -->
                         @if (HttpContextAccessor.HttpContext.Session.GetString("Role") == "Admin")
@@ -32,11 +34,14 @@
                     @foreach (var leave in Model)
                     {
                         <tr>
+                            <td>@leave.LeaveId</td>
+                            <td>@leave.Employee.EmpId</td>
                             <td>@leave.LeaveType</td>
                             <td>@leave.StartDate</td>
                             <td>@leave.EndDate</td>
                             <td>@leave.Reason</td>
                             <td>@leave.Status</td>
+                            <td>@leave.Approver</td>
 
                             <!-- Only show action buttons if the user is an admin -->
                             @if (HttpContextAccessor.HttpContext.Session.GetString("Role") == "Admin")
@@ -44,10 +49,24 @@
                                 <td>
                                     <form asp-action="UpdateLeaveStatus" method="post">
                                         <input type="hidden" name="leaveId" value="@leave.LeaveId" />
-                                        <select name="status">
-                                            <option value="Approved">Approved</option>
-                                            <option value="Rejected">Rejected</option>
+                                        <select name="status" class="form-select">
+                                            @if (leave.Status == "Approved")
+                                            {
+                                                <option value="Approved" selected="selected">Approved</option>
+                                                <option value="Rejected">Rejected</option>
+                                            }
+                                            else if (leave.Status == "Rejected")
+                                            {
+                                                <option value="Approved">Approved</option>
+                                                <option value="Rejected" selected="selected">Rejected</option>
+                                            }
+                                            else
+                                            {
+                                                <option value="Approved">Approved</option>
+                                                <option value="Rejected">Rejected</option>
+                                            }
                                         </select>
+
                                         <button type="submit" class="btn btn-primary">Update Status</button>
                                     </form>
                                 </td>
@@ -57,6 +76,5 @@
                 </tbody>
             </table>
         </div>
-
     </div>
 </div>

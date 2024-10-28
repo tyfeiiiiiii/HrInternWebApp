@@ -1,5 +1,4 @@
-﻿using HrInternWebApp.Services;
-using HrInternWebApp.Models.Identity;
+﻿using HrInternWebApp.Models.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
 
@@ -12,12 +11,34 @@ public class LeaveController : Controller
         leaveServices = leaveService;
     }
 
-    // View all leave applications
+    // View all leave applications based on the user's role
     public IActionResult ViewLeave()
     {
-        var leaves = leaveServices.GetAllLeaves();
-        return View("ViewLeave", leaves);  // Make sure you have a ViewLeave.cshtml file
+        string role = HttpContext.Session.GetString("Role");
+        string employeeIdString = HttpContext.Session.GetString("EmployeeId");
+
+        IList<Leave> leaves;
+
+        if (role == "Admin")
+        {
+            // Admin can see all leave applications
+            leaves = leaveServices.GetAllLeaves();
+        }
+        else if (int.TryParse(employeeIdString, out int employeeId))
+        {
+            // Normal users can only see their own leave applications
+            leaves = leaveServices.GetLeavesByEmployee(employeeId);
+        }
+        else
+        {
+            // Handle case where EmployeeId is not found or invalid
+            TempData["ErrorMessage"] = "Unable to find Employee ID.";
+            return RedirectToAction("Login", "Authentication");
+        }
+
+        return View("ViewLeave", leaves);  // Return filtered leave data
     }
+
 
     // GET: Show apply leave form
     public IActionResult ApplyLeave()
