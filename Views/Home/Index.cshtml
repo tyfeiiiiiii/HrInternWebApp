@@ -11,8 +11,8 @@
             <div class="col-md-8 bg-light p-5 rounded" style="min-height: 70vh;">
                 <h2 class="text-center">Welcome, @HttpContextAccessor.HttpContext.Session.GetString("Username")</h2>
                 <div class="d-flex justify-content-center mt-4">
-                    <a class="btn btn-primary me-3" href="@Url.Action("ApplyLeave", "Leave")">Apply for Leave</a>
-                    <a class="btn btn-secondary" href="@Url.Action("ViewLeave", "Leave")">View Leave Applications</a>
+                    <a class="btn btn-primary me-3" href="/Leave/ApplyLeave">Apply for Leave</a>
+                    <a class="btn btn-secondary" href="/Leave/ViewLeave">View Leave Applications</a>
                 </div>
             </div>
         </div>

@@ -9,7 +9,7 @@ namespace HrInternWebApp.Models.Map
         {
             Table("Employee");
 
-            Id(x => x.EmpId);
+            Id(x => x.empId).GeneratedBy.Assigned();
             Map(x => x.Username).Column("username").Not.Nullable();
             Map(x => x.Password).Column("password").Not.Nullable();
             Map(x => x.Role).Column("Role").Not.Nullable();

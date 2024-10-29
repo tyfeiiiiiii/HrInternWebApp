@@ -13,10 +13,10 @@ namespace HrInternWebApp.Models.Map
             Map(x => x.StartDate).Column("startDate").Not.Nullable();
             Map(x => x.EndDate).Column("endDate").Not.Nullable();
             Map(x => x.Reason).Column("reason").Not.Nullable();
-            Map(x => x.Status).Column("status");
-            Map(x => x.Approver).Column("approver");
+            Map(x => x.Status).Column("status").Nullable();
+            Map(x => x.Approver).Column("approver").Nullable();
 
-            References(x => x.Employee, "empId"); // Foreign key to Employee
+            References(x => x.Employee).Column( "empId").Not.Nullable(); // Foreign key to Employee
         }
     }
 }

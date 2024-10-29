@@ -25,7 +25,7 @@ public class AuthenticationController : Controller
                 _session.Save(employee);
                 transaction.Commit();
             }
-            return RedirectToAction("Login");
+            return RedirectToAction(nameof(AuthenticationController.Login));
         }
         return View(employee);  
     }
@@ -39,13 +39,13 @@ public class AuthenticationController : Controller
         {
             // Set username and role in session
             HttpContext.Session.SetString("Username", employee.Username);
-            HttpContext.Session.SetString("Role", employee.Role);  // Store the user role in session
-            HttpContext.Session.SetString("EmployeeId", employee.EmpId.ToString());  // Store EmployeeId
+            HttpContext.Session.SetString("Role", employee.Role);  
+            HttpContext.Session.SetString("EmployeeId", employee.empId.ToString());  
 
             return RedirectToAction("Index", "Home");
         }
 
-        ModelState.AddModelError("", "Invalid login attempt.");
+        ModelState.AddModelError("", "Invalid username or password.");
         return View(loginModel);
     }
 

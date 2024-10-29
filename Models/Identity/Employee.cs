@@ -5,7 +5,7 @@ namespace HrInternWebApp.Models.Identity
 {
     public class Employee
     {
-        public virtual int EmpId { get; set; }
+        public virtual int empId { get; set; }
 
         [Required(ErrorMessage = "Username is required.")]
         public virtual string Username { get; set; }

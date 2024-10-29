@@ -24,6 +24,20 @@ namespace HrInternWebApp
                 options.Cookie.IsEssential = true;
             });
 
+            // Add cookie-based authentication
+            builder.Services.AddAuthentication("MyCookieAuthenticationScheme")
+                .AddCookie("MyCookieAuthenticationScheme", options =>
+                {
+                    options.LoginPath = "/Authentication/Login"; // Set the login path
+                    options.AccessDeniedPath = "/Authentication/AccessDenied"; // Optional: Set access denied path
+                });
+
+            // Add authorization policies if needed
+            builder.Services.AddAuthorization(options =>
+            {
+                options.AddPolicy("AdminPolicy", policy => policy.RequireRole("Admin"));
+            });
+
             // NHibernate session factory setup
             var sessionFactory = CreateSessionFactory();
             builder.Services.AddSingleton<ISessionFactory>(sessionFactory);  // Register session factory as singleton
@@ -33,9 +47,6 @@ namespace HrInternWebApp
 
             // Register the LeaveService for dependency injection
             builder.Services.AddScoped<LeaveService>();
-
-            // You can register other services like UserService here if needed
-            // builder.Services.AddScoped<UserService>();
 
             var app = builder.Build();
 
@@ -50,11 +61,12 @@ namespace HrInternWebApp
             app.UseStaticFiles();
             app.UseSession();
             app.UseRouting();
-            app.UseAuthorization();
+            app.UseAuthentication(); // Enable authentication
+            app.UseAuthorization();  // Enable authorization
 
             app.MapControllerRoute(
                 name: "login",
-                pattern: "{controller=LogIn}/{action=Login}/{id?}");
+                pattern: "{controller=Authentication}/{action=Login}/{id?}");
 
             app.MapControllerRoute(
                 name: "default",

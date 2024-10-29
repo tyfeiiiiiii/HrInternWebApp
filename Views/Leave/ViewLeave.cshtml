@@ -35,13 +35,13 @@
                     {
                         <tr>
                             <td>@leave.LeaveId</td>
-                            <td>@leave.Employee.EmpId</td>
+                            <td>@leave.Employee.empId</td>
                             <td>@leave.LeaveType</td>
                             <td>@leave.StartDate</td>
                             <td>@leave.EndDate</td>
                             <td>@leave.Reason</td>
-                            <td>@leave.Status</td>
-                            <td>@leave.Approver</td>
+                            <td>@(string.IsNullOrEmpty(leave.Status) ? "Pending" : leave.Status)</td>
+                            <td>@(string.IsNullOrEmpty(leave.Approver) ? "" : leave.Approver)</td>
 
                             <!-- Only show action buttons if the user is an admin -->
                             @if (HttpContextAccessor.HttpContext.Session.GetString("Role") == "Admin")

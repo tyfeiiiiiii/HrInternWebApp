@@ -16,7 +16,7 @@ public class LeaveService
     public IList<Leave> GetLeavesByEmployee(int employeeId)
     {
         return _session.Query<Leave>()
-                       .Where(l => l.Employee.EmpId == employeeId)
+                       .Where(l => l.Employee.empId == employeeId)
                        .ToList();
     }
 

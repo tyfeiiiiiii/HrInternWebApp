@@ -50,13 +50,18 @@ public class LeaveController : Controller
     [HttpPost]
     public IActionResult ApplyLeave(Leave leave)
     {
+        ModelState.Remove("Status");
+        ModelState.Remove("Approver");
+        ModelState.Remove("Employee");
+
+        var employeeIdString = HttpContext.Session.GetString("EmployeeId");
+
         if (ModelState.IsValid)
         {
-            var employeeIdString = HttpContext.Session.GetString("EmployeeId");
 
-            if (string.IsNullOrEmpty(employeeIdString) || !int.TryParse(employeeIdString, out int employeeId))
+            if (string.IsNullOrEmpty(employeeIdString) || !int.TryParse(employeeIdString, out int employeeId))//convert string to integer
             {
-                ModelState.AddModelError("", "Unable to find EmployeeId.");
+                ModelState.AddModelError("", "Invalid Employee ID");
                 return View(leave);
             }
 
