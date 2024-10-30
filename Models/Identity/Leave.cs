@@ -2,7 +2,7 @@
 
 namespace HrInternWebApp.Models.Identity
 {
-    public class Leave
+    public class ApplyLeave
     {
         public virtual int LeaveId { get; set; }
 
@@ -22,10 +22,14 @@ namespace HrInternWebApp.Models.Identity
         [StringLength(255)]
         public virtual string Reason { get; set; }
 
-        public virtual string Status { get; set; }
-        public virtual string Approver { get; set; }
-
         // Foreign key reference to Employee
         public virtual Employee Employee { get; set; }
+
     }
+    public class ViewLeave : ApplyLeave
+    {
+        public virtual string Status { get; set; }
+        public virtual string Approver { get; set; }
+    }
+
 }

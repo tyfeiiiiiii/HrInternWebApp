@@ -87,8 +87,9 @@ namespace HrInternWebApp
                     .ConnectionString(@"Server=(localdb)\Local;Database=HRManagementSystem;Trusted_Connection=True;"))
                 .Mappings(m =>
                 {
-                    m.FluentMappings.AddFromAssemblyOf<EmployeeMap>();  // Employee Map
-                    m.FluentMappings.AddFromAssemblyOf<LeaveMap>();     // Leave Map
+                    m.FluentMappings.AddFromAssemblyOf<EmployeeMap>(); 
+                    //m.FluentMappings.AddFromAssemblyOf<ApplyLeaveMap>();    
+
                 })
                 .BuildSessionFactory();
         }

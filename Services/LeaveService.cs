@@ -13,21 +13,21 @@ public class LeaveService
     }
 
     // Fetch all leave applications by employee ID (for normal employees)
-    public IList<Leave> GetLeavesByEmployee(int employeeId)
+    public IList<ViewLeave> GetLeavesByEmployee(int employeeId)
     {
-        return _session.Query<Leave>()
+        return _session.Query<ViewLeave>()
                        .Where(l => l.Employee.empId == employeeId)
                        .ToList();
     }
 
     // Fetch all leave applications (for admin)
-    public IList<Leave> GetAllLeaves()
+    public IList<ViewLeave> GetAllLeaves()
     {
-        return _session.Query<Leave>().ToList();
+        return _session.Query<ViewLeave>().ToList();
     }
 
     // Apply for a new Leave
-    public void ApplyLeave(Leave leave, int employeeId)
+    public void ApplyLeave(ApplyLeave leave, int employeeId)
     {
         leave.Employee = _session.Get<Employee>(employeeId);  // Associate employee
         using (ITransaction transaction = _session.BeginTransaction())
@@ -40,7 +40,7 @@ public class LeaveService
     // Update leave status (for admin)
     public void UpdateLeaveStatus(int leaveId, string newStatus, string approver)
     {
-        var leave = _session.Get<Leave>(leaveId);
+        var leave = _session.Get<ViewLeave>(leaveId);
         if (leave != null)
         {
             leave.Status = newStatus;

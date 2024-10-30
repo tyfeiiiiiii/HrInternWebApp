@@ -1,16 +1,4 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <hibernate-mapping xmlns="urn:nhibernate-mapping-2.2" assembly="HrInternWebApp" namespace="HrInternWebApp.Models.Identity">
-	<!--<class name="Leave">
-		<id name="LeaveId">
-			<generator class="native"/>
-		</id>
-		
-		<property name="LeaveType"/>
-		<property name="StartDate"/>
-		<property name="EndDate"/>
-		<property name="Reason"/>
-		<property name="Status"/>
-		<property name="Approver"/>
 
-	</class>-->
 </hibernate-mapping>

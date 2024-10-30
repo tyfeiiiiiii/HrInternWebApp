@@ -1,4 +1,4 @@
-﻿@model HrInternWebApp.Models.Identity.Leave 
+﻿@model HrInternWebApp.Models.Identity.ApplyLeave 
 
 <div class="container-fluid" style="background-color: #0E3B31; height: 100vh;">
     <div class="row h-100">
@@ -12,13 +12,23 @@
                 <h2 class="text-center mb-5">Request Leave</h2>
                 <form asp-action="ApplyLeave" method="post">
 
-                    <div class="form-group row mb-5">
-                        <label asp-for="LeaveType" class="col-sm-3 col-form-label">Leave type:</label>
-                        <div class="col-sm-9">
-                            <input asp-for="LeaveType" class="form-control" placeholder="Enter the type of leave" />
-                            <span asp-validation-for="LeaveType" class="text-danger"></span>
-                        </div>
+                  <div class="form-group row mb-5">
+                    <label asp-for="LeaveType" class="col-sm-3 col-form-label">Leave type:</label>
+                    <div class="col-sm-9">
+                        <select asp-for="LeaveType" class="form-control">
+                            <option value="">Select leave type</option>
+                            <option value="Medical Leave">Medical Leave</option>
+                            <option value="Annual Leave">Annual Leave</option>
+                            <option value="Hospitalization">Hospitalization</option>
+                            <option value="Examination">Examination</option>
+                            <option value="Marriage Leave">Marriage Leave</option>
+                            <option value="Paternity Leave">Paternity Leave</option>
+                            <option value="Unpaid Leave">Unpaid Leave</option>
+                            <option value="Other Leave">Other Leave</option>
+                        </select>
+                        <span asp-validation-for="LeaveType" class="text-danger"></span>
                     </div>
+                </div>
 
                     <div class="form-group row mb-5">
                         <label asp-for="StartDate" class="col-sm-3 col-form-label">Duration:</label>

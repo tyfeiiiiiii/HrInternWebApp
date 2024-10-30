@@ -17,7 +17,7 @@ public class LeaveController : Controller
         string role = HttpContext.Session.GetString("Role");
         string employeeIdString = HttpContext.Session.GetString("EmployeeId");
 
-        IList<Leave> leaves;
+        IList<ViewLeave> leaves;
 
         if (role == "Admin")
         {
@@ -48,11 +48,8 @@ public class LeaveController : Controller
 
     // POST: Apply for leave
     [HttpPost]
-    public IActionResult ApplyLeave(Leave leave)
+    public IActionResult ApplyLeave(ApplyLeave leave)
     {
-        ModelState.Remove("Status");
-        ModelState.Remove("Approver");
-        ModelState.Remove("Employee");
 
         var employeeIdString = HttpContext.Session.GetString("EmployeeId");
 

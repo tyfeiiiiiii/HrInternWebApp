@@ -17,7 +17,7 @@ namespace HrInternWebApp.Models.Identity
 
         public virtual string Department { get; set; }
 
-        public virtual IList<Leave> Leave { get; set; } = new List<Leave>();
+        public virtual IList<ApplyLeave> Leave { get; set; } = new List<ApplyLeave>();
     }
 }
 
