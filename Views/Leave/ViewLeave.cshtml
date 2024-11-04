@@ -3,12 +3,10 @@
 
 <div class="container-fluid" style="background-color: #0E3B31; height: 100vh;">
     <div class="row h-100">
-        <!-- Sidebar Section -->
         <div class="col-md-3 p-3" style="background-color: #1A3E37;">
             @await Html.PartialAsync("Sidebar")
         </div>
 
-        <!-- Main Content Section -->
         <div class="col-md-9" style="background-color: white; padding: 20px;">
             <h2>Leave Applications</h2>
             <table class="table table-bordered">
@@ -16,6 +14,7 @@
                     <tr>
                         <th>Leave ID</th>
                         <th>Employee ID</th>
+                        <th>Username</th>
                         <th>Leave Type</th>
                         <th>Start Date</th>
                         <th>End Date</th>
@@ -23,7 +22,7 @@
                         <th>Status</th>
                         <th>Approver</th>
 
-                        <!-- Only show Action column if the user is an admin -->
+                        <!-- Show Action column only for Admins -->
                         @if (HttpContextAccessor.HttpContext.Session.GetString("Role") == "Admin")
                         {
                             <th>Action</th>
@@ -36,12 +35,13 @@
                         <tr>
                             <td>@leave.LeaveId</td>
                             <td>@leave.Employee.empId</td>
+                            <th>@leave.Employee.Username</th>
                             <td>@leave.LeaveType</td>
-                            <td>@leave.StartDate</td>
-                            <td>@leave.EndDate</td>
+                            <td>@leave.StartDate?.ToString("MM/dd/yyyy")</td>
+                            <td>@leave.EndDate?.ToString("MM/dd/yyyy")</td>
                             <td>@leave.Reason</td>
                             <td>@(string.IsNullOrEmpty(leave.Status) ? "Pending" : leave.Status)</td>
-                            <td>@(string.IsNullOrEmpty(leave.Approver) ? "" : leave.Approver)</td>
+                            <td>@(string.IsNullOrEmpty(leave.Approver) ? "N/A" : leave.Approver)</td>
 
                             <!-- Only show action buttons if the user is an admin -->
                             @if (HttpContextAccessor.HttpContext.Session.GetString("Role") == "Admin")
@@ -49,25 +49,38 @@
                                 <td>
                                     <form asp-action="UpdateLeaveStatus" method="post">
                                         <input type="hidden" name="leaveId" value="@leave.LeaveId" />
+                                        
                                         <select name="status" class="form-select">
                                             @if (leave.Status == "Approved")
                                             {
-                                                <option value="Approved" selected="selected">Approved</option>
-                                                <option value="Rejected">Rejected</option>
-                                            }
-                                            else if (leave.Status == "Rejected")
-                                            {
-                                                <option value="Approved">Approved</option>
-                                                <option value="Rejected" selected="selected">Rejected</option>
+                                                <option value="Approved" selected>Approved</option>
                                             }
                                             else
                                             {
                                                 <option value="Approved">Approved</option>
+                                            }
+
+                                            @if (leave.Status == "Rejected")
+                                            {
+                                                <option value="Rejected" selected>Rejected</option>
+                                            }
+                                            else
+                                            {
                                                 <option value="Rejected">Rejected</option>
+                                            }
+
+                                            @if (leave.Status == "Pending" || string.IsNullOrEmpty(leave.Status))
+                                            {
+                                                <option value="Pending" selected>Pending</option>
+                                            }
+                                            else
+                                            {
+                                                <option value="Pending">Pending</option>
                                             }
                                         </select>
 
-                                        <button type="submit" class="btn btn-primary">Update Status</button>
+
+                                        <button type="submit" class="btn btn-primary mt-2">Update Status</button>
                                     </form>
                                 </td>
                             }

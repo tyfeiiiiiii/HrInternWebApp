@@ -30,6 +30,7 @@ namespace HrInternWebApp.Models.Identity
     {
         public virtual string Status { get; set; }
         public virtual string Approver { get; set; }
+        public virtual string Username { get; set; }
     }
 
 }

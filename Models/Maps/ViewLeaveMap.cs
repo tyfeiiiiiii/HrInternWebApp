@@ -7,10 +7,10 @@ namespace HrInternWebApp.Models.Map
     {
         public ViewLeaveMap()
         {
-            // Discriminator value specific to ViewLeave
+            // Set the discriminator value if needed
             DiscriminatorValue("ViewLeave");
 
-            // Additional properties specific to ViewLeave
+            // Map the additional properties specific to ViewLeave
             Map(x => x.Status).Column("status").Nullable();
             Map(x => x.Approver).Column("approver").Nullable();
         }
