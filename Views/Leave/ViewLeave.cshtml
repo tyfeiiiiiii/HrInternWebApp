@@ -1,4 +1,4 @@
-﻿@model IEnumerable<HrInternWebApp.Models.Identity.ViewLeave>
+﻿@model IEnumerable<HrInternWebApp.Models.Identity.EditLeave>
 @inject IHttpContextAccessor HttpContextAccessor
 
 <div class="container-fluid" style="background-color: #0E3B31; height: 100vh;">
@@ -33,25 +33,24 @@
                     @foreach (var leave in Model)
                     {
                         <tr>
-                            <td>@leave.LeaveId</td>
-                            <td>@leave.Employee.empId</td>
-                            <th>@leave.Employee.Username</th>
-                            <td>@leave.LeaveType</td>
-                            <td>@leave.StartDate?.ToString("MM/dd/yyyy")</td>
-                            <td>@leave.EndDate?.ToString("MM/dd/yyyy")</td>
-                            <td>@leave.Reason</td>
-                            <td>@(string.IsNullOrEmpty(leave.Status) ? "Pending" : leave.Status)</td>
-                            <td>@(string.IsNullOrEmpty(leave.Approver) ? "N/A" : leave.Approver)</td>
-
+                            <td>@leave.leaveId</td>
+                            <td>@leave.empId</td>
+                            <td>@leave.username</td>
+                            <td>@leave.leaveType</td>
+                            <td>@leave.startDate?.ToString("MM/dd/yyyy")</td>
+                            <td>@leave.endDate?.ToString("MM/dd/yyyy")</td>
+                            <td>@leave.reason</td>
+                            <td>@(string.IsNullOrEmpty(leave.status) ? "Pending" : leave.status)</td>
+                            <td>@(string.IsNullOrEmpty(leave.approver) ? "N/A" : leave.approver)</td>
                             <!-- Only show action buttons if the user is an admin -->
                             @if (HttpContextAccessor.HttpContext.Session.GetString("Role") == "Admin")
                             {
                                 <td>
                                     <form asp-action="UpdateLeaveStatus" method="post">
-                                        <input type="hidden" name="leaveId" value="@leave.LeaveId" />
-                                        
+                                        <input type="hidden" name="leaveId" value="@leave.leaveId" />
+
                                         <select name="status" class="form-select">
-                                            @if (leave.Status == "Approved")
+                                            @if (leave.status == "Approved")
                                             {
                                                 <option value="Approved" selected>Approved</option>
                                             }
@@ -60,7 +59,7 @@
                                                 <option value="Approved">Approved</option>
                                             }
 
-                                            @if (leave.Status == "Rejected")
+                                            @if (leave.status == "Rejected")
                                             {
                                                 <option value="Rejected" selected>Rejected</option>
                                             }
@@ -69,7 +68,7 @@
                                                 <option value="Rejected">Rejected</option>
                                             }
 
-                                            @if (leave.Status == "Pending" || string.IsNullOrEmpty(leave.Status))
+                                            @if (leave.status == "Pending" || string.IsNullOrEmpty(leave.status))
                                             {
                                                 <option value="Pending" selected>Pending</option>
                                             }

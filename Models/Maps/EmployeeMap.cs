@@ -1,7 +1,7 @@
 ﻿using FluentNHibernate.Mapping;
-using HrInternWebApp.Models.Identity;
+using HrInternWebApp.Entity;
 
-namespace HrInternWebApp.Models.Map
+namespace HrInternWebApp.Models.Maps
 {
     public class EmployeeMap : ClassMap<Employee>
     {
@@ -10,15 +10,12 @@ namespace HrInternWebApp.Models.Map
             Table("Employee");
 
             Id(x => x.empId).GeneratedBy.Assigned();
-            Map(x => x.Username).Column("username").Not.Nullable();
-            Map(x => x.Password).Column("password").Not.Nullable();
-            Map(x => x.Role).Column("Role").Not.Nullable();
-            Map(x => x.Department).Column("department").Not.Nullable();
+            Map(x => x.username).Not.Nullable();
+            Map(x => x.password).Not.Nullable();
+            Map(x => x.Role).Not.Nullable();
+            Map(x => x.Department).Not.Nullable();
 
-            HasMany(x => x.Leave)
-                .KeyColumn("empId")   // Foreign key in the Leave table
-                .Inverse()
-                .Cascade.All();
+            HasMany(x => x.Leave).KeyColumn("empId").Inverse().Cascade.All();
         }
     }
 }

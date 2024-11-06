@@ -1,7 +1,7 @@
 using FluentNHibernate.Cfg;
 using FluentNHibernate.Cfg.Db;
 using NHibernate;
-using HrInternWebApp.Models.Map;
+using HrInternWebApp.Models.Maps;
 
 namespace HrInternWebApp
 {
@@ -61,8 +61,8 @@ namespace HrInternWebApp
             app.UseStaticFiles();
             app.UseSession();
             app.UseRouting();
-            app.UseAuthentication(); // Enable authentication
-            app.UseAuthorization();  // Enable authorization
+            //app.UseAuthentication(); // Enable authentication
+            //app.UseAuthorization();  // Enable authorization
 
             app.MapControllerRoute(
                 name: "login",
@@ -79,17 +79,58 @@ namespace HrInternWebApp
             app.Run();
         }
 
-        // Fluent NHibernate configuration for the session factory
+        //// Fluent NHibernate configuration for the session factory
+        //public static ISessionFactory CreateSessionFactory()
+        //{
+        //    //return Fluently.Configure()
+        //    //    .Database(MsSqlConfiguration.MsSql2012
+        //    //        .ConnectionString(@"Server=(localdb)\Local;Database=HRManagementSystem;Trusted_Connection=True;"))
+        //    //    .Mappings(m =>
+        //    //    {
+        //    //        m.FluentMappings.AddFromAssemblyOf<EmployeeMap>();
+        //    //        m.FluentMappings.AddFromAssemblyOf<LeaveMap>();
+        //    //    })
+        //    //    .BuildSessionFactory();
+
+        //}
         public static ISessionFactory CreateSessionFactory()
         {
-            return Fluently.Configure()
-                .Database(MsSqlConfiguration.MsSql2012
-                    .ConnectionString(@"Server=(localdb)\Local;Database=HRManagementSystem;Trusted_Connection=True;"))
-                .Mappings(m =>
+            try
+            {
+                return Fluently.Configure()
+                    .Database(MsSqlConfiguration.MsSql2012
+                        .ConnectionString(@"Server=(localdb)\Local;Database=HRManagementSystem;Trusted_Connection=True;"))
+                    .Mappings(m =>
+                    {
+                        // Add all mappings in the assembly
+                        m.FluentMappings.AddFromAssemblyOf<EmployeeMap>();
+                        m.FluentMappings.AddFromAssemblyOf<LeaveMap>();
+                    })
+                    .ExposeConfiguration(cfg =>
+                    {
+                        // Optional: Enable SQL logging for easier debugging
+                        cfg.SetProperty("show_sql", "true");
+                        cfg.SetProperty("format_sql", "true");
+                    })
+                    .BuildSessionFactory();
+            }
+            catch (FluentNHibernate.Cfg.FluentConfigurationException ex)
+            {
+                Console.WriteLine("FluentConfigurationException: " + ex.Message);
+                if (ex.InnerException != null)
                 {
-                    m.FluentMappings.AddFromAssemblyOf<EmployeeMap>();
-                })
-                .BuildSessionFactory();
+                    Console.WriteLine("Inner Exception: " + ex.InnerException.Message);
+                    Console.WriteLine("Inner Exception Type: " + ex.InnerException.GetType().ToString());
+                    Console.WriteLine("Stack Trace: " + ex.InnerException.StackTrace);
+                }
+                else
+                {
+                    Console.WriteLine("No Inner Exception Details Available.");
+                }
+                throw; // Re-throw to stop the application if configuration is invalid
+            }
+
         }
+
     }
 }

@@ -42,24 +42,22 @@ public class LeaveController : Controller
     }
     #endregion
 
-    #region View Leave
-    // View leave applications based on the user's role
-    public IActionResult ViewLeave()
+    public async Task<IActionResult> ViewLeave()
     {
         string role = HttpContext.Session.GetString("Role");
         string employeeIdString = HttpContext.Session.GetString("EmployeeId");
 
-        IList<ViewLeave> leaves;
+        IList<EditLeave> leaves;
 
         if (role == "Admin")
         {
             // Admin can see all leave applications
-            leaves = leaveServices.GetAllLeaves();
+            leaves = await leaveServices.GetAllLeaves();
         }
         else if (int.TryParse(employeeIdString, out int employeeId))
         {
             // Normal users can only see their own leave applications
-            leaves = leaveServices.GetLeavesByEmployee(employeeId);
+            leaves = await leaveServices.GetLeavesByEmployee(employeeId);
         }
         else
         {
@@ -69,7 +67,8 @@ public class LeaveController : Controller
 
         return View("ViewLeave", leaves);  // Return filtered leave data
     }
-    #endregion
+
+
 
     #region Update Leave Status
     // Update leave status, only for admins

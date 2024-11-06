@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using NHibernate;
 using ISession = NHibernate.ISession;
-using HrInternWebApp.Models.Identity;
+using HrInternWebApp.Entity;
 
 public class AuthenticationController : Controller
 {
@@ -16,8 +16,6 @@ public class AuthenticationController : Controller
     }
     #endregion
 
-    #region Actions
-
     #region Login Actions
     public IActionResult Login() => View();
 
@@ -25,11 +23,11 @@ public class AuthenticationController : Controller
     public IActionResult Login(LogIn loginModel)
     {
         var employee = _session.Query<Employee>()
-                               .FirstOrDefault(e => e.Username == loginModel.Username && e.Password == loginModel.Password);
+                               .FirstOrDefault(e => e.username == loginModel.Username && e.password == loginModel.Password);
         if (employee != null)
         {
             // Set username and role in session
-            HttpContext.Session.SetString("Username", employee.Username);
+            HttpContext.Session.SetString("Username", employee.username);
             HttpContext.Session.SetString("Role", employee.Role);
             HttpContext.Session.SetString("EmployeeId", employee.empId.ToString());
 
@@ -64,7 +62,5 @@ public class AuthenticationController : Controller
         }
         return View(employee);
     }
-    #endregion
-
     #endregion
 }

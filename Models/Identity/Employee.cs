@@ -1,23 +1,24 @@
-﻿using HrInternWebApp.Models.Identity;
-using System.ComponentModel.DataAnnotations;
+﻿//using System.ComponentModel.DataAnnotations;
+//using HrInternWebApp.Entity;
 
-namespace HrInternWebApp.Models.Identity 
-{
-    public class Employee
-    {
-        public virtual int empId { get; set; }
 
-        [Required(ErrorMessage = "Username is required.")]
-        public virtual string Username { get; set; }
+//namespace HrInternWebApp.Models.Identity
+//{
+//    public class Employee
+//    {
+//        public virtual int empId { get; set; }
 
-        [Required(ErrorMessage = "Password is required.")]
-        public virtual string Password { get; set; }
+//        [Required(ErrorMessage = "Username is required.")]
+//        public virtual string username { get; set; }
 
-        public virtual string Role { get; set; }
+//        [Required(ErrorMessage = "Password is required.")]
+//        public virtual string password { get; set; }
 
-        public virtual string Department { get; set; }
+//        public virtual string Role { get; set; }
 
-        public virtual IList<ApplyLeave> Leave { get; set; } = new List<ApplyLeave>();
-    }
-}
+//        public virtual string Department { get; set; }
+
+//        //public virtual IList<Leave> Leave { get; set; } = new List<Leave>();
+//    }
+//}
 

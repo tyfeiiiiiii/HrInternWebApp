@@ -1,6 +1,6 @@
 ﻿using NHibernate.Mapping;
 
-namespace HrInternWebApp.Models.Identity
+namespace HrInternWebApp.Entity
 {
     public class Home
     {

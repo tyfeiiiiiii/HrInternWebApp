@@ -13,9 +13,9 @@
                 <form asp-action="ApplyLeave" method="post">
 
                   <div class="form-group row mb-5">
-                    <label asp-for="LeaveType" class="col-sm-3 col-form-label">Leave type:</label>
+                    <label asp-for="leaveType" class="col-sm-3 col-form-label">Leave type:</label>
                     <div class="col-sm-9">
-                        <select asp-for="LeaveType" class="form-control">
+                        <select asp-for="leaveType" class="form-control">
                             <option value="">Select leave type</option>
                             <option value="Medical Leave">Medical Leave</option>
                             <option value="Annual Leave">Annual Leave</option>
@@ -26,28 +26,28 @@
                             <option value="Unpaid Leave">Unpaid Leave</option>
                             <option value="Other Leave">Other Leave</option>
                         </select>
-                        <span asp-validation-for="LeaveType" class="text-danger"></span>
+                        <span asp-validation-for="leaveType" class="text-danger"></span>
                     </div>
                 </div>
 
                     <div class="form-group row mb-5">
-                        <label asp-for="StartDate" class="col-sm-3 col-form-label">Duration:</label>
+                        <label asp-for="startDate" class="col-sm-3 col-form-label">Duration:</label>
                         <div class="col-sm-4">
-                            <input asp-for="StartDate" class="form-control" type="date" />
-                             <span asp-validation-for="StartDate" class="text-danger"></span>
+                            <input asp-for="startDate" class="form-control" type="date" />
+                             <span asp-validation-for="startDate" class="text-danger"></span>
                         </div>
                         <div class="col-sm-1 text-center">to</div>
                         <div class="col-sm-4">
-                            <input asp-for="EndDate" class="form-control" type="date" />
-                            <span asp-validation-for="EndDate" class="text-danger"></span>
+                            <input asp-for="endDate" class="form-control" type="date" />
+                            <span asp-validation-for="endDate" class="text-danger"></span>
                         </div>
                     </div>
 
                     <div class="form-group row mb-5">
-                        <label asp-for="Reason" class="col-sm-3 col-form-label">Description:</label>
+                        <label asp-for="reason" class="col-sm-3 col-form-label">Description:</label>
                         <div class="col-sm-9">
-                            <textarea asp-for="Reason" class="form-control" placeholder="Type your description here" style="height: 150px;"></textarea>
-                            <span asp-validation-for="Reason" class="text-danger"></span>
+                            <textarea asp-for="reason" class="form-control" placeholder="Type your description here" style="height: 150px;"></textarea>
+                            <span asp-validation-for="reason" class="text-danger"></span>
                         </div>
                     </div>
 
