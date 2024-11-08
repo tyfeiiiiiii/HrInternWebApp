@@ -9,17 +9,14 @@ namespace HrInternWebApp.Models.Maps
         {
             Table("Leave"); // Map to the Leave table in the database
             Id(x => x.leaveId).Column("leaveId").GeneratedBy.Identity();
-
-            // Map common properties from ApplyLeave
             Map(x => x.leaveType).Not.Nullable();
             Map(x => x.startDate).Not.Nullable();
             Map(x => x.endDate).Not.Nullable();
             Map(x => x.reason).Not.Nullable();
             Map(x => x.status).Nullable();
             Map(x => x.approver).Nullable();
-            Map(x => x.username).Nullable();
 
-            //Foreign key reference to Employee
+            //reference to Employee
             References(x => x.employee).Column("empId").Not.Nullable();
         }
     }

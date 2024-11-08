@@ -47,7 +47,7 @@ public class LeaveController : Controller
         string role = HttpContext.Session.GetString("Role");
         string employeeIdString = HttpContext.Session.GetString("EmployeeId");
 
-        IList<EditLeave> leaves;
+        IList<ViewLeave> leaves;
 
         if (role == "Admin")
         {

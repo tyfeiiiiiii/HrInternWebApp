@@ -5,7 +5,7 @@ namespace HrInternWebApp.Models.Identity
 {
     public class ApplyLeave
     {
-        public int leaveId { get; set; }
+        //public int leaveId { get; set; }
 
         [Required(ErrorMessage = "Please fill in your leave type.")]
         public string leaveType { get; set; }

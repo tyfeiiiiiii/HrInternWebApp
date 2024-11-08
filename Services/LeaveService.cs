@@ -6,6 +6,7 @@ using NHibernate.Transform;
 using Microsoft.Extensions.Logging;
 using HrInternWebApp.Models.Identity;
 using ISession = NHibernate.ISession;
+using NHibernate.Linq;
 
 public class LeaveService
 {
@@ -13,136 +14,100 @@ public class LeaveService
     private readonly ISessionFactory _sessionFactory;
     private readonly ILogger<LeaveService> _logger;
 
-    public LeaveService(ISession session, ILogger<LeaveService> logger)
+    public LeaveService(ISession session, ISessionFactory sessionFactory, ILogger<LeaveService> logger)
     {
-        _session = session;
+        _session = session ?? throw new ArgumentNullException(nameof(session));
         _sessionFactory = sessionFactory ?? throw new ArgumentNullException(nameof(sessionFactory));
-        _logger = logger;
+        _logger = logger ?? throw new ArgumentNullException(nameof(logger));
     }
-
-    public async Task TestSessionAsync()
-    {
-        // This method uses a new session from _sessionFactory for testing purposes
-        using (var session = _sessionFactory.OpenSession())
-        using (var transaction = session.BeginTransaction())
-        {
-            try
-            {
-                // Example operation
-                var employee = await session.GetAsync<Employee>(3); // Make sure employee ID 3 exists
-                _logger.LogInformation("Employee retrieved: {0}", employee?.username);
-
-                // Insert a leave record
-                var leave = new Leave
-                {
-                    empId = 3,
-                    leaveType = "Test Leave",
-                    startDate = DateTime.Now,
-                    endDate = DateTime.Now.AddDays(1),
-                    reason = "Testing",
-                    status = "Pending"
-                };
-
-                await session.SaveAsync(leave);
-                await transaction.CommitAsync();
-
-                _logger.LogInformation("Leave successfully saved with leave ID: {0}", leave.leaveId);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error in TestSessionAsync");
-                await transaction.RollbackAsync();
-            }
-        }
-    }
-
     #region Apply Leave
     public async Task ApplyLeave(ApplyLeave leave, int employeeId)
     {
         try
         {
-            // Associate the employee with the leave request
-            leave.employee = await _session.GetAsync<Employee>(employeeId);
+            if (_session.Connection.State == System.Data.ConnectionState.Closed)
+            {
+                _session.Connection.Open();
+            }
+            _logger.LogInformation($"Entering ApplyLeave for Employee ID: {employeeId}");
+            //leave.employee = await _session.GetAsync<Employee>(employeeId);
+            //var test = await _session.GetAsync<Employee>(employeeId);
+            if (leave.employee == null)
+            {
+                _logger.LogWarning($"No employee found with ID {employeeId}");
+                throw new InvalidOperationException($"Employee with ID {employeeId} does not exist.");
+            }
 
             using (var transaction = _session.BeginTransaction())
             {
                 await _session.SaveAsync(leave);
                 await transaction.CommitAsync();
+                _logger.LogInformation($"Leave record successfully saved for employee ID {employeeId}");
             }
-
-            _logger.LogInformation($"Leave application submitted for employee ID: {employeeId}");
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error applying for leave");
-            throw new Exception("Failed to apply for leave", ex);
+            _logger.LogError(ex, "An error occurred while applying for leave.");
+            throw;
         }
-    }
 
+    }
     #endregion
 
     #region Fetch Leaves
 
     // Fetch leave applications by employee ID (for users)
-    public async Task<IList<EditLeave>> GetLeavesByEmployee(int employeeId)
+    public async Task<IList<ViewLeave>> GetLeavesByEmployee(int employeeId)
     {
-        try
-        {
-            Leave leaveAlias = null;
-            Employee employeeAlias = null;
-            EditLeave getModel = null;
+        Leave leaveAlias = null;
+        Employee employeeAlias = null;
+        ViewLeave viewLeave = null;
 
-            var leaves = await _session.QueryOver(() => leaveAlias)
-                .JoinAlias(() => leaveAlias.employee, () => employeeAlias)
-                .Where(() => leaveAlias.employee.empId == employeeId)
-                .SelectList(list => list
-                    .Select(() => leaveAlias.leaveId).WithAlias(() => getModel.leaveId)
-                    .Select(() => leaveAlias.leaveType).WithAlias(() => getModel.leaveType)
-                    .Select(() => leaveAlias.startDate).WithAlias(() => getModel.startDate)
-                    .Select(() => leaveAlias.endDate).WithAlias(() => getModel.endDate)
-                    .Select(() => leaveAlias.reason).WithAlias(() => getModel.reason)
-                    .Select(() => leaveAlias.status).WithAlias(() => getModel.status)
-                    .Select(() => leaveAlias.approver).WithAlias(() => getModel.approver)
-                    .Select(() => employeeAlias.empId).WithAlias(() => getModel.empId)
-                    .Select(() => employeeAlias.username).WithAlias(() => getModel.username)
-                )
-                .TransformUsing(Transformers.AliasToBean<EditLeave>())
-                .ListAsync<EditLeave>();
+        var leaves = await _session.QueryOver(() => leaveAlias)
+            .JoinAlias(() => leaveAlias.employee, () => employeeAlias) 
+            .Where(() => employeeAlias.empId == employeeId) 
+            .SelectList(list => list
+                .Select(() => leaveAlias.leaveId).WithAlias(() => viewLeave.leaveId)
+                .Select(() => leaveAlias.leaveType).WithAlias(() => viewLeave.leaveType)
+                .Select(() => leaveAlias.startDate).WithAlias(() => viewLeave.startDate)
+                .Select(() => leaveAlias.endDate).WithAlias(() => viewLeave.endDate)
+                .Select(() => leaveAlias.reason).WithAlias(() => viewLeave.reason)
+                .Select(() => leaveAlias.status).WithAlias(() => viewLeave.status)
+                .Select(() => leaveAlias.approver).WithAlias(() => viewLeave.approver)
+                .Select(() => employeeAlias.empId).WithAlias(() => viewLeave.empId)
+                .Select(() => employeeAlias.username).WithAlias(() => viewLeave.username)
+            )
+            .TransformUsing(Transformers.AliasToBean<ViewLeave>())
+            .ListAsync<ViewLeave>();
 
-            _logger.LogInformation($"Retrieved {leaves.Count} leave(s) for employee ID: {employeeId}");
-            return leaves;
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error retrieving leaves for employee ID: {employeeId}");
-            throw;
-        }
+        _logger.LogInformation($"Retrieved {leaves.Count} leave(s) for employee ID: {employeeId}");
+        return leaves;
     }
 
 
-    public async Task<IList<EditLeave>> GetAllLeaves()
+    public async Task<IList<ViewLeave>> GetAllLeaves()
     {
         try
         {
             Leave leaveAlias = null;
             Employee employeeAlias = null;
-            EditLeave getModel = null;
+            ViewLeave viewLeave = null;
 
             var leaves = await _session.QueryOver(() => leaveAlias)
                 .JoinAlias(() => leaveAlias.employee, () => employeeAlias)
                 .SelectList(list => list
-                    .Select(() => leaveAlias.leaveId).WithAlias(() => getModel.leaveId)
-                    .Select(() => leaveAlias.leaveType).WithAlias(() => getModel.leaveType)
-                    .Select(() => leaveAlias.startDate).WithAlias(() => getModel.startDate)
-                    .Select(() => leaveAlias.endDate).WithAlias(() => getModel.endDate)
-                    .Select(() => leaveAlias.reason).WithAlias(() => getModel.reason)
-                    .Select(() => leaveAlias.status).WithAlias(() => getModel.status)
-                    .Select(() => leaveAlias.approver).WithAlias(() => getModel.approver)
-                    .Select(() => employeeAlias.empId).WithAlias(() => getModel.empId)
-                    .Select(() => employeeAlias.username).WithAlias(() => getModel.username)
+                    .Select(() => leaveAlias.leaveId).WithAlias(() => viewLeave.leaveId)
+                    .Select(() => leaveAlias.leaveType).WithAlias(() => viewLeave.leaveType)
+                    .Select(() => leaveAlias.startDate).WithAlias(() => viewLeave.startDate)
+                    .Select(() => leaveAlias.endDate).WithAlias(() => viewLeave.endDate)
+                    .Select(() => leaveAlias.reason).WithAlias(() => viewLeave.reason)
+                    .Select(() => leaveAlias.status).WithAlias(() => viewLeave.status)
+                    .Select(() => leaveAlias.approver).WithAlias(() => viewLeave.approver)
+                    .Select(() => employeeAlias.empId).WithAlias(() => viewLeave.empId)
+                    .Select(() => employeeAlias.username).WithAlias(() => viewLeave.username)
                 )
-                .TransformUsing(Transformers.AliasToBean<EditLeave>())
-                .ListAsync<EditLeave>();
+                .TransformUsing(Transformers.AliasToBean<ViewLeave>())
+                .ListAsync<ViewLeave>();
 
             _logger.LogInformation($"Retrieved {leaves.Count} leave(s) for admin view");
             return leaves;
@@ -153,6 +118,7 @@ public class LeaveService
             throw;
         }
     }
+
 
     #endregion
 
