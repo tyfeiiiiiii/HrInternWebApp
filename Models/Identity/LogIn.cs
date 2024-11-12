@@ -5,5 +5,6 @@ namespace HrInternWebApp.Models.Identity
     {
         [Required] public virtual string Username { get; set; }
         [Required] public virtual string Password { get; set; }
+        public bool RememberMe { get; set; }
     }
 }

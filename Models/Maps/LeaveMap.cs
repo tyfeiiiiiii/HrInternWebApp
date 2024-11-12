@@ -8,6 +8,8 @@ namespace HrInternWebApp.Models.Maps
         public LeaveMap()
         {
             Table("Leave"); // Map to the Leave table in the database
+            DynamicInsert();
+            DynamicUpdate();
             Id(x => x.leaveId).Column("leaveId").GeneratedBy.Identity();
             Map(x => x.leaveType).Not.Nullable();
             Map(x => x.startDate).Not.Nullable();

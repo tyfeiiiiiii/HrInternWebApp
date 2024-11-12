@@ -22,6 +22,7 @@ namespace HrInternWebApp
                 options.IdleTimeout = TimeSpan.FromMinutes(30);
                 options.Cookie.HttpOnly = true;
                 options.Cookie.IsEssential = true;
+                options.Cookie.SecurePolicy = CookieSecurePolicy.Always; // Enforce HTTPS
             });
 
             // Add cookie-based authentication
@@ -30,6 +31,8 @@ namespace HrInternWebApp
                 {
                     options.LoginPath = "/Authentication/Login"; // Set the login path
                     options.AccessDeniedPath = "/Authentication/AccessDenied"; // Optional: Set access denied path
+                    options.Cookie.HttpOnly = true;
+                    options.Cookie.SecurePolicy = CookieSecurePolicy.Always; // Enforce HTTPS
                 });
 
             // Add authorization policies if needed
@@ -47,6 +50,7 @@ namespace HrInternWebApp
 
             // Register the LeaveService for dependency injection
             builder.Services.AddScoped<LeaveService>();
+            builder.Services.AddScoped<EmployeeService>();
 
             var app = builder.Build();
 
@@ -61,8 +65,8 @@ namespace HrInternWebApp
             app.UseStaticFiles();
             app.UseSession();
             app.UseRouting();
-            //app.UseAuthentication(); // Enable authentication
-            //app.UseAuthorization();  // Enable authorization
+            app.UseAuthentication(); 
+            app.UseAuthorization(); 
 
             app.MapControllerRoute(
                 name: "login",
@@ -76,6 +80,11 @@ namespace HrInternWebApp
                 name: "signup",
                 pattern: "{controller=Authentication}/{action=Signup}");
 
+            app.MapControllerRoute(
+                name: "default",
+                pattern: "{controller=Employee}/{action=EmpHome}/{id?}");
+
+
             app.Run();
         }
 
@@ -87,53 +96,13 @@ namespace HrInternWebApp
                     .ConnectionString(@"Server=(localdb)\Local;Database=HRManagementSystem;Trusted_Connection=True;"))
                 .Mappings(m =>
                 {
+                    //no need to add on each map file as the n hibernat will combine tgt since th einitial file that stated here
                     m.FluentMappings.AddFromAssemblyOf<EmployeeMap>();
-                    //m.FluentMappings.AddFromAssemblyOf<LeaveMap>();
                 })
                 .BuildSessionFactory();
 
+
+
         }
-
-
-        //public static ISessionFactory CreateSessionFactory()
-        //{
-        //    try
-        //    {
-        //                    return Fluently.Configure()
-        //        .Database(MsSqlConfiguration.MsSql2012
-        //            .ConnectionString(@"Server=(localdb)\Local;Database=HRManagementSystem;Trusted_Connection=True;"))
-        //        .Mappings(m =>
-        //        {
-        //            // Add all mappings in the assembly
-        //            m.FluentMappings.AddFromAssemblyOf<EmployeeMap>();
-        //            m.FluentMappings.AddFromAssemblyOf<LeaveMap>();
-        //        })
-        //        .ExposeConfiguration(cfg =>
-        //        {
-        //            // Optional: Enable SQL logging for easier debugging
-        //            cfg.SetProperty("show_sql", "true");
-        //            cfg.SetProperty("format_sql", "true");
-        //        })
-        //        .BuildSessionFactory();
-
-        //    }
-        //    catch (FluentNHibernate.Cfg.FluentConfigurationException ex)
-        //    {
-        //        Console.WriteLine("FluentConfigurationException: " + ex.Message);
-        //        if (ex.InnerException != null)
-        //        {
-        //            Console.WriteLine("Inner Exception: " + ex.InnerException.Message);
-        //            Console.WriteLine("Inner Exception Type: " + ex.InnerException.GetType().ToString());
-        //            Console.WriteLine("Stack Trace: " + ex.InnerException.StackTrace);
-        //        }
-        //        else
-        //        {
-        //            Console.WriteLine("No Inner Exception Details Available.");
-        //        }
-        //        throw; // Re-throw to stop the application if configuration is invalid
-        //    }
-
-        //}
-
     }
     }

@@ -22,7 +22,6 @@
                         <th>Status</th>
                         <th>Approver</th>
 
-                        <!-- Show Action column only for Admins -->
                         @if (HttpContextAccessor.HttpContext.Session.GetString("Role") == "Admin")
                         {
                             <th>Action</th>

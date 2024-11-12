@@ -10,11 +10,9 @@ namespace HrInternWebApp.Controllers
             var Username = HttpContext.Session.GetString("Username");
 
             if (string.IsNullOrEmpty(Username))
-            {
-                return RedirectToAction("Login", "LogIn");
+            { 
+                return RedirectToAction(nameof(AuthenticationController.Login));
             }
-
-
             ViewBag.Username = Username;
             return View();
         }

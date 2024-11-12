@@ -1,12 +1,12 @@
 ﻿using HrInternWebApp.Models.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
+using System.Collections.Generic;
 
 public class LeaveController : Controller
 {
-  
     private readonly LeaveService leaveServices;
-  
+
     #region Constructor
     public LeaveController(LeaveService leaveService)
     {
@@ -23,7 +23,7 @@ public class LeaveController : Controller
 
     // POST: Apply for leave
     [HttpPost]
-    public IActionResult ApplyLeave(ApplyLeave leave)
+    public async Task<IActionResult> ApplyLeave(ApplyLeave leave)
     {
         var employeeIdString = HttpContext.Session.GetString("EmployeeId");
 
@@ -35,13 +35,14 @@ public class LeaveController : Controller
                 return View(leave);
             }
 
-            leaveServices.ApplyLeave(leave, employeeId);
-            return RedirectToAction("ViewLeave");
+            await leaveServices.ApplyLeaveAsync(leave, employeeId);
+            return RedirectToAction(nameof(LeaveController.ViewLeave));
         }
         return View(leave);  // Return form with validation errors if model is invalid
     }
     #endregion
 
+    #region View Leave
     public async Task<IActionResult> ViewLeave()
     {
         string role = HttpContext.Session.GetString("Role");
@@ -52,29 +53,28 @@ public class LeaveController : Controller
         if (role == "Admin")
         {
             // Admin can see all leave applications
-            leaves = await leaveServices.GetAllLeaves();
+            leaves = await leaveServices.GetAllLeavesAsync(); // Synchronous call
         }
         else if (int.TryParse(employeeIdString, out int employeeId))
         {
             // Normal users can only see their own leave applications
-            leaves = await leaveServices.GetLeavesByEmployee(employeeId);
+            leaves = await leaveServices.GetLeavesByEmployeeAsync(employeeId); // Synchronous call
         }
         else
         {
             TempData["ErrorMessage"] = "Unable to find Employee ID.";
-            return RedirectToAction("Login", "Authentication");
+            return RedirectToAction(nameof(AuthenticationController.Login));
         }
 
         return View("ViewLeave", leaves);  // Return filtered leave data
     }
-
-
+    #endregion
 
     #region Update Leave Status
     // Update leave status, only for admins
     //[HttpPost]
     //[Authorize(Roles = "Admin")]
-    public IActionResult UpdateLeaveStatus(int leaveId, string status)
+    public async Task<IActionResult> UpdateLeaveStatusAsync(int leaveId, string status)
     {
         var approver = HttpContext.Session.GetString("Username");
 
@@ -83,8 +83,8 @@ public class LeaveController : Controller
             return RedirectToAction("Login", "Authentication");
         }
 
-        leaveServices.UpdateLeaveStatus(leaveId, status, approver);
-        return RedirectToAction("ViewLeave");
+        await leaveServices.UpdateLeaveStatusAsync(leaveId, status, approver);
+        return RedirectToAction(nameof(LeaveController.ViewLeave));
     }
     #endregion
 }
