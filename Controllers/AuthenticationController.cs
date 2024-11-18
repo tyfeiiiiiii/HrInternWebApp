@@ -28,8 +28,6 @@ public class AuthenticationController : Controller
     [HttpPost]
     public IActionResult Login(LogIn loginModel, bool RememberMe)
     {
-        _logger.LogInformation("Login attempt for username: {Username}", loginModel.Username);
-
         var employee = _session.Query<Employee>()
                                .FirstOrDefault(e => e.username == loginModel.Username && e.password == loginModel.Password);
         if (employee != null)
@@ -54,22 +52,21 @@ public class AuthenticationController : Controller
                     Path = "/"  // Cookie available within entire application
                 };
                 Response.Cookies.Append("RememberMeName", employee.username, options);
-                Response.Cookies.Append("RememberMePass", employee.password, options);
+                Response.Cookies.Append("RememberMeId", employee.empId.ToString(), options);
             }
 
-            // Set ViewBag values to retrieve them when loading the form
+            // Set ViewBag values to retrieve value when loading the form
             ViewBag.RememberMeName = Request.Cookies["RememberMeName"];
-            ViewBag.RememberMePassword = Request.Cookies["RememberMePass"];
+            ViewBag.RememberMeId = Request.Cookies["RememberMeId"];
 
             return RedirectToAction("Index", "Home");
         }
 
-        _logger.LogWarning("Invalid login attempt for username: {Username}", loginModel.Username);
         ModelState.AddModelError("", "Invalid username or password.");
 
         // Set ViewBag values even if login fails
         ViewBag.RememberMeName = Request.Cookies["RememberMeName"];
-        ViewBag.RememberMePassword = Request.Cookies["RememberMePass"];
+        ViewBag.RememberMeId = Request.Cookies["RememberMeId"];
 
         return View(loginModel);
     }
@@ -78,12 +75,10 @@ public class AuthenticationController : Controller
     public IActionResult Logout()
     {
         HttpContext.Session.Clear();
-        _logger.LogInformation("Session cleared");
 
         //// Remove cookies when logging out
         //Response.Cookies.Delete("RememberMeName");
-
-        //Response.Cookies.Delete("RememberMePass");
+        //Response.Cookies.Delete("RememberMeId");
 
         return RedirectToAction(nameof(AuthenticationController.Login));
     }
@@ -94,18 +89,25 @@ public class AuthenticationController : Controller
     public IActionResult SignUp() => View();
 
     [HttpPost]
-    public IActionResult Signup(Employee employee)
+    public async Task<IActionResult> Signup(Employee model, IFormFile ProfilePic)
     {
+        if (ProfilePic != null && ProfilePic.Length > 0)
+        {
+            using var memoryStream = new MemoryStream();
+            await ProfilePic.CopyToAsync(memoryStream);
+            model.profilePic = memoryStream.ToArray(); // Convert to byte array
+        }
+
+        // Validate model and perform additional checks as necessary
         if (ModelState.IsValid)
         {
-            using (ITransaction transaction = _session.BeginTransaction())
-            {
-                _session.Save(employee);
-                transaction.Commit();
-            }
-            return RedirectToAction(nameof(AuthenticationController.Login));
+            using var transaction = _session.BeginTransaction();
+            _session.Save(model);
+            await transaction.CommitAsync();
+            return RedirectToAction("Login");
         }
-        return View(employee);
+
+        return View(model); // Re-display the form if there are errors
     }
     #endregion
 }

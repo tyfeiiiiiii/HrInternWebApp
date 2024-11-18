@@ -20,10 +20,7 @@
                 @if (!ViewData.ModelState.IsValid)
                 {
                     <div class="alert alert-danger" role="alert">
-                        @foreach (var error in ViewData.ModelState.Values.SelectMany(v => v.Errors))
-                        {
-                            <p>@error.ErrorMessage</p>
-                        }
+                        Invalid username or password.
                     </div>
                 }
 
@@ -43,6 +40,19 @@
                     </div>
 
                     <div class="form-group mb-4">
+                        <label for="Username" class="text-white">EmployeeId</label>
+                        <div class="input-group">
+                            <div class="input-group-prepend">
+                                <span class="input-group-text">
+                                    <i class="bi bi-code-square"></i>
+                                </span>
+                            </div>
+                            <input type="text" id="empId" name="empId" class="form-control"
+                                   placeholder="Enter EmployeeId" value="@ViewBag.RememberMeId" />
+                        </div>
+                    </div>
+
+                    <div class="form-group mb-4">
                         <label for="password" class="text-white">Password</label>
                         <div class="input-group">
                             <div class="input-group-prepend">
@@ -51,7 +61,7 @@
                                 </span>
                             </div>
                             <input type="password" id="password" name="password" class="form-control"
-                                   placeholder="Enter Password" value="@ViewBag.RememberMePass" />
+                                   placeholder="Enter Password"/>
                         </div>
                     </div>
 

@@ -8,7 +8,21 @@
         </div>
 
         <div class="col-md-9" style="background-color: white; padding: 20px;">
-            <h2>Leave Applications</h2>
+            <nav class="navbar navbar-light bg-light justify-content-between">
+                <a class="navbar-brand">Leave Applications</a>
+                <form class="form-inline d-flex" method="get" asp-action="ViewLeave">
+                    <input class="form-control mr-2" type="search" name="empId"placeholder="Search by Employee Id" aria-label="Search">
+                    <button class="btn btn-outline-success" type="submit">Search</button>
+                </form>
+            </nav>
+
+            @if (TempData["ErrorMessage"] != null)
+            {
+                <div class="alert alert-danger mt-3">
+                    @TempData["ErrorMessage"]
+                </div>
+            }
+
             <table class="table table-bordered">
                 <thead>
                     <tr>

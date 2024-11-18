@@ -43,7 +43,7 @@ public class LeaveController : Controller
     #endregion
 
     #region View Leave
-    public async Task<IActionResult> ViewLeave()
+    public async Task<IActionResult> ViewLeave(string empId)
     {
         string role = HttpContext.Session.GetString("Role");
         string employeeIdString = HttpContext.Session.GetString("EmployeeId");
@@ -52,13 +52,32 @@ public class LeaveController : Controller
 
         if (role == "Admin")
         {
-            // Admin can see all leave applications
-            leaves = await leaveServices.GetAllLeavesAsync(); // Synchronous call
+            leaves = await leaveServices.GetAllLeavesAsync();
+
+            // If search by key in empId
+            if (!string.IsNullOrEmpty(empId) && int.TryParse(empId, out int employeeIdFilter))
+            {
+                leaves = leaves.Where(l => l.empId == employeeIdFilter).ToList();
+            }
         }
         else if (int.TryParse(employeeIdString, out int employeeId))
         {
-            // Normal users can only see their own leave applications
-            leaves = await leaveServices.GetLeavesByEmployeeAsync(employeeId); // Synchronous call
+            // Normal users can only see own leave applications
+            if (!string.IsNullOrEmpty(empId) && int.TryParse(empId, out int employeeIdFilter) && employeeIdFilter != employeeId)
+            {
+                // If a normal user search for an employee ID that is not their own, show an error message
+                TempData["ErrorMessage"] = "You do not have the privilege to view other users' leave applications.";
+                return View("ViewLeave", new List<ViewLeave>()); 
+            }
+
+            // Fetch leaves for the logged-in user
+            leaves = await leaveServices.GetLeavesByEmployeeAsync(employeeId);
+
+            if (!leaves.Any())
+            {
+                TempData["ErrorMessage"] = "No records found for your Employee ID.";
+                return View("ViewLeave", new List<ViewLeave>()); // Return an empty list
+            }
         }
         else
         {
@@ -66,8 +85,9 @@ public class LeaveController : Controller
             return RedirectToAction(nameof(AuthenticationController.Login));
         }
 
-        return View("ViewLeave", leaves);  // Return filtered leave data
+        return View("ViewLeave", leaves);  
     }
+
     #endregion
 
     #region Update Leave Status

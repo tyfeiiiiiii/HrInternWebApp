@@ -29,10 +29,10 @@ namespace HrInternWebApp
             builder.Services.AddAuthentication("MyCookieAuthenticationScheme")
                 .AddCookie("MyCookieAuthenticationScheme", options =>
                 {
-                    options.LoginPath = "/Authentication/Login"; // Set the login path
-                    options.AccessDeniedPath = "/Authentication/AccessDenied"; // Optional: Set access denied path
+                    options.LoginPath = "/Authentication/Login"; 
+                    //options.AccessDeniedPath = "/Authentication/AccessDenied"; // Optional: Set access denied path
                     options.Cookie.HttpOnly = true;
-                    options.Cookie.SecurePolicy = CookieSecurePolicy.Always; // Enforce HTTPS
+                    options.Cookie.SecurePolicy = CookieSecurePolicy.Always; 
                 });
 
             // Add authorization policies if needed
@@ -81,8 +81,8 @@ namespace HrInternWebApp
                 pattern: "{controller=Authentication}/{action=Signup}");
 
             app.MapControllerRoute(
-                name: "default",
-                pattern: "{controller=Employee}/{action=EmpHome}/{id?}");
+                name: "employeeHome",
+                pattern: "{controller=Employee}/{action=ViewEmp}/{id?}");
 
 
             app.Run();

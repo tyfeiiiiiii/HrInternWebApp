@@ -11,9 +11,11 @@ namespace HrInternWebApp.Models.Maps
 
             Id(x => x.empId).GeneratedBy.Assigned();
             Map(x => x.username).Not.Nullable();
-            Map(x => x.password).Not.Nullable();
+            Map(x => x.password).Nullable();
             Map(x => x.Role).Not.Nullable();
             Map(x => x.Department).Not.Nullable();
+            Map(x => x.email).Not.Nullable();
+            Map(x => x.profilePic).CustomType("BinaryBlob").Nullable();
 
             HasMany(x => x.Leave).KeyColumn("empId").Inverse().Cascade.All();
         }

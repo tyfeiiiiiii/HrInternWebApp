@@ -13,7 +13,7 @@
         </div>
         <div class="col-md-7 d-flex flex-column justify-content-center align-items-center" style="background-color:#0E3B31;">
             <div class="signup-content p-5">
-                <form asp-action="Signup" method="post">
+                <form asp-action="Signup" method="post" enctype="multipart/form-data">
 
                     <div class="form-group mb-4">
                         <label for="Username" class="text-white">Username</label>
@@ -26,6 +26,11 @@
                     </div>
 
                     <div class="form-group mb-4">
+                        <label for="Email" class="text-white">Email</label>
+                        <input type="text" id="email" name="Email" class="form-control" placeholder="Enter Email" />
+                    </div>
+
+                    <div class="form-group mb-4">
                         <label for="Password" class="text-white">Password</label>
                         <input type="password" id="password" name="Password" class="form-control" placeholder="Enter Password" />
                     </div>
@@ -34,7 +39,9 @@
                         <label for="Role" class="text-white">Role</label>
                         <select id="role" name="Role" class="form-control">
                             <option value="Admin">Admin</option>
-                            <option value="User">User</option>
+                            <option value="Manager">Manager</option>
+                            <option value="Senior">Senior</option>
+                            <option value="Junior">Junior</option>
                         </select>
                     </div>
 
@@ -49,6 +56,11 @@
                                 <option value="Operation">Operation</option>
                             </select>
                             <span asp-validation-for="Department" class="text-danger"></span>
+                    </div>
+
+                    <div class="form-group mb-4">
+                        <label for="profilePic" class="text-white">Upload Profile </label>
+                        <input type="file" id="profilePic" name="ProfilePic" class="form-control-file" accept="image/*" />
                     </div>
 
                     <button type="submit" class="btn btn-primary w-100">Register</button>

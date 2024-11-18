@@ -73,7 +73,6 @@ public class LeaveService
 
     #region Fetch Leaves
 
-    // Fetch leave applications by employee ID (for users) using QueryOver with join logic
     public async Task<IList<ViewLeave>> GetLeavesByEmployeeAsync(int employeeId)
     {
         try
@@ -110,7 +109,6 @@ public class LeaveService
         }
     }
 
-    // Fetch all leave applications (for admins) using synchronous QueryOver (if needed)
     public async Task<IList<ViewLeave>> GetAllLeavesAsync()
     {
         try

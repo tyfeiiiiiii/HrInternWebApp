@@ -1,127 +1,113 @@
-﻿using NHibernate;
-using HrInternWebApp.Entity;
+﻿using HrInternWebApp.Entity;
+using NHibernate;
 using Microsoft.Extensions.Logging;
 using System.Collections.Generic;
-using System.Linq;
+using System.Threading.Tasks;
+using HrInternWebApp.Models.Identity;
 using ISession = NHibernate.ISession;
 
 public class EmployeeService
 {
-    #region Fields
     private readonly ISession _session;
     private readonly ILogger<EmployeeService> _logger;
-    #endregion
 
-    #region Constructor
     public EmployeeService(ISession session, ILogger<EmployeeService> logger)
     {
         _session = session;
         _logger = logger;
     }
-    #endregion
 
-    #region Get All Employees
-    public IList<Employee> GetAllEmployees()
+    public async Task CreateEmployeeAsync(Employee employee)
     {
-        try
+        using (var transaction = _session.BeginTransaction())
         {
-            var employees = _session.Query<Employee>().ToList();
-            _logger.LogInformation($"Retrieved {employees.Count} employee(s) from the database.");
-            return employees;
-        }
-        catch (System.Exception ex)
-        {
-            _logger.LogError(ex, "Error retrieving all employees.");
-            throw;
-        }
-    }
-    #endregion
-
-    #region Get Employee By ID
-    public Employee GetEmployeeById(int id)
-    {
-        try
-        {
-            var employee = _session.Get<Employee>(id);
-            if (employee == null)
+            try
             {
-                _logger.LogWarning($"Employee with ID {id} not found.");
+                await _session.SaveAsync(employee);
+                await transaction.CommitAsync();
+                _logger.LogInformation($"Employee record successfully created for ID {employee.empId}");
             }
-            return employee;
-        }
-        catch (System.Exception ex)
-        {
-            _logger.LogError(ex, "Error retrieving employee with ID {Id}", id);
-            throw;
-        }
-    }
-    #endregion
-
-    #region Create Employee
-    public void CreateEmployee(Employee employee)
-    {
-        try
-        {
-            using (var transaction = _session.BeginTransaction())
+            catch (Exception ex)
             {
-                _session.Save(employee);
-                transaction.Commit();
-                _logger.LogInformation($"Employee created successfully with ID {employee.empId}.");
+                await transaction.RollbackAsync();
+                _logger.LogError(ex, "Failed to create employee");
+                throw;
             }
         }
-        catch (System.Exception ex)
-        {
-            _logger.LogError(ex, "Error creating employee.");
-            throw;
-        }
     }
-    #endregion
 
-    #region Update Employee
-    public void UpdateEmployee(Employee employee)
+    public async Task<IList<Employee>> GetAllEmployeesAsync()
     {
         try
         {
-            using (var transaction = _session.BeginTransaction())
+            return await _session.QueryOver<Employee>().ListAsync();
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error retrieving all employees");
+            throw;
+        }
+    }
+
+    public async Task<Employee> GetEmployeeByIdAsync(int employeeId)
+    {
+        try
+        {
+            return await _session.GetAsync<Employee>(employeeId);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error retrieving employee with ID {EmployeeId}", employeeId);
+            throw;
+        }
+    }
+
+    public async Task UpdateEmployeeAsync(Employee employee)
+    {
+        using (var transaction = _session.BeginTransaction())
+        {
+            try
             {
-                _session.Update(employee);
-                transaction.Commit();
-                _logger.LogInformation($"Employee with ID {employee.empId} updated successfully.");
+                await _session.UpdateAsync(employee);
+                await transaction.CommitAsync();
+                _logger.LogInformation($"Employee record updated for ID {employee.empId}");
+            }
+            catch (Exception ex)
+            {
+                await transaction.RollbackAsync();
+                _logger.LogError(ex, "Failed to update employee");
+                throw;
             }
         }
-        catch (System.Exception ex)
-        {
-            _logger.LogError(ex, "Error updating employee with ID {Id}", employee.empId);
-            throw;
-        }
     }
-    #endregion
 
-    #region Delete Employee
-    public void DeleteEmployee(int id)
+    public async Task DeleteEmployeeAsync(int employeeId)
     {
-        try
+        using (var transaction = _session.BeginTransaction())
         {
-            var employee = _session.Get<Employee>(id);
-            if (employee != null)
+            try
             {
-                using (var transaction = _session.BeginTransaction())
+                var employee = await _session.GetAsync<Employee>(employeeId);
+                if (employee != null)
                 {
-                    _session.Delete(employee);
-                    transaction.Commit();
-                    _logger.LogInformation($"Employee with ID {id} deleted successfully.");
+                    // Add any additional cleanup of related data if necessary here
+
+                    await _session.DeleteAsync(employee);
+                    await transaction.CommitAsync();
+                    _logger.LogInformation($"Employee record deleted for ID {employeeId}");
+                }
+                else
+                {
+                    _logger.LogWarning($"Employee with ID {employeeId} not found.");
                 }
             }
-            else
+            catch (Exception ex)
             {
-                _logger.LogWarning($"Employee with ID {id} not found for deletion.");
+                await transaction.RollbackAsync();
+                _logger.LogError(ex, "Failed to delete employee");
+                throw;
             }
         }
-        catch (System.Exception ex)
-        {
-            _logger.LogError(ex, "Error deleting employee with ID {Id}", id);
-            throw;
-        }
     }
-    #endregion
+
 }
