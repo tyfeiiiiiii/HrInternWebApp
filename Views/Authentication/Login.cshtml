@@ -17,10 +17,10 @@
                 <h2 class="text-white mb-4">Welcome Back</h2>
                 <p class="text-white mb-4">Sign in to your account</p>
 
-                @if (!ViewData.ModelState.IsValid)
+                @if (TempData["ErrorMessage"] != null)
                 {
-                    <div class="alert alert-danger" role="alert">
-                        Invalid username or password.
+                    <div class="alert alert-danger">
+                        @TempData["ErrorMessage"]
                     </div>
                 }
 

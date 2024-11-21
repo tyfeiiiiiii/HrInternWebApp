@@ -22,7 +22,6 @@
                     <div class="col-md-4 mb-4">
                         <div class="card shadow-sm h-100">
                             <div class="card-body text-center">
-                                <!-- Profile Image -->
                                 @if (employee.profilePic != null && employee.profilePic.Length > 0)
                                 {
                                     <img src="data:image/png;base64,@(Convert.ToBase64String(employee.profilePic))" alt="Profile Picture" class="rounded-circle mb-3" style="width: 100px; height: 100px; object-fit: cover;" />
@@ -32,7 +31,6 @@
                                     <img src="https://via.placeholder.com/100" alt="No Image" class="rounded-circle mb-3" style="width: 100px; height: 100px; object-fit: cover;" />
                                 }
 
-                                <!-- Employee Details -->
                                 <h5 class="card-title">Employee ID: @employee.empId</h5>
                                 <p class="card-text">
                                     <strong>Username:</strong> @employee.username<br />
@@ -41,7 +39,7 @@
                                     <strong>Email:</strong> <a href="mailto:@employee.email">@employee.email</a>
                                 </p>
 
-                                <!-- Edit and Delete Buttons Visible Only to Admins -->
+                                @* Edit and Delete Buttons Only Visible for Admins  *@
                                 @if (HttpContextAccessor.HttpContext.Session.GetString("Role") == "Admin")
                                 {
                                     <div class="d-flex justify-content-center mt-3">
@@ -51,7 +49,7 @@
                                             Delete
                                         </button>
 
-                                        <!-- Modal for Delete Confirmation -->
+                                         @* Delete Confirmation *@
                                         <div class="modal fade" id="deleteModal-@employee.empId" tabindex="-1" aria-labelledby="deleteModalLabel-@employee.empId" aria-hidden="true">
                                             <div class="modal-dialog">
                                                 <div class="modal-content">

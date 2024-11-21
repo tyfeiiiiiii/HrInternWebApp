@@ -23,6 +23,45 @@ public class LeaveService
     #endregion
 
     #region Apply Leave
+
+    public List<string> GetLeaveTypesByGender(string gender)
+    {
+        if (gender == "Male")
+        {
+            return new List<string>
+        {
+            "Medical Leave",
+            "Annual Leave",
+            "Hospitalization",
+            "Examination",
+            "Marriage",
+            "Paternity Leave",
+            "Military Service Leave",
+            "Unpaid Leave",
+            "Emergency Leave"
+        };
+        }
+        else if (gender == "Female")
+        {
+            return new List<string>
+        {
+            "Medical Leave",
+            "Annual Leave",
+            "Hospitalization",
+            "Examination",
+            "Marriage",
+            "Maternity Leave",
+            "Child Care Leave",
+            "Unpaid Leave",
+            "Emergency Leave"
+        };
+        }
+        else
+        {
+            return new List<string> { "Medical Leave", "Annual Leave", "Unpaid Leave" };
+        }
+    }
+
     public async Task ApplyLeaveAsync(ApplyLeave leaveRequest, int employeeId)
     {
         try

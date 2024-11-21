@@ -50,12 +50,12 @@
                             <td>@leave.empId</td>
                             <td>@leave.username</td>
                             <td>@leave.leaveType</td>
-                            <td>@leave.startDate?.ToString("MM/dd/yyyy")</td>
-                            <td>@leave.endDate?.ToString("MM/dd/yyyy")</td>
+                            <td>@leave.startDate?.ToString("dd/MM/yyyy")</td>
+                            <td>@leave.endDate?.ToString("dd/MM/yyyy")</td>
                             <td>@leave.reason</td>
                             <td>@(string.IsNullOrEmpty(leave.status) ? "Pending" : leave.status)</td>
                             <td>@(string.IsNullOrEmpty(leave.approver) ? "N/A" : leave.approver)</td>
-                            <!-- Only show action buttons if the user is an admin -->
+                            @*  Only show action buttons if the user is an admin  *@
                             @if (HttpContextAccessor.HttpContext.Session.GetString("Role") == "Admin")
                             {
                                 <td>

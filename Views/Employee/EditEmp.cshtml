@@ -13,12 +13,12 @@
 
         <div class="form-group">
             <label asp-for="username" class="control-label"></label>
-            <input asp-for="username" class="form-control" readonly="true" /> <!-- Make username readonly for all -->
+            <input asp-for="username" class="form-control" readonly="true" /> @* Make username readonly for all *@ 
         </div>
 
         <div class="form-group">
             <label asp-for="email" class="control-label"></label>
-            <input asp-for="email" type="email" class="form-control" readonly="@(!isAdmin)" /> <!-- Allow editing only for admins -->
+            <input asp-for="email" type="email" class="form-control" readonly="@(!isAdmin)" /> @* only for admins  *@
         </div>
 
         @if (isAdmin)

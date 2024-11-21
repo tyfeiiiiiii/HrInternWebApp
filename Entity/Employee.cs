@@ -15,6 +15,7 @@ namespace HrInternWebApp.Entity
 
         public virtual string email { get; set; }
         public virtual byte[] profilePic { get; set; }
+        public virtual string  Gender{ get; set; }
 
         public virtual IList<Leave> Leave { get; set; } = new List<Leave>();
     }

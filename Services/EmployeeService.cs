@@ -17,25 +17,7 @@ public class EmployeeService
         _logger = logger;
     }
 
-    public async Task CreateEmployeeAsync(Employee employee)
-    {
-        using (var transaction = _session.BeginTransaction())
-        {
-            try
-            {
-                await _session.SaveAsync(employee);
-                await transaction.CommitAsync();
-                _logger.LogInformation($"Employee record successfully created for ID {employee.empId}");
-            }
-            catch (Exception ex)
-            {
-                await transaction.RollbackAsync();
-                _logger.LogError(ex, "Failed to create employee");
-                throw;
-            }
-        }
-    }
-
+    #region Get All Employees
     public async Task<IList<Employee>> GetAllEmployeesAsync()
     {
         try
@@ -48,7 +30,9 @@ public class EmployeeService
             throw;
         }
     }
+    #endregion
 
+    #region Get Employee By ID
     public async Task<Employee> GetEmployeeByIdAsync(int employeeId)
     {
         try
@@ -61,7 +45,9 @@ public class EmployeeService
             throw;
         }
     }
+    #endregion
 
+    #region Update Employee
     public async Task UpdateEmployeeAsync(Employee employee)
     {
         using (var transaction = _session.BeginTransaction())
@@ -70,7 +56,6 @@ public class EmployeeService
             {
                 await _session.UpdateAsync(employee);
                 await transaction.CommitAsync();
-                _logger.LogInformation($"Employee record updated for ID {employee.empId}");
             }
             catch (Exception ex)
             {
@@ -80,7 +65,9 @@ public class EmployeeService
             }
         }
     }
+    #endregion
 
+    #region Delete Employee
     public async Task DeleteEmployeeAsync(int employeeId)
     {
         using (var transaction = _session.BeginTransaction())
@@ -90,11 +77,8 @@ public class EmployeeService
                 var employee = await _session.GetAsync<Employee>(employeeId);
                 if (employee != null)
                 {
-                    // Add any additional cleanup of related data if necessary here
-
                     await _session.DeleteAsync(employee);
                     await transaction.CommitAsync();
-                    _logger.LogInformation($"Employee record deleted for ID {employeeId}");
                 }
                 else
                 {
@@ -109,5 +93,5 @@ public class EmployeeService
             }
         }
     }
-
+    #endregion
 }

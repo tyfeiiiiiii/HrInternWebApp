@@ -1,4 +1,4 @@
-﻿@model HrInternWebApp.Entity.Employee
+﻿@model HrInternWebApp.Models.Identity.SignUp
 
 @{
     ViewData["Title"] = "Sign Up";
@@ -14,53 +14,70 @@
         <div class="col-md-7 d-flex flex-column justify-content-center align-items-center" style="background-color:#0E3B31;">
             <div class="signup-content p-5">
                 <form asp-action="Signup" method="post" enctype="multipart/form-data">
-
                     <div class="form-group mb-4">
                         <label for="Username" class="text-white">Username</label>
-                        <input type="text" id="username" name="Username" class="form-control" placeholder="Enter Username" />
+                        <input asp-for="Username" class="form-control" />
+                        <span asp-validation-for="Username" class="text-danger"></span>
                     </div>
 
                     <div class="form-group mb-4">
-                        <label for="Employee ID" class="text-white">Employee ID</label>
-                        <input type="text" id="empId" name="EmpId" class="form-control" placeholder="Enter Employee ID" />
+                        <label for="EmpId" class="text-white">Employee ID</label>
+                        <input asp-for="EmpId" class="form-control" />
+                        <span asp-validation-for="EmpId" class="text-danger"></span>
                     </div>
 
                     <div class="form-group mb-4">
                         <label for="Email" class="text-white">Email</label>
-                        <input type="text" id="email" name="Email" class="form-control" placeholder="Enter Email" />
+                        <input asp-for="Email" class="form-control" />
+                        <span asp-validation-for="Email" class="text-danger"></span>
                     </div>
 
                     <div class="form-group mb-4">
                         <label for="Password" class="text-white">Password</label>
-                        <input type="password" id="password" name="Password" class="form-control" placeholder="Enter Password" />
+                        <input asp-for="Password" type="password" class="form-control" />
+                        <span asp-validation-for="Password" class="text-danger"></span>
+                    </div>
+
+                    <div class="form-group mb-4">
+                        <label for="Gender" class="text-white">Gender</label>
+                        <select asp-for="Gender" class="form-control">
+                            <option value="">Select Gender</option>
+                            <option value="Male">Male</option>
+                            <option value="Female">Female</option>
+                        </select>
+                        <span asp-validation-for="Gender" class="text-danger"></span>
                     </div>
 
                     <div class="form-group mb-4">
                         <label for="Role" class="text-white">Role</label>
-                        <select id="role" name="Role" class="form-control">
+                        <select asp-for="Role" class="form-control">
+                            <option value="">Select Role</option>
                             <option value="Admin">Admin</option>
                             <option value="Manager">Manager</option>
                             <option value="Senior">Senior</option>
                             <option value="Junior">Junior</option>
                         </select>
-                    </div>
-
-                     <div class="form-group mb-4">
-                            <select asp-for="Department" class="form-control">
-                                <option value="">Select Department</option>
-                                <option value="Finance">Finance</option>
-                                <option value="IT">IT</option>
-                                <option value="Human Resource">Human Resource</option>
-                                <option value="Logistic">Logistic</option>
-                                <option value="Consultant">Consultant</option>
-                                <option value="Operation">Operation</option>
-                            </select>
-                            <span asp-validation-for="Department" class="text-danger"></span>
+                        <span asp-validation-for="Role" class="text-danger"></span>
                     </div>
 
                     <div class="form-group mb-4">
-                        <label for="profilePic" class="text-white">Upload Profile </label>
-                        <input type="file" id="profilePic" name="ProfilePic" class="form-control-file" accept="image/*" />
+                        <label for="Department" class="text-white">Department</label>
+                        <select asp-for="Department" class="form-control">
+                            <option value="">Select Department</option>
+                            <option value="Finance">Finance</option>
+                            <option value="IT">IT</option>
+                            <option value="Human Resource">Human Resource</option>
+                            <option value="Logistic">Logistic</option>
+                            <option value="Consultant">Consultant</option>
+                            <option value="Operation">Operation</option>
+                        </select>
+                        <span asp-validation-for="Department" class="text-danger"></span>
+                    </div>
+
+                    <div class="form-group mb-4">
+                        <label for="ProfilePic" class="text-white">Upload Profile</label>
+                        <input asp-for="ProfilePic" type="file" class="form-control-file" accept="image/*" />
+                        <span asp-validation-for="ProfilePic" class="text-danger"></span>
                     </div>
 
                     <button type="submit" class="btn btn-primary w-100">Register</button>

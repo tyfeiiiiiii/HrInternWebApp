@@ -19,27 +19,11 @@ public class EmployeeController : Controller
     #endregion
 
     #region View Employees
-    //public async Task<IActionResult> ViewEmp()
-    //{
-    //    var role = _httpContextAccessor.HttpContext.Session.GetString("Role");
-    //    var currentUserId = _httpContextAccessor.HttpContext.Session.GetInt32("empId");
-
-    //    var employees = await _employeeService.GetAllEmployeesAsync();
-
-    //    if (role != "Admin" && currentUserId.HasValue)
-    //    {
-    //        // Filter employees to show only the current user's information for non-admins
-    //        employees = employees.Where(e => e.empId == currentUserId.Value).ToList();
-    //    }
-
-    //    return View(employees);
-    //}
     public async Task<IActionResult> ViewEmp(string empId)
     {
         if (!string.IsNullOrWhiteSpace(empId))
         {
-            // Convert empId to int if necessary
-            if (int.TryParse(empId, out int parsedEmpId))
+            if (int.TryParse(empId, out int parsedEmpId))//convert empId to integer
             {
                 var employee = await _employeeService.GetEmployeeByIdAsync(parsedEmpId);
                 if (employee != null)
@@ -53,8 +37,7 @@ public class EmployeeController : Controller
                 TempData["ErrorMessage"] = "Invalid Employee ID.";
             }
         }
-
-        // Fetch all employees if no specific employee ID is searched for
+        // List all employees if no specific employee ID is searched 
         var employees = await _employeeService.GetAllEmployeesAsync();
         return View(employees);
     }
@@ -63,17 +46,15 @@ public class EmployeeController : Controller
     #endregion
 
     #region Edit Employee
-    public async Task<IActionResult> EditEmp(int id)
+    public async Task<IActionResult> EditEmp(int id)//for get (load initial form with data for editing)
     {
         // Check if the user is an admin
         var currentUserRole = _httpContextAccessor.HttpContext.Session.GetString("Role");
         if (currentUserRole != "Admin")
         {
-            TempData["ErrorMessage"] = "You do not have permission to edit employee information.";
             return RedirectToAction(nameof(ViewEmp));
         }
 
-        // Fetch the employee record from the database
         var employee = await _employeeService.GetEmployeeByIdAsync(id);
         if (employee == null)
         {
@@ -81,7 +62,6 @@ public class EmployeeController : Controller
             return RedirectToAction(nameof(ViewEmp));
         }
 
-        // Populate the view model
         var model = new EditEmp
         {
             empId = employee.empId,
@@ -91,15 +71,12 @@ public class EmployeeController : Controller
             email = employee.email,
             profilePic = employee.profilePic
         };
-
-        // Pass the model to the view for editing
         return View(model);
     }
 
     [HttpPost]
     public async Task<IActionResult> EditEmp(EditEmp model, IFormFile ProfilePic)
     {
-        // Check if the user is an admin
         var currentUserRole = _httpContextAccessor.HttpContext.Session.GetString("Role");
         if (currentUserRole != "Admin")
         {
@@ -107,14 +84,12 @@ public class EmployeeController : Controller
             return RedirectToAction(nameof(ViewEmp));
         }
 
-        // Validate model state
         if (!ModelState.IsValid)
         {
             TempData["ErrorMessage"] = "Please correct the errors in the form.";
-            return View(model); // Return view with validation errors
+            return View(model); 
         }
 
-        // Fetch the employee record from the database
         var employee = await _employeeService.GetEmployeeByIdAsync(model.empId);
         if (employee == null)
         {
@@ -122,13 +97,11 @@ public class EmployeeController : Controller
             return RedirectToAction(nameof(ViewEmp));
         }
 
-        // Update employee fields
         employee.username = model.username;
         employee.email = model.email;
-        employee.Role = model.Role; // Ensure this field is correctly populated
+        employee.Role = model.Role; 
         employee.Department = model.Department;
 
-        // Handle profile picture upload if provided
         if (ProfilePic != null && ProfilePic.Length > 0)
         {
             using var memoryStream = new MemoryStream();
@@ -138,16 +111,14 @@ public class EmployeeController : Controller
 
         try
         {
-            // Save changes to the database
             await _employeeService.UpdateEmployeeAsync(employee);
             TempData["SuccessMessage"] = "Employee information updated successfully.";
             return RedirectToAction(nameof(ViewEmp));
         }
         catch (Exception ex)
         {
-            // Log and handle the exception as needed
             ModelState.AddModelError(string.Empty, "An error occurred while updating the employee: " + ex.Message);
-            return View(model); // Return to view with model to show error
+            return View(model); 
         }
     }
     #endregion
@@ -156,15 +127,8 @@ public class EmployeeController : Controller
     #region Delete Employee
     public async Task<IActionResult> DeleteEmp(int id)
     {
-        // Ensure only admins can delete employees
-        if (_httpContextAccessor.HttpContext.Session.GetString("Role") != "Admin")
-        {
-            return Unauthorized();
-        }
-
         try
         {
-            // Call the service to delete the employee and associated information
             await _employeeService.DeleteEmployeeAsync(id);
             TempData["SuccessMessage"] = "Employee deleted successfully.";
         }

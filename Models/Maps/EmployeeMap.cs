@@ -16,8 +16,9 @@ namespace HrInternWebApp.Models.Maps
             Map(x => x.Department).Not.Nullable();
             Map(x => x.email).Not.Nullable();
             Map(x => x.profilePic).CustomType("BinaryBlob").Nullable();
+            Map(x => x.Gender).Not.Nullable();   
 
-            HasMany(x => x.Leave).KeyColumn("empId").Inverse().Cascade.All();
+        HasMany(x => x.Leave).KeyColumn("empId").Inverse().Cascade.All();
         }
     }
 }
