@@ -13,17 +13,15 @@
 
         <div class="form-group">
             <label asp-for="username" class="control-label"></label>
-            <input asp-for="username" class="form-control" readonly="true" /> @* Make username readonly for all *@ 
+            <input asp-for="username" class="form-control" readonly="true" />
         </div>
 
         <div class="form-group">
             <label asp-for="email" class="control-label"></label>
-            <input asp-for="email" type="email" class="form-control" readonly="@(!isAdmin)" /> @* only for admins  *@
+            <input asp-for="email" type="email" class="form-control" readonly="true" /> 
         </div>
 
-        @if (isAdmin)
-        {
-            <div class="form-group">
+  <div class="form-group">
                 <label asp-for="Role" class="control-label"></label>
                 <select asp-for="Role" class="form-control">
                     <option value="Admin">Admin</option>
@@ -44,17 +42,13 @@
                     <option value="Operation">Operation</option>
                 </select>
             </div>
-        }
 
-        <div class="form-group">
+@*         <div class="form-group">
             <label asp-for="profilePic" class="control-label">Upload Profile Picture</label>
             <input type="file" name="ProfilePic" class="form-control-file" accept="image/*" @(!isAdmin ? "disabled" : "") /> <!-- Disable upload if not admin -->
-        </div>
+        </div> *@
 
-        @if (isAdmin)
-        {
             <button type="submit" class="btn btn-primary">Save changes</button>
-        }
         <a asp-action="ViewEmp" class="btn btn-secondary">Cancel</a>
     </form>
 </div>

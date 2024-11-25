@@ -79,12 +79,6 @@ namespace HrInternWebApp
             app.MapControllerRoute(
                 name: "signup",
                 pattern: "{controller=Authentication}/{action=Signup}");
-
-            app.MapControllerRoute(
-                name: "employeeHome",
-                pattern: "{controller=Employee}/{action=ViewEmp}/{id?}");
-
-
             app.Run();
         }
 

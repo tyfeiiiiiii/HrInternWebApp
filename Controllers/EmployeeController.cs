@@ -41,11 +41,9 @@ public class EmployeeController : Controller
         var employees = await _employeeService.GetAllEmployeesAsync();
         return View(employees);
     }
-
-
     #endregion
 
-    #region Edit Employee
+    #region Edit Employee 
     public async Task<IActionResult> EditEmp(int id)//for get (load initial form with data for editing)
     {
         // Check if the user is an admin

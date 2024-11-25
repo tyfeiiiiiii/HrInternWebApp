@@ -1,4 +1,6 @@
-﻿<div class="container-fluid" style="background-color: #0E3B31; height: 100vh;">
+﻿@inject IHttpContextAccessor HttpContextAccessor
+
+<div class="container-fluid" style="background-color: #0E3B31; height: 100vh;">
     <div class="row h-100">
 
         <div class="col-md-3 p-3" style="background-color: #1A3E37;">
@@ -25,10 +27,19 @@
                     </li>
 
                     <li class="nav-item mb-2">
-                        <a asp-controller="Employee" asp-action="ViewEmp" class="nav-link text-white d-flex align-items-center">
-                            <i class="bi bi-people me-2"></i>   Employee
+                        <a asp-controller="Profile" asp-action="Index" class="nav-link text-white d-flex align-items-center">
+                            <i class="bi bi-person me-2"></i> My Profile
                         </a>
                     </li>
+
+                    @if (HttpContextAccessor.HttpContext.Session.GetString("Role") == "Admin")
+                    {
+                        <li class="nav-item mb-2">
+                            <a asp-controller="Employee" asp-action="ViewEmp" class="nav-link text-white d-flex align-items-center">
+                                <i class="bi bi-people me-2"></i> Employee
+                            </a>
+                        </li>
+                    }
 
                     <li class="nav-item mb-2">
                         <a asp-controller="Authentication" asp-action="Logout" class="nav-link text-white d-flex align-items-center">
