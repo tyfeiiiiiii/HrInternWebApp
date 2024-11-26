@@ -10,16 +10,16 @@
         <div class="col-md-9" style="background-color: white; padding: 20px;">
             <nav class="navbar navbar-light bg-light justify-content-between">
                 <a class="navbar-brand">Employee Management</a>
-                <form class="form-inline d-flex" method="get" asp-action="ViewEmp">
-                    <input class="form-control mr-2" type="search" name="empId" placeholder="Search by Employee ID" aria-label="Search">
+                <form class="form-inline d-flex" id="searchForm">
+                    <input class="form-control mr-2" type="search" id="empIdSearch" placeholder="Search by Employee ID" aria-label="Search">
                     <button class="btn btn-outline-success" type="submit">Search</button>
                 </form>
             </nav>
 
-            <div class="row">
+            <div id="employeeList" class="row">
                 @foreach (var employee in Model)
                 {
-                    <div class="col-md-4 mb-4">
+                    <div class="col-md-4 mb-4 employee-card" data-empid="@employee.empId">
                         <div class="card shadow-sm h-100">
                             <div class="card-body text-center">
                                 @if (employee.profilePic != null && employee.profilePic.Length > 0)
@@ -39,7 +39,7 @@
                                     <strong>Email:</strong> <a href="mailto:@employee.email">@employee.email</a>
                                 </p>
 
-                                @* Edit and Delete Buttons Only Visible for Admins  *@
+                                @* Edit and Delete Buttons Only Visible for Admins *@
                                 @if (HttpContextAccessor.HttpContext.Session.GetString("Role") == "Admin")
                                 {
                                     <div class="d-flex justify-content-center mt-3">
@@ -49,7 +49,7 @@
                                             Delete
                                         </button>
 
-                                         @* Delete Confirmation *@
+                                        @* Delete Confirmation *@
                                         <div class="modal fade" id="deleteModal-@employee.empId" tabindex="-1" aria-labelledby="deleteModalLabel-@employee.empId" aria-hidden="true">
                                             <div class="modal-dialog">
                                                 <div class="modal-content">
@@ -77,3 +77,51 @@
         </div>
     </div>
 </div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            $('#searchForm').on('submit', function (e) {
+                e.preventDefault();
+
+                var empId = $('#empIdSearch').val();
+
+                $.ajax({
+                    url: '@Url.Action("ViewEmp", "Employee")',
+                    data: { empId: empId },
+                    type: 'GET',
+                    success: function (data) {
+                        $('#employeeList').empty(); // Clear current employee list
+
+                        if (data.length > 0) {
+                            // Append the new employee list
+                            data.forEach(function (employee) {
+                                $('#employeeList').append(`
+                                            <div class="col-md-4 mb-4 employee-card" data-empid="${employee.empId}">
+                                                <div class="card shadow-sm h-100">
+                                                    <div class="card-body text-center">
+                                                        <img src="data:image/png;base64,${employee.profilePic ? Convert.ToBase64String(employee.profilePic) : 'https://via.placeholder.com/100'}" alt="Profile Picture" class="rounded-circle mb-3" style="width: 100px; height: 100px; object-fit: cover;" />
+                                                        <h5 class="card-title">Employee ID: ${employee.empId}</h5>
+                                                        <p class="card-text">
+                                                            <strong>Username:</strong> ${employee.username}<br />
+                                                            <strong>Role:</strong> ${employee.Role}<br />
+                                                            <strong>Department:</strong> ${employee.Department}<br />
+                                                            <strong>Email:</strong> <a href="mailto:${employee.email}">${employee.email}</a>
+                                                        </p>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        `);
+                            });
+                        } else {
+                            $('#employeeList').append('<p>No employees found matching your search.</p>');
+                        }
+                    },
+                    error: function () {
+                        alert('Error retrieving employees.');
+                    }
+                });
+            });
+        });
+    </script>
+}

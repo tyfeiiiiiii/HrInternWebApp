@@ -12,12 +12,12 @@ public class LeaveController : Controller
         leaveServices = leaveService;
     }
     #region Apply Leave
-    public IActionResult GetLeaveTypes()
-    {
-        var gender = HttpContext.Session.GetString("Gender");
-        var leaveTypes = leaveServices.GetLeaveTypesByGender(gender);
-        return Json(leaveTypes);
-    }
+    //public IActionResult GetLeaveTypes()
+    //{
+    //    var gender = HttpContext.Session.GetString("Gender");
+    //    var leaveTypes = leaveServices.GetLeaveTypesByGender(gender);
+    //    return Json(leaveTypes);
+    //}
 
     public IActionResult ApplyLeave()
     {
@@ -86,7 +86,27 @@ public class LeaveController : Controller
 
         return View(leaves);
     }
-    #endregion 
+    #endregion
+
+    #region SearchLeave By EmpId
+    public async Task<IActionResult> SearchLeave(string empId)
+    {
+        // If no empId is provided, return all leaves
+        if (string.IsNullOrEmpty(empId))
+        {
+            var allLeaves = await leaveServices.GetAllLeavesAsync();
+            return Json(allLeaves);
+        }
+
+        // Filter the leaves based on the provided empId
+        var allFilteredLeaves = await leaveServices.GetAllLeavesAsync();
+        var filteredLeaves = allFilteredLeaves.Where(l => l.empId.ToString().Contains(empId)).ToList();
+
+        return Json(filteredLeaves); // Return filtered leave list as JSON
+    }
+
+
+    #endregion
 
     #region Update Leave Status
     // Update leave status, only for admins

@@ -106,3 +106,68 @@
         </div>
     </div>
 </div>
+
+<script>
+    $(document).ready(function () {
+        // Handle input event for the search field (when typing)
+        $('input[name="empId"]').on('input', function () {
+            var empId = $(this).val(); // Get the input value
+
+            if (empId) {
+                $.ajax({
+                    url: '@Url.Action("SearchLeave", "Leave")', // The action method to call in controller
+                    type: 'GET',
+                    data: { empId: empId }, // Pass empId as query parameter
+                    success: function (data) {
+                        var tableBody = $('table tbody'); // Get the table body
+                        tableBody.empty(); // Clear existing rows in the table
+
+                        // Loop through the data returned and add rows to the table
+                        $.each(data, function (index, leave) {
+                            var row = '<tr>' +
+                                '<td>' + leave.leaveId + '</td>' +
+                                '<td>' + leave.empId + '</td>' +
+                                '<td>' + leave.username + '</td>' +
+                                '<td>' + leave.leaveType + '</td>' +
+                                '<td>' + new Date(leave.startDate).toLocaleDateString() + '</td>' +
+                                '<td>' + new Date(leave.endDate).toLocaleDateString() + '</td>' +
+                                '<td>' + leave.reason + '</td>' +
+                                '<td>' + (leave.status || 'Pending') + '</td>' +
+                                '<td>' + (leave.approver || 'N/A') + '</td>' +
+                                '</tr>';
+                            tableBody.append(row); // Append the row to the table
+                        });
+                    },
+                    error: function () {
+                        alert('Error fetching search results.');
+                    }
+                });
+            } else {
+                // If no empId is entered, reload the page with all employees
+                $.ajax({
+                    url: '@Url.Action("ViewLeave", "Leave")', // Reload without search
+                    type: 'GET',
+                    success: function (data) {
+                        var tableBody = $('table tbody');
+                        tableBody.empty();
+
+                        $.each(data, function (index, leave) {
+                            var row = '<tr>' +
+                                '<td>' + leave.leaveId + '</td>' +
+                                '<td>' + leave.empId + '</td>' +
+                                '<td>' + leave.username + '</td>' +
+                                '<td>' + leave.leaveType + '</td>' +
+                                '<td>' + new Date(leave.startDate).toLocaleDateString() + '</td>' +
+                                '<td>' + new Date(leave.endDate).toLocaleDateString() + '</td>' +
+                                '<td>' + leave.reason + '</td>' +
+                                '<td>' + (leave.status || 'Pending') + '</td>' +
+                                '<td>' + (leave.approver || 'N/A') + '</td>' +
+                                '</tr>';
+                            tableBody.append(row);
+                        });
+                    }
+                });
+            }
+        });
+    });
+</script>

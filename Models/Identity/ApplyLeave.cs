@@ -49,7 +49,7 @@ namespace HrInternWebApp.Models.Identity
 
             if (!instance.startDate.HasValue)
             {
-                return ValidationResult.Success; // Allow endDate to be set before startDate
+                return ValidationResult.Success; 
             }
 
             if (!endDate.HasValue)

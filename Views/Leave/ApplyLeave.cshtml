@@ -60,17 +60,18 @@
     </div>
 </div>
 
-<script>
+@* <script type="text/javascript"> 
+
     $(document).ready(function () {
         var gender = '@ViewData["Gender"]';//retrieve user's gender from server-side , assign it to gender
-
-        if (gender) {//AJAX request only made if gender not empty or null
+        alert(gender)
+        if (gender) {//AJAX request only made if gender not empty
             $.ajax({
                 url: '/Leave/GetLeaveTypes',
                 type: 'GET',
                 data: { gender: gender },//data sent to the server
                 success: function (data) {
-                    $('#leaveType').append('<option value="">Select leave type</option>'); contan
+                    $('#leaveType').append('<option value="">Select leave type</option>');
 
                     $.each(data, function (index, value) {//iteration here is let the each leave type within the list be shown
                         $('#leaveType').append('<option value="' + value + '">' + value + '</option>');
@@ -83,5 +84,5 @@
         }
     });
 
-</script>
+</script> *@
 

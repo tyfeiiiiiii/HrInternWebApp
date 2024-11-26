@@ -1,4 +1,4 @@
-﻿@model HrInternWebApp.Models.Identity.EditEmp
+﻿@model HrInternWebApp.Entity.Employee
 @inject IHttpContextAccessor HttpContextAccessor
 
 <div class="container-fluid" style="background-color: #f8f9fa; height: 100vh;">
@@ -7,7 +7,6 @@
             @await Html.PartialAsync("Sidebar")
         </div>
 
-        <!-- Main Content (Profile View) -->
         <div class="col-md-9 d-flex justify-content-center align-items-center" style="background-color: white; padding: 20px;">
             <div class="col-md-8 bg-light p-5 rounded" style="min-height: 70vh;">
                 <div class="text-center mb-4">
@@ -15,9 +14,7 @@
                     <hr style="border-color: #0056b3;">
                 </div>
 
-                <!-- Profile Content -->
                 <div class="row">
-                    <!-- Profile Picture -->
                     <div class="col-md-4 text-center">
                         @if (Model.profilePic != null && Model.profilePic.Length > 0)
                         {
@@ -29,7 +26,6 @@
                         }
                     </div>
 
-                    <!-- Profile Information -->
                     <div class="col-md-8">
                         <div class="row mb-3">
                             <div class="col-md-4 text-right font-weight-bold" style="color: #343a40;">Employee ID:</div>
@@ -51,16 +47,6 @@
                             <div class="col-md-4 text-right font-weight-bold" style="color: #343a40;">Email:</div>
                             <div class="col-md-8"><a href="mailto:@Model.email">@Model.email</a></div>
                         </div>
-
-                        <!-- Edit Profile Button -->
-                        @if (HttpContextAccessor.HttpContext.Session.GetString("EmpId") == Model.empId.ToString())
-                        {
-                            <div class="row mt-4">
-                                <div class="col-md-12 text-center">
-                                    <a asp-action="Edit" asp-controller="Profile" class="btn btn-primary" style="background-color: #0056b3; border-color: #0056b3;">Edit Profile</a>
-                                </div>
-                            </div>
-                        }
                     </div>
                 </div>
 

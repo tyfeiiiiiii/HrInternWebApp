@@ -19,28 +19,42 @@ public class EmployeeController : Controller
     #endregion
 
     #region View Employees
+    //public async Task<IActionResult> ViewEmp(string empId)
+    //{
+    //    if (!string.IsNullOrWhiteSpace(empId))
+    //    {
+    //        //if (int.TryParse(empId, out int parsedEmpId))//convert empId to integer
+    //        //{
+    //        //    var employee = await _employeeService.GetEmployeeByIdAsync(parsedEmpId);
+    //        //    if (employee != null)
+    //        //    {
+    //        //        return View(new List<Employee> { employee });
+    //        //    }
+    //        //    TempData["ErrorMessage"] = "Employee not found.";
+    //        //}
+    //        //else
+    //        //{
+    //        //    TempData["ErrorMessage"] = "Invalid Employee ID.";
+    //        //}
+    //    }
+    //    // List all employees if no specific employee ID is searched 
+    //    var employees = await _employeeService.GetAllEmployeesAsync();
+    //    return View(employees);
+    //}
     public async Task<IActionResult> ViewEmp(string empId)
     {
         if (!string.IsNullOrWhiteSpace(empId))
         {
-            if (int.TryParse(empId, out int parsedEmpId))//convert empId to integer
-            {
-                var employee = await _employeeService.GetEmployeeByIdAsync(parsedEmpId);
-                if (employee != null)
-                {
-                    return View(new List<Employee> { employee });
-                }
-                TempData["ErrorMessage"] = "Employee not found.";
-            }
-            else
-            {
-                TempData["ErrorMessage"] = "Invalid Employee ID.";
-            }
+            var employees = await _employeeService.GetAllEmployeesAsync();
+            var filteredEmployees = employees.Where(e => e.empId.ToString().Contains(empId)).ToList();
+            return Json(filteredEmployees); // Return filtered employees as JSON
         }
-        // List all employees if no specific employee ID is searched 
-        var employees = await _employeeService.GetAllEmployeesAsync();
-        return View(employees);
+
+        // If no empId is provided, return all employees
+        var allEmployees = await _employeeService.GetAllEmployeesAsync();
+        return View(allEmployees);
     }
+
     #endregion
 
     #region Edit Employee 
