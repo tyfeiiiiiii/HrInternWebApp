@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using HrInternWebApp.Models.Identity;
 using ISession = NHibernate.ISession;
+using NHibernate.Linq;
 
 public class EmployeeService
 {
@@ -22,26 +23,27 @@ public class EmployeeService
     {
         try
         {
-            return await _session.QueryOver<Employee>().ListAsync();
+            var employees = await _session.Query<Employee>().ToListAsync();
+            return employees;
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error retrieving all employees");
+            _logger.LogError(ex, "Error fetching employees.");
             throw;
         }
     }
     #endregion
 
-    #region Get Employee By ID
-    public async Task<Employee> GetEmployeeByIdAsync(int employeeId)
+    #region Get Employee By ID (for profile use)
+    public async Task<Employee> GetEmployeeByIdAsync(int empId)
     {
         try
         {
-            return await _session.GetAsync<Employee>(employeeId);
+            return await _session.GetAsync<Employee>(empId); // Use empId here
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error retrieving employee with ID {EmployeeId}", employeeId);
+            _logger.LogError(ex, "Error retrieving employee with ID {EmployeeId}", empId);
             throw;
         }
     }
@@ -95,3 +97,4 @@ public class EmployeeService
     }
     #endregion
 }
+

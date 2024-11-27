@@ -91,19 +91,24 @@ public class LeaveController : Controller
     #region SearchLeave By EmpId
     public async Task<IActionResult> SearchLeave(string empId)
     {
-        // If no empId is provided, return all leaves
+        IList<ViewLeave> filteredLeaves;
+
         if (string.IsNullOrEmpty(empId))
         {
-            var allLeaves = await leaveServices.GetAllLeavesAsync();
-            return Json(allLeaves);
+            // If no empId is provided, return all leaves
+            filteredLeaves = await leaveServices.GetAllLeavesAsync();
+        }
+        else
+        {
+            // Filter the leaves based on the provided empId
+            filteredLeaves = await leaveServices.GetAllLeavesAsync();
+            filteredLeaves = filteredLeaves.Where(l => l.empId.ToString().Contains(empId)).ToList();
         }
 
-        // Filter the leaves based on the provided empId
-        var allFilteredLeaves = await leaveServices.GetAllLeavesAsync();
-        var filteredLeaves = allFilteredLeaves.Where(l => l.empId.ToString().Contains(empId)).ToList();
-
-        return Json(filteredLeaves); // Return filtered leave list as JSON
+        return Json(filteredLeaves); 
     }
+
+
 
 
     #endregion

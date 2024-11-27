@@ -12,8 +12,8 @@
                 <a class="navbar-brand">Leave Applications</a>
                 @if (HttpContextAccessor.HttpContext.Session.GetString("Role") == "Admin")
                 {
-                    <form class="form-inline d-flex" method="get" asp-action="ViewLeave">
-                        <input class="form-control mr-2" type="search" name="empId" placeholder="Search by Employee Id" aria-label="Search">
+                    <form class="form-inline d-flex" id="searchForm" method="get" action="javascript:void(0)">
+                        <input class="form-control mr-2" type="search" id="empIdInput" name="empId" placeholder="Search by Employee ID" aria-label="Search">
                         <button class="btn btn-outline-success" type="submit">Search</button>
                     </form>
                 }
@@ -38,14 +38,13 @@
                         <th>Reason</th>
                         <th>Status</th>
                         <th>Approver</th>
-
                         @if (HttpContextAccessor.HttpContext.Session.GetString("Role") == "Admin")
                         {
                             <th>Action</th>
                         }
                     </tr>
                 </thead>
-                <tbody>
+                <tbody id="leaveTableBody">
                     @foreach (var leave in Model)
                     {
                         <tr>
@@ -58,13 +57,12 @@
                             <td>@leave.reason</td>
                             <td>@(string.IsNullOrEmpty(leave.status) ? "Pending" : leave.status)</td>
                             <td>@(string.IsNullOrEmpty(leave.approver) ? "N/A" : leave.approver)</td>
-                            @*  Only show action buttons if the user is an admin  *@
+
                             @if (HttpContextAccessor.HttpContext.Session.GetString("Role") == "Admin")
                             {
                                 <td>
                                     <form asp-action="UpdateLeaveStatus" method="post">
                                         <input type="hidden" name="leaveId" value="@leave.leaveId" />
-
                                         <select name="status" class="form-select">
                                             @if (leave.status == "Approved")
                                             {
@@ -108,65 +106,54 @@
 </div>
 
 <script>
-    $(document).ready(function () {
-        // Handle input event for the search field (when typing)
-        $('input[name="empId"]').on('input', function () {
-            var empId = $(this).val(); // Get the input value
+    // Prevent the default form submission and trigger AJAX instead
+    $("#searchForm").on("submit", function (e) {
+        e.preventDefault(); // Prevent the form from submitting normally
+        
+        var empId = $("#empIdInput").val(); // Get the empId from the input field
 
-            if (empId) {
-                $.ajax({
-                    url: '@Url.Action("SearchLeave", "Leave")', // The action method to call in controller
-                    type: 'GET',
-                    data: { empId: empId }, // Pass empId as query parameter
-                    success: function (data) {
-                        var tableBody = $('table tbody'); // Get the table body
-                        tableBody.empty(); // Clear existing rows in the table
+        $.ajax({
+            url: '@Url.Action("SearchLeave", "Leave")',
+            type: 'GET',
+            data: { empId: empId }, 
+            success: function (data) {
+                var tableBody = $('#leaveTableBody');
+                tableBody.empty(); // Clear the existing table rows
 
-                        // Loop through the data returned and add rows to the table
-                        $.each(data, function (index, leave) {
-                            var row = '<tr>' +
-                                '<td>' + leave.leaveId + '</td>' +
-                                '<td>' + leave.empId + '</td>' +
-                                '<td>' + leave.username + '</td>' +
-                                '<td>' + leave.leaveType + '</td>' +
-                                '<td>' + new Date(leave.startDate).toLocaleDateString() + '</td>' +
-                                '<td>' + new Date(leave.endDate).toLocaleDateString() + '</td>' +
-                                '<td>' + leave.reason + '</td>' +
-                                '<td>' + (leave.status || 'Pending') + '</td>' +
-                                '<td>' + (leave.approver || 'N/A') + '</td>' +
-                                '</tr>';
-                            tableBody.append(row); // Append the row to the table
-                        });
-                    },
-                    error: function () {
-                        alert('Error fetching search results.');
+                $.each(data, function (index, leave) {
+                    var row = '<tr>' +
+                        '<td>' + leave.leaveId + '</td>' +
+                        '<td>' + leave.empId + '</td>' +
+                        '<td>' + leave.username + '</td>' +
+                        '<td>' + leave.leaveType + '</td>' +
+                        '<td>' + new Date(leave.startDate).toLocaleDateString() + '</td>' +
+                        '<td>' + new Date(leave.endDate).toLocaleDateString() + '</td>' +
+                        '<td>' + leave.reason + '</td>' +
+                        '<td>' + (leave.status || 'Pending') + '</td>' +
+                        '<td>' + (leave.approver || 'N/A') + '</td>';
+
+                    // Only show action buttons if the user is an admin
+                    if ('@HttpContextAccessor.HttpContext.Session.GetString("Role")' === "Admin") {
+                        row += '<td>' +
+                            '<form method="post" action="/Leave/UpdateLeaveStatus">' +
+                            '<input type="hidden" name="leaveId" value="' + leave.leaveId + '" />' +
+                            '<select name="status" class="form-select">' +
+                            '<option value="Approved"' + (leave.status === "Approved" ? " selected" : "") + '>Approved</option>' +
+                            '<option value="Rejected"' + (leave.status === "Rejected" ? " selected" : "") + '>Rejected</option>' +
+                            '<option value="Pending"' + (leave.status === "Pending" ? " selected" : "") + '>Pending</option>' +
+                            '</select>' +
+                            '<button type="submit" class="btn btn-primary mt-2">Update Status</button>' +
+                            '</form>' +
+                            '</td>';
                     }
-                });
-            } else {
-                // If no empId is entered, reload the page with all employees
-                $.ajax({
-                    url: '@Url.Action("ViewLeave", "Leave")', // Reload without search
-                    type: 'GET',
-                    success: function (data) {
-                        var tableBody = $('table tbody');
-                        tableBody.empty();
 
-                        $.each(data, function (index, leave) {
-                            var row = '<tr>' +
-                                '<td>' + leave.leaveId + '</td>' +
-                                '<td>' + leave.empId + '</td>' +
-                                '<td>' + leave.username + '</td>' +
-                                '<td>' + leave.leaveType + '</td>' +
-                                '<td>' + new Date(leave.startDate).toLocaleDateString() + '</td>' +
-                                '<td>' + new Date(leave.endDate).toLocaleDateString() + '</td>' +
-                                '<td>' + leave.reason + '</td>' +
-                                '<td>' + (leave.status || 'Pending') + '</td>' +
-                                '<td>' + (leave.approver || 'N/A') + '</td>' +
-                                '</tr>';
-                            tableBody.append(row);
-                        });
-                    }
+                    row += '</tr>';
+                    tableBody.append(row);
                 });
+            },
+            error: function (xhr, status, error) {
+                console.log("Error:", error); // Log the error message
+                alert('Error fetching search results.');
             }
         });
     });

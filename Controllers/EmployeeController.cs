@@ -9,12 +9,13 @@ public class EmployeeController : Controller
 {
     private readonly EmployeeService _employeeService;
     private readonly IHttpContextAccessor _httpContextAccessor;
-
+    private readonly ILogger<EmployeeController> _logger;
     #region Constructor
-    public EmployeeController(EmployeeService employeeService, IHttpContextAccessor httpContextAccessor)
+    public EmployeeController(EmployeeService employeeService, IHttpContextAccessor httpContextAccessor, ILogger<EmployeeController> logger)
     {
         _employeeService = employeeService;
         _httpContextAccessor = httpContextAccessor;
+        _logger = logger;
     }
     #endregion
 
@@ -41,21 +42,52 @@ public class EmployeeController : Controller
     //    var employees = await _employeeService.GetAllEmployeesAsync();
     //    return View(employees);
     //}
-    public async Task<IActionResult> ViewEmp(string empId)
-    {
-        if (!string.IsNullOrWhiteSpace(empId))
-        {
-            var employees = await _employeeService.GetAllEmployeesAsync();
-            var filteredEmployees = employees.Where(e => e.empId.ToString().Contains(empId)).ToList();
-            return Json(filteredEmployees); // Return filtered employees as JSON
-        }
+    //public async Task<IActionResult> ViewEmp(string empId)
+    //{
+    //    if (!string.IsNullOrWhiteSpace(empId))
+    //    {
+    //        var employees = await _employeeService.GetAllEmployeesAsync();
+    //        var filteredEmployees = employees.Where(e => e.empId.ToString().Contains(empId)).ToList();
+    //        return Json(filteredEmployees); // Return filtered employees as JSON
+    //    }
 
-        // If no empId is provided, return all employees
-        var allEmployees = await _employeeService.GetAllEmployeesAsync();
-        return View(allEmployees);
+    //    // If no empId is provided, return all employees
+    //    var allEmployees = await _employeeService.GetAllEmployeesAsync();
+    //    return View(allEmployees);
+    //}
+    public async Task<IActionResult> ViewEmp()
+    {
+        var employees = await _employeeService.GetAllEmployeesAsync();
+        return View(employees); 
     }
 
     #endregion
+
+    #region Search Employee by EmpId
+
+    #region Search Employee
+    public async Task<IActionResult> SearchEmployee(string empId)
+    {
+        IList<Employee> filteredEmployees;
+
+        if (string.IsNullOrEmpty(empId))
+        {
+            // If no empId is provided, return all employees
+            filteredEmployees = await _employeeService.GetAllEmployeesAsync();
+        }
+        else
+        {
+            // Filter the employees based on the provided empId
+            filteredEmployees = await _employeeService.GetAllEmployeesAsync();
+            filteredEmployees = filteredEmployees.Where(e => e.empId.ToString().Contains(empId)).ToList();
+        }
+
+        return Json(filteredEmployees);
+    }
+    #endregion
+
+    #endregion
+
 
     #region Edit Employee 
     public async Task<IActionResult> EditEmp(int id)//for get (load initial form with data for editing)

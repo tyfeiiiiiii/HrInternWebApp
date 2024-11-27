@@ -10,8 +10,8 @@
         <div class="col-md-9" style="background-color: white; padding: 20px;">
             <nav class="navbar navbar-light bg-light justify-content-between">
                 <a class="navbar-brand">Employee Management</a>
-                <form class="form-inline d-flex" id="searchForm">
-                    <input class="form-control mr-2" type="search" id="empIdSearch" placeholder="Search by Employee ID" aria-label="Search">
+                <form class="form-inline d-flex" id="searchForm" method="get" action="">
+                    <input class="form-control mr-2" type="search" id="empIdSearch" name="empId" placeholder="Search by Employee ID" aria-label="Search">
                     <button class="btn btn-outline-success" type="submit">Search</button>
                 </form>
             </nav>
@@ -78,50 +78,55 @@
     </div>
 </div>
 
-@section Scripts {
-    <script>
-        $(document).ready(function () {
-            $('#searchForm').on('submit', function (e) {
-                e.preventDefault();
+<script>
+    $(document).ready(function () {
+        // Handle search form submission
+        $('#searchForm').on('submit', function (e) {
+            e.preventDefault(); // Prevent normal form submission
 
-                var empId = $('#empIdSearch').val();
+            var empId = $('#empIdSearch').val(); // Get the search input
+            if (!empId) {
+                alert('Please enter an Employee ID.');
+                return;
+            }
 
-                $.ajax({
-                    url: '@Url.Action("ViewEmp", "Employee")',
-                    data: { empId: empId },
-                    type: 'GET',
-                    success: function (data) {
-                        $('#employeeList').empty(); // Clear current employee list
-
-                        if (data.length > 0) {
-                            // Append the new employee list
-                            data.forEach(function (employee) {
-                                $('#employeeList').append(`
-                                            <div class="col-md-4 mb-4 employee-card" data-empid="${employee.empId}">
-                                                <div class="card shadow-sm h-100">
-                                                    <div class="card-body text-center">
-                                                        <img src="data:image/png;base64,${employee.profilePic ? Convert.ToBase64String(employee.profilePic) : 'https://via.placeholder.com/100'}" alt="Profile Picture" class="rounded-circle mb-3" style="width: 100px; height: 100px; object-fit: cover;" />
-                                                        <h5 class="card-title">Employee ID: ${employee.empId}</h5>
-                                                        <p class="card-text">
-                                                            <strong>Username:</strong> ${employee.username}<br />
-                                                            <strong>Role:</strong> ${employee.Role}<br />
-                                                            <strong>Department:</strong> ${employee.Department}<br />
-                                                            <strong>Email:</strong> <a href="mailto:${employee.email}">${employee.email}</a>
-                                                        </p>
-                                                    </div>
-                                                </div>
+            // Perform the AJAX request
+            $.ajax({
+                url: '@Url.Action("SearchEmployee", "Employee")',
+                type: 'GET',
+                data: { empId: empId },
+                contentType: "application/json",
+                success: function (data) {
+                    $('#employeeList').empty(); // Clear the existing employee list
+                    if (data && data.length > 0) {
+                        $.each(data, function (index, employee) {
+                            var profilePic = employee.profilePic ? 'data:image/png;base64,' + employee.profilePic : 'https://via.placeholder.com/100';
+                            $('#employeeList').append(`
+                                    <div class="col-md-4 mb-4 employee-card" data-empid="${employee.empId}">
+                                        <div class="card shadow-sm h-100">
+                                            <div class="card-body text-center">
+                                                <img src="${profilePic}" alt="Profile Picture" class="rounded-circle mb-3" style="width: 100px; height: 100px; object-fit: cover;" />
+                                                <h5 class="card-title">Employee ID: ${employee.empId}</h5>
+                                                <p class="card-text">
+                                                    <strong>Username:</strong> ${employee.username}<br />
+                                                    <strong>Role:</strong> ${employee.Role}<br />
+                                                    <strong>Department:</strong> ${employee.Department}<br />
+                                                    <strong>Email:</strong> <a href="mailto:${employee.email}">${employee.email}</a>
+                                                </p>
                                             </div>
-                                        `);
-                            });
-                        } else {
-                            $('#employeeList').append('<p>No employees found matching your search.</p>');
-                        }
-                    },
-                    error: function () {
-                        alert('Error retrieving employees.');
+                                        </div>
+                                    </div>
+                                `);
+                        });
+                    } else {
+                        $('#employeeList').append('<p class="text-center">No employee found with this ID.</p>');
                     }
-                });
+                },
+                error: function (xhr, status, error) {
+                    console.error('Error:', error);
+                    alert('Error retrieving employee details. Please try again.');
+                }
             });
         });
-    </script>
-}
+    });
+</script>

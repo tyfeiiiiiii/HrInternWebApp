@@ -73,7 +73,6 @@ public class LeaveService
                 throw new InvalidOperationException($"Employee with ID {employeeId} does not exist.");
             }
 
-            // Create a Leave entity using data from ApplyLeave
             Leave leaveEntity = new Leave
             {
                 leaveType = leaveRequest.leaveType,
