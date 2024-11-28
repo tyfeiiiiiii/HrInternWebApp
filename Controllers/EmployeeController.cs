@@ -1,172 +1,242 @@
-﻿using HrInternWebApp.Entity;
+﻿//using HrInternWebApp.Models.Identity;
+//using Microsoft.AspNetCore.Mvc;
+//using HrInternWebApp.Entity;
+//using System.IO;
+//using System.Threading.Tasks;
+//using Microsoft.Extensions.Logging;
+
+//public class EmployeeController : Controller
+//{
+//    private readonly EmployeeService _employeeService;
+//    private readonly IHttpContextAccessor _httpContextAccessor;
+//    private readonly ILogger<EmployeeController> _logger;
+
+//    public EmployeeController(EmployeeService employeeService, IHttpContextAccessor httpContextAccessor, ILogger<EmployeeController> logger)
+//    {
+//        _employeeService = employeeService;
+//        _httpContextAccessor = httpContextAccessor;
+//        _logger = logger;
+//    }
+
+//    #region View Employees
+//    public async Task<IActionResult> ViewEmp()
+//    {
+//        var employees = await _employeeService.GetAllEmployeesAsync();
+//        return View(employees); // Return the list of ViewEmp models to the view
+//    }
+//    #endregion
+
+//    #region Search Employee
+//    public async Task<IActionResult> SearchEmployee(string empId)
+//    {
+//        IList<ViewEmp> filteredEmployees;
+
+//        if (string.IsNullOrEmpty(empId))
+//        {
+//            // Return all employees if no search query
+//            filteredEmployees = await _employeeService.GetAllEmployeesAsync();
+//        }
+//        else
+//        {
+//            // Filter employees based on the provided empId
+//            filteredEmployees = await _employeeService.GetFilteredEmployeesAsync(empId);
+//        }
+
+//        return Json(filteredEmployees); // Return filtered list as JSON
+//    }
+//    #endregion
+
+//    #region Edit Employee
+//    // EditEmp GET method
+//    public async Task<IActionResult> EditEmp(int empId)
+//    {
+//        // Fetch the Employee entity
+//        var employee = await _employeeService.GetEmployeeByIdAsync(empId);
+
+//        if (employee == null)
+//        {
+//            TempData["ErrorMessage"] = "Employee not found.";
+//            return RedirectToAction(nameof(ViewEmp)); // Return to employee list or other page
+//        }
+
+//        // Map the Employee entity to ViewEmp model (used for form)
+//        var model = new ViewEmp
+//        {
+//            empId = employee.empId,
+//            username = employee.username,
+//            email = employee.email,
+//            Role = employee.Role,
+//            Department = employee.Department,
+//            profilePic = employee.profilePic // map the profilePic if necessary
+//        };
+
+//        // Return to the Edit view with the ViewEmp model
+//        return View(model);
+//    }
+
+
+//    [HttpPost]
+//    [HttpPost]
+//    public async Task<IActionResult> EditEmp(ViewEmp model)
+//    {
+//        if (!ModelState.IsValid)
+//        {
+//            TempData["ErrorMessage"] = "Please correct the errors in the form.";
+//            return View(model); // Return with validation errors if invalid
+//        }
+
+//        // Fetch the Employee entity
+//        var employee = await _employeeService.GetEmployeeByIdAsync(model.empId);
+
+//        if (employee == null)
+//        {
+//            TempData["ErrorMessage"] = "Employee not found.";
+//            return RedirectToAction(nameof(ViewEmp)); // Return to employee list if not found
+//        }
+
+//        // Map the properties from ViewEmp to Employee entity
+//        employee.username = model.username; // Update entity properties
+//        employee.email = model.email;
+//        employee.Role = model.Role;
+//        employee.Department = model.Department;
+
+//        // Handle profile picture upload if required
+//        if (model.profilePic != null && model.profilePic.Length > 0)
+//        {
+//            employee.profilePic = model.profilePic;
+//        }
+
+//        // Save the updated Employee entity
+//        await _employeeService.UpdateEmployeeAsync(employee);
+
+//        TempData["SuccessMessage"] = "Employee updated successfully!";
+//        return RedirectToAction(nameof(ViewEmp)); // Redirect to the list view
+//    }
+
+//    #endregion
+
+//    #region Delete Employee
+//    public async Task<IActionResult> DeleteEmp(int id)
+//    {
+//        try
+//        {
+//            await _employeeService.DeleteEmployeeAsync(id);
+//            TempData["SuccessMessage"] = "Employee deleted successfully.";
+//        }
+//        catch (Exception ex)
+//        {
+//            TempData["ErrorMessage"] = "Failed to delete employee: " + ex.Message;
+//        }
+
+//        return RedirectToAction(nameof(ViewEmp));
+//    }
+//    #endregion
+//}
+// EmployeeController.cs
+
 using HrInternWebApp.Models.Identity;
 using Microsoft.AspNetCore.Mvc;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
-using System.Linq;
 
 public class EmployeeController : Controller
 {
     private readonly EmployeeService _employeeService;
-    private readonly IHttpContextAccessor _httpContextAccessor;
-    private readonly ILogger<EmployeeController> _logger;
-    #region Constructor
-    public EmployeeController(EmployeeService employeeService, IHttpContextAccessor httpContextAccessor, ILogger<EmployeeController> logger)
+
+    public EmployeeController(EmployeeService employeeService)
     {
         _employeeService = employeeService;
-        _httpContextAccessor = httpContextAccessor;
-        _logger = logger;
     }
-    #endregion
 
     #region View Employees
-    //public async Task<IActionResult> ViewEmp(string empId)
-    //{
-    //    if (!string.IsNullOrWhiteSpace(empId))
-    //    {
-    //        //if (int.TryParse(empId, out int parsedEmpId))//convert empId to integer
-    //        //{
-    //        //    var employee = await _employeeService.GetEmployeeByIdAsync(parsedEmpId);
-    //        //    if (employee != null)
-    //        //    {
-    //        //        return View(new List<Employee> { employee });
-    //        //    }
-    //        //    TempData["ErrorMessage"] = "Employee not found.";
-    //        //}
-    //        //else
-    //        //{
-    //        //    TempData["ErrorMessage"] = "Invalid Employee ID.";
-    //        //}
-    //    }
-    //    // List all employees if no specific employee ID is searched 
-    //    var employees = await _employeeService.GetAllEmployeesAsync();
-    //    return View(employees);
-    //}
-    //public async Task<IActionResult> ViewEmp(string empId)
-    //{
-    //    if (!string.IsNullOrWhiteSpace(empId))
-    //    {
-    //        var employees = await _employeeService.GetAllEmployeesAsync();
-    //        var filteredEmployees = employees.Where(e => e.empId.ToString().Contains(empId)).ToList();
-    //        return Json(filteredEmployees); // Return filtered employees as JSON
-    //    }
-
-    //    // If no empId is provided, return all employees
-    //    var allEmployees = await _employeeService.GetAllEmployeesAsync();
-    //    return View(allEmployees);
-    //}
     public async Task<IActionResult> ViewEmp()
     {
         var employees = await _employeeService.GetAllEmployeesAsync();
-        return View(employees); 
+        return View(employees); // Return the list of ViewEmp models to the view
     }
-
     #endregion
-
-    #region Search Employee by EmpId
 
     #region Search Employee
     public async Task<IActionResult> SearchEmployee(string empId)
     {
-        IList<Employee> filteredEmployees;
+        IList<ViewEmp> filteredEmployees;
 
         if (string.IsNullOrEmpty(empId))
         {
-            // If no empId is provided, return all employees
+            // Return all employees if no search query
             filteredEmployees = await _employeeService.GetAllEmployeesAsync();
         }
         else
         {
-            // Filter the employees based on the provided empId
-            filteredEmployees = await _employeeService.GetAllEmployeesAsync();
-            filteredEmployees = filteredEmployees.Where(e => e.empId.ToString().Contains(empId)).ToList();
+            // Filter employees based on the provided empId
+            filteredEmployees = await _employeeService.GetFilteredEmployeesAsync(empId);
         }
 
-        return Json(filteredEmployees);
+        return Json(filteredEmployees); // Return filtered list as JSON
     }
     #endregion
 
-    #endregion
-
-
-    #region Edit Employee 
-    public async Task<IActionResult> EditEmp(int id)//for get (load initial form with data for editing)
+    #region Edit Employee (GET)
+    public async Task<IActionResult> EditEmp(int id)
     {
-        // Check if the user is an admin
-        var currentUserRole = _httpContextAccessor.HttpContext.Session.GetString("Role");
-        if (currentUserRole != "Admin")
-        {
-            return RedirectToAction(nameof(ViewEmp));
-        }
+        var model = await _employeeService.GetEmployeeByIdAsync(id);
 
-        var employee = await _employeeService.GetEmployeeByIdAsync(id);
-        if (employee == null)
+        if (model == null)
         {
             TempData["ErrorMessage"] = "Employee not found.";
-            return RedirectToAction(nameof(ViewEmp));
+            return RedirectToAction("ViewEmp"); // Redirect to employee list or other page
         }
 
-        var model = new EditEmp
-        {
-            empId = employee.empId,
-            username = employee.username,
-            Role = employee.Role,
-            Department = employee.Department,
-            email = employee.email,
-            profilePic = employee.profilePic
-        };
-        return View(model);
+        return View(model); // Pass ViewEmp model to the view
     }
+    #endregion
 
+    #region Edit Employee (POST)
     [HttpPost]
-    public async Task<IActionResult> EditEmp(EditEmp model, IFormFile ProfilePic)
+    public async Task<IActionResult> EditEmp(ViewEmp model, IFormFile? profilePic)
     {
-        var currentUserRole = _httpContextAccessor.HttpContext.Session.GetString("Role");
-        if (currentUserRole != "Admin")
-        {
-            TempData["ErrorMessage"] = "You do not have permission to edit employee information.";
-            return RedirectToAction(nameof(ViewEmp));
-        }
-
         if (!ModelState.IsValid)
         {
             TempData["ErrorMessage"] = "Please correct the errors in the form.";
-            return View(model); 
-        }
-
-        var employee = await _employeeService.GetEmployeeByIdAsync(model.empId);
-        if (employee == null)
-        {
-            TempData["ErrorMessage"] = "Employee not found.";
-            return RedirectToAction(nameof(ViewEmp));
-        }
-
-        employee.username = model.username;
-        employee.email = model.email;
-        employee.Role = model.Role; 
-        employee.Department = model.Department;
-
-        if (ProfilePic != null && ProfilePic.Length > 0)
-        {
-            using var memoryStream = new MemoryStream();
-            await ProfilePic.CopyToAsync(memoryStream);
-            employee.profilePic = memoryStream.ToArray();
+            return View(model); // Return the same model if validation fails
         }
 
         try
         {
-            await _employeeService.UpdateEmployeeAsync(employee);
-            TempData["SuccessMessage"] = "Employee information updated successfully.";
-            return RedirectToAction(nameof(ViewEmp));
+            // Fetch the existing employee to preserve the old profilePic if no new one is uploaded
+            var existingEmployee = await _employeeService.GetEmployeeByIdAsync(model.empId);
+            if (existingEmployee == null)
+            {
+                TempData["ErrorMessage"] = "Employee not found.";
+                return RedirectToAction("ViewEmp");
+            }
+
+            // If a new profile picture is uploaded, update it
+            if (profilePic != null && profilePic.Length > 0)
+            {
+                using (var memoryStream = new MemoryStream())
+                {
+                    await profilePic.CopyToAsync(memoryStream);
+                    model.profilePic = memoryStream.ToArray(); // Set the new profile picture
+                }
+            }
+            else
+            {
+                // If no new picture is uploaded, keep the existing one
+                model.profilePic = existingEmployee.profilePic;
+            }
+
+            // Update the employee's information (preserve old profilePic if no new one is uploaded)
+            await _employeeService.UpdateEmployeeAsync(model);
+
+            TempData["SuccessMessage"] = "Employee updated successfully!";
+            return RedirectToAction("ViewEmp"); // Redirect back to the employee list or profile page
         }
         catch (Exception ex)
         {
-            ModelState.AddModelError(string.Empty, "An error occurred while updating the employee: " + ex.Message);
-            return View(model); 
+            TempData["ErrorMessage"] = $"Error updating employee: {ex.Message}";
+            return View(model); // Return the same model if there's an error
         }
     }
     #endregion
-
 
     #region Delete Employee
     public async Task<IActionResult> DeleteEmp(int id)
@@ -183,7 +253,5 @@ public class EmployeeController : Controller
 
         return RedirectToAction(nameof(ViewEmp));
     }
-
     #endregion
 }
-

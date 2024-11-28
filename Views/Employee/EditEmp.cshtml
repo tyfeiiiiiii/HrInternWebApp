@@ -1,4 +1,4 @@
-﻿@model HrInternWebApp.Models.Identity.EditEmp
+﻿@model HrInternWebApp.Models.Identity.ViewEmp
 @inject IHttpContextAccessor HttpContextAccessor
 
 @{
@@ -21,34 +21,46 @@
             <input asp-for="email" type="email" class="form-control" readonly="true" /> 
         </div>
 
-  <div class="form-group">
-                <label asp-for="Role" class="control-label"></label>
-                <select asp-for="Role" class="form-control">
-                    <option value="Admin">Admin</option>
-                    <option value="Manager">Manager</option>
-                    <option value="Senior">Senior</option>
-                    <option value="Junior">Junior</option>
-                </select>
-            </div>
+        <div class="form-group">
+            <label asp-for="Role" class="control-label"></label>
+            <select asp-for="Role" class="form-control">
+                <option value="Admin">Admin</option>
+                <option value="Manager">Manager</option>
+                <option value="Senior">Senior</option>
+                <option value="Junior">Junior</option>
+            </select>
+        </div>
 
-            <div class="form-group">
-                <label asp-for="Department" class="control-label"></label>
-                <select asp-for="Department" class="form-control">
-                    <option value="Finance">Finance</option>
-                    <option value="IT">IT</option>
-                    <option value="Human Resource">Human Resource</option>
-                    <option value="Logistic">Logistic</option>
-                    <option value="Consultant">Consultant</option>
-                    <option value="Operation">Operation</option>
-                </select>
-            </div>
+        <div class="form-group">
+            <label asp-for="Department" class="control-label"></label>
+            <select asp-for="Department" class="form-control">
+                <option value="Finance">Finance</option>
+                <option value="IT">IT</option>
+                <option value="Human Resource">Human Resource</option>
+                <option value="Logistic">Logistic</option>
+                <option value="Consultant">Consultant</option>
+                <option value="Operation">Operation</option>
+            </select>
+        </div>
 
-@*         <div class="form-group">
+        <div class="form-group">
             <label asp-for="profilePic" class="control-label">Upload Profile Picture</label>
-            <input type="file" name="ProfilePic" class="form-control-file" accept="image/*" @(!isAdmin ? "disabled" : "") /> <!-- Disable upload if not admin -->
-        </div> *@
+            <input type="file" name="profilePic" class="form-control-file" accept="image/*" />
+        </div>
 
-            <button type="submit" class="btn btn-primary">Save changes</button>
+        <div class="form-group">
+            <label>Current Profile Picture:</label>
+            @if (Model.profilePic != null && Model.profilePic.Length > 0)
+            {
+                <img src="data:image/png;base64,@(Convert.ToBase64String(Model.profilePic))" alt="Profile Picture" class="rounded-circle mb-3" style="width: 100px; height: 100px; object-fit: cover;" />
+            }
+            else
+            {
+                <img src="https://via.placeholder.com/100" alt="No Image" class="rounded-circle mb-3" style="width: 100px; height: 100px; object-fit: cover;" />
+            }
+        </div>
+
+        <button type="submit" class="btn btn-primary">Save changes</button>
         <a asp-action="ViewEmp" class="btn btn-secondary">Cancel</a>
     </form>
 </div>

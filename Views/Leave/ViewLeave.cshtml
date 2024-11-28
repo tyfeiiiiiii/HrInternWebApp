@@ -13,8 +13,7 @@
                 @if (HttpContextAccessor.HttpContext.Session.GetString("Role") == "Admin")
                 {
                     <form class="form-inline d-flex" id="searchForm" method="get" action="javascript:void(0)">
-                        <input class="form-control mr-2" type="search" id="empIdInput" name="empId" placeholder="Search by Employee ID" aria-label="Search">
-                        <button class="btn btn-outline-success" type="submit">Search</button>
+                        <input class="form-control mr-2" type="search" id="empIdSearch" name="empId" placeholder="Search by Employee ID" aria-label="Search">
                     </form>
                 }
             </nav>
@@ -106,11 +105,11 @@
 </div>
 
 <script>
-    // Prevent the default form submission and trigger AJAX instead
-    $("#searchForm").on("submit", function (e) {
+    // Prevent the default form submission trigger AJAX
+    $("#searchForm").on("input", function (e) {
         e.preventDefault(); // Prevent the form from submitting normally
         
-        var empId = $("#empIdInput").val(); // Get the empId from the input field
+        var empId = $("#empIdSearch").val(); // Get the empId from the input field
 
         $.ajax({
             url: '@Url.Action("SearchLeave", "Leave")',
