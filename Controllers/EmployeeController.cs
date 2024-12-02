@@ -1,149 +1,20 @@
-﻿//using HrInternWebApp.Models.Identity;
-//using Microsoft.AspNetCore.Mvc;
-//using HrInternWebApp.Entity;
-//using System.IO;
-//using System.Threading.Tasks;
-//using Microsoft.Extensions.Logging;
-
-//public class EmployeeController : Controller
-//{
-//    private readonly EmployeeService _employeeService;
-//    private readonly IHttpContextAccessor _httpContextAccessor;
-//    private readonly ILogger<EmployeeController> _logger;
-
-//    public EmployeeController(EmployeeService employeeService, IHttpContextAccessor httpContextAccessor, ILogger<EmployeeController> logger)
-//    {
-//        _employeeService = employeeService;
-//        _httpContextAccessor = httpContextAccessor;
-//        _logger = logger;
-//    }
-
-//    #region View Employees
-//    public async Task<IActionResult> ViewEmp()
-//    {
-//        var employees = await _employeeService.GetAllEmployeesAsync();
-//        return View(employees); // Return the list of ViewEmp models to the view
-//    }
-//    #endregion
-
-//    #region Search Employee
-//    public async Task<IActionResult> SearchEmployee(string empId)
-//    {
-//        IList<ViewEmp> filteredEmployees;
-
-//        if (string.IsNullOrEmpty(empId))
-//        {
-//            // Return all employees if no search query
-//            filteredEmployees = await _employeeService.GetAllEmployeesAsync();
-//        }
-//        else
-//        {
-//            // Filter employees based on the provided empId
-//            filteredEmployees = await _employeeService.GetFilteredEmployeesAsync(empId);
-//        }
-
-//        return Json(filteredEmployees); // Return filtered list as JSON
-//    }
-//    #endregion
-
-//    #region Edit Employee
-//    // EditEmp GET method
-//    public async Task<IActionResult> EditEmp(int empId)
-//    {
-//        // Fetch the Employee entity
-//        var employee = await _employeeService.GetEmployeeByIdAsync(empId);
-
-//        if (employee == null)
-//        {
-//            TempData["ErrorMessage"] = "Employee not found.";
-//            return RedirectToAction(nameof(ViewEmp)); // Return to employee list or other page
-//        }
-
-//        // Map the Employee entity to ViewEmp model (used for form)
-//        var model = new ViewEmp
-//        {
-//            empId = employee.empId,
-//            username = employee.username,
-//            email = employee.email,
-//            Role = employee.Role,
-//            Department = employee.Department,
-//            profilePic = employee.profilePic // map the profilePic if necessary
-//        };
-
-//        // Return to the Edit view with the ViewEmp model
-//        return View(model);
-//    }
-
-
-//    [HttpPost]
-//    [HttpPost]
-//    public async Task<IActionResult> EditEmp(ViewEmp model)
-//    {
-//        if (!ModelState.IsValid)
-//        {
-//            TempData["ErrorMessage"] = "Please correct the errors in the form.";
-//            return View(model); // Return with validation errors if invalid
-//        }
-
-//        // Fetch the Employee entity
-//        var employee = await _employeeService.GetEmployeeByIdAsync(model.empId);
-
-//        if (employee == null)
-//        {
-//            TempData["ErrorMessage"] = "Employee not found.";
-//            return RedirectToAction(nameof(ViewEmp)); // Return to employee list if not found
-//        }
-
-//        // Map the properties from ViewEmp to Employee entity
-//        employee.username = model.username; // Update entity properties
-//        employee.email = model.email;
-//        employee.Role = model.Role;
-//        employee.Department = model.Department;
-
-//        // Handle profile picture upload if required
-//        if (model.profilePic != null && model.profilePic.Length > 0)
-//        {
-//            employee.profilePic = model.profilePic;
-//        }
-
-//        // Save the updated Employee entity
-//        await _employeeService.UpdateEmployeeAsync(employee);
-
-//        TempData["SuccessMessage"] = "Employee updated successfully!";
-//        return RedirectToAction(nameof(ViewEmp)); // Redirect to the list view
-//    }
-
-//    #endregion
-
-//    #region Delete Employee
-//    public async Task<IActionResult> DeleteEmp(int id)
-//    {
-//        try
-//        {
-//            await _employeeService.DeleteEmployeeAsync(id);
-//            TempData["SuccessMessage"] = "Employee deleted successfully.";
-//        }
-//        catch (Exception ex)
-//        {
-//            TempData["ErrorMessage"] = "Failed to delete employee: " + ex.Message;
-//        }
-
-//        return RedirectToAction(nameof(ViewEmp));
-//    }
-//    #endregion
-//}
-// EmployeeController.cs
-
+﻿using HrInternWebApp.Entity;
 using HrInternWebApp.Models.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Caching.Memory;
+using System.Collections.Generic;
 
 public class EmployeeController : Controller
 {
     private readonly EmployeeService _employeeService;
+    private readonly IMemoryCache _cache;
+    private readonly ILogger<EmployeeController> _logger;
 
-    public EmployeeController(EmployeeService employeeService)
+    public EmployeeController(EmployeeService employeeService, IMemoryCache memoryCache, ILogger<EmployeeController> logger)
     {
         _employeeService = employeeService;
+        _cache = memoryCache;
+        _logger = logger;
     }
 
     #region View Employees
@@ -155,23 +26,61 @@ public class EmployeeController : Controller
     #endregion
 
     #region Search Employee
+    //public async Task<IActionResult> SearchEmployee(string empId)
+    //{
+    //    IList<ViewEmp> filteredEmployees;
+
+    //    if (string.IsNullOrEmpty(empId))
+    //    {
+    //        // Return all employees if no search query
+    //        filteredEmployees = await _employeeService.GetAllEmployeesAsync();
+    //    }
+    //    else
+    //    {
+    //        // Filter employees based on the provided empId
+    //        filteredEmployees = await _employeeService.GetFilteredEmployeesAsync(empId);
+    //    }
+
+    //    return Json(filteredEmployees); // Return filtered list as JSON
+    //}
     public async Task<IActionResult> SearchEmployee(string empId)
     {
         IList<ViewEmp> filteredEmployees;
 
+        // If no empId is provided, use cached data
         if (string.IsNullOrEmpty(empId))
         {
-            // Return all employees if no search query
             filteredEmployees = await _employeeService.GetAllEmployeesAsync();
         }
         else
         {
-            // Filter employees based on the provided empId
-            filteredEmployees = await _employeeService.GetFilteredEmployeesAsync(empId);
+            // If an empId is provided, search the cache or database
+            string cacheKey = $"Employee_{empId}";
+            if (!_cache.TryGetValue(cacheKey, out filteredEmployees))
+            {
+                // Cache miss: fetch from the service
+                _logger.LogInformation($"Cache miss for empId: {empId}");
+
+                filteredEmployees = await _employeeService.GetFilteredEmployeesAsync(empId);
+
+                // Cache the result for future use
+                _cache.Set(cacheKey, filteredEmployees, new MemoryCacheEntryOptions
+                {
+                    AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(15) // Cache for 15 minutes
+                });
+
+                _logger.LogInformation($"Data for empId: {empId} fetched from database and cached.");
+            }
+            else
+            {
+                // Cache hit
+                _logger.LogInformation($"Cache hit for empId: {empId}");
+            }
         }
 
         return Json(filteredEmployees); // Return filtered list as JSON
     }
+
     #endregion
 
     #region Edit Employee (GET)
