@@ -1,4 +1,5 @@
-﻿using HrInternWebApp.Models.Identity;
+﻿using HrInternWebApp.Entity;
+using HrInternWebApp.Models.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Caching.Memory;
 
@@ -22,26 +23,16 @@ public class LeaveController : Controller
         var gender = HttpContext.Session.GetString("Gender");
         ViewData["Gender"] = gender;
 
-        // Cache leave types by gender
         string cacheKey = $"LeaveTypes_{gender}";
         if (!_cache.TryGetValue(cacheKey, out List<string> leaveTypes))
         {
-            // Cache miss, fetch from service
-            _logger.LogInformation("Cache miss for LeaveTypes with gender: {Gender}. Fetching from service.", gender);
             leaveTypes = leaveServices.GetLeaveTypesByGender(gender);
 
-            // Store in cache with a 30-minute expiration
             _cache.Set(cacheKey, leaveTypes, new MemoryCacheEntryOptions
             {
                 AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(30)
             });
-            _logger.LogInformation("LeaveTypes cached with key: {CacheKey} for 30 minutes.", cacheKey);
         }
-        else
-        {
-            _logger.LogInformation("Cache hit for LeaveTypes with gender: {Gender}.", gender);
-        }
-
         ViewData["LeaveTypes"] = leaveTypes;
         return View();
     }
@@ -82,44 +73,26 @@ public class LeaveController : Controller
 
         IList<ViewLeave> leaves;
 
-        // Cache key for leave records
-        string cacheKey = $"Leaves_{role}_{empId ?? employeeIdString}";
-
-        if (!_cache.TryGetValue(cacheKey, out leaves))
+        if (role == "Admin")
         {
-            _logger.LogInformation("Cache miss for leaves with role: {Role} and empId: {EmpId}. Fetching from service.", role, empId ?? employeeIdString);
-
-            if (role == "Admin")
+            leaves = await leaveServices.GetAllLeavesAsync();
+            if (!string.IsNullOrEmpty(empId) && int.TryParse(empId, out int employeeIdFilter))
             {
-                leaves = await leaveServices.GetAllLeavesAsync();
-                if (!string.IsNullOrEmpty(empId) && int.TryParse(empId, out int employeeIdFilter))
-                {
-                    leaves = leaves.Where(l => l.empId == employeeIdFilter).ToList();
-                }
+                leaves = leaves.Where(l => l.empId == employeeIdFilter).ToList();
             }
-            else if (int.TryParse(employeeIdString, out int employeeId))
-            {
-                leaves = await leaveServices.GetLeavesByEmployeeAsync(employeeId);
+        }
+        else if (int.TryParse(employeeIdString, out int employeeId))
+        {
+            leaves = await leaveServices.GetLeavesByEmployeeAsync(employeeId);
 
-                if (!leaves.Any())
-                {
-                    TempData["ErrorMessage"] = "No records found for your Employee ID.";
-                }
-            }
-            else
+            if (!leaves.Any())
             {
-                leaves = new List<ViewLeave>();
+                TempData["ErrorMessage"] = "No records found for your Employee ID.";
             }
-
-            _cache.Set(cacheKey, leaves, new MemoryCacheEntryOptions
-            {
-                AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(30)
-            });
-            _logger.LogInformation("Leaves data cached with key: {CacheKey} for 30 minutes.", cacheKey);
         }
         else
         {
-            _logger.LogInformation("Cache hit for leaves with role: {Role} and empId: {EmpId}.", role, empId ?? employeeIdString);
+            leaves = new List<ViewLeave>();
         }
 
         return View(leaves);
@@ -129,48 +102,49 @@ public class LeaveController : Controller
 
     #region Search Leave by EmpId
 
+    //public async Task<IActionResult> SearchLeave(string empId)
+    //{
+    //    IList<ViewLeave> filteredLeaves;
+
+    //    if (string.IsNullOrEmpty(empId))
+    //    {
+    //        // If no empId is provided, return all leaves
+    //        filteredLeaves = await leaveServices.GetAllLeavesAsync();
+    //    }
+    //    else
+    //    {
+    //        // Filter the leaves based on the provided empId
+    //        filteredLeaves = await leaveServices.GetAllLeavesAsync();
+    //        filteredLeaves = filteredLeaves.Where(l => l.empId.ToString().Contains(empId)).ToList();
+    //    }
+
+    //    return Json(filteredLeaves);
+    //}
     public async Task<IActionResult> SearchLeave(string empId)
     {
         IList<ViewLeave> filteredLeaves;
 
-        // Cache key for searching leaves by empId
-        string cacheKey = string.IsNullOrEmpty(empId) ? "AllLeaves" : $"FilteredLeaves_{empId}";
-
-        if (!_cache.TryGetValue(cacheKey, out filteredLeaves))
+        if (string.IsNullOrEmpty(empId))
         {
-            _logger.LogInformation("Cache miss for search leaves with empId: {EmpId}. Fetching from service.", empId);
-
-            // Cache miss, fetch from service
-            if (string.IsNullOrEmpty(empId))
-            {
-                filteredLeaves = await leaveServices.GetAllLeavesAsync();
-            }
-            else
-            {
-                filteredLeaves = await leaveServices.GetAllLeavesAsync();
-                filteredLeaves = filteredLeaves.Where(l => l.empId.ToString().Contains(empId)).ToList();
-            }
-
-            // Cache the result for 15 minutes
-            _cache.Set(cacheKey, filteredLeaves, new MemoryCacheEntryOptions
-            {
-                AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(15)
-            });
-            _logger.LogInformation("Filtered leaves cached with key: {CacheKey} for 15 minutes.", cacheKey);
+            // If no empId is provided, return all leaves
+            filteredLeaves = await leaveServices.GetAllLeavesAsync();
         }
         else
         {
-            _logger.LogInformation("Cache hit for search leaves with empId: {EmpId}.", empId);
+            // If empId is provided, filter the leaves
+            filteredLeaves = await leaveServices.GetFilteredLeavesAsync(empId);
         }
 
         return Json(filteredLeaves);
     }
 
+
+
     #endregion
 
     #region Update Leave Status
 
-    // Update leave status, only for admins
+    // only for admins
     public async Task<IActionResult> UpdateLeaveStatusAsync(int leaveId, string status)
     {
         var approver = HttpContext.Session.GetString("Username");
@@ -179,17 +153,25 @@ public class LeaveController : Controller
         {
             return RedirectToAction("Login", "Authentication");
         }
-
-        // Invalidate cache for leave records when updating status
-        string role = HttpContext.Session.GetString("Role");
-        string empId = HttpContext.Session.GetString("EmployeeId");
-        string cacheKey = $"Leaves_{role}_{empId}";
-        _cache.Remove(cacheKey);
-        _logger.LogInformation("Cache for leave records with key: {CacheKey} removed due to status update.", cacheKey);
-
         await leaveServices.UpdateLeaveStatusAsync(leaveId, status, approver);
-        _logger.LogInformation("Leave status updated for Leave ID: {LeaveId} to {Status}.", leaveId, status);
+
         return RedirectToAction(nameof(LeaveController.ViewLeave));
+    }
+    #endregion
+
+    #region Delete Leave
+    public async Task<IActionResult> DeleteLeave (int leaveId)
+    {
+        try
+        {
+            await leaveServices.DeleteLeaveAsync(leaveId);
+            TempData["SuccessMessage"] = "Leave deleted successfully.";
+        }
+        catch (Exception ex)
+        {
+            TempData["ErrorMessage"] = "Failed tod delete leave" + ex.Message;
+        }
+        return RedirectToAction(nameof(ViewLeave));
     }
 
     #endregion

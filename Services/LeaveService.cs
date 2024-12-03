@@ -222,4 +222,82 @@ public class LeaveService
         }
     }
     #endregion
+
+    #region get Filtered Leave
+    public async Task<IList<ViewLeave>> GetFilteredLeavesAsync(string empId)
+    {
+        try
+        {
+            Employee employeeAlias = null;
+            Leave leaveAlias = null;
+            ViewLeave viewLeave = null;
+
+            var query = _session.QueryOver(() => leaveAlias)
+                .JoinAlias(() => leaveAlias.employee, () => employeeAlias)
+                .SelectList(list => list
+                    .Select(() => leaveAlias.leaveId).WithAlias(() => viewLeave.leaveId)
+                    .Select(() => leaveAlias.leaveType).WithAlias(() => viewLeave.leaveType)
+                    .Select(() => leaveAlias.startDate).WithAlias(() => viewLeave.startDate)
+                    .Select(() => leaveAlias.endDate).WithAlias(() => viewLeave.endDate)
+                    .Select(() => leaveAlias.reason).WithAlias(() => viewLeave.reason)
+                    .Select(() => leaveAlias.status).WithAlias(() => viewLeave.status)
+                    .Select(() => leaveAlias.approver).WithAlias(() => viewLeave.approver)
+                    .Select(() => employeeAlias.empId).WithAlias(() => viewLeave.empId)
+                    .Select(() => employeeAlias.username).WithAlias(() => viewLeave.username)
+                )
+                .TransformUsing(Transformers.AliasToBean<ViewLeave>());
+
+            // While enter empId 
+            if (!string.IsNullOrEmpty(empId))
+            {
+                int empIdInt;
+                if (int.TryParse(empId, out empIdInt)) 
+                {
+                    query.Where(() => employeeAlias.empId == empIdInt);
+                }
+                else
+                {
+                    query.Where(() => employeeAlias.empId.ToString().Contains(empId)); 
+                }
+            }
+            var filteredLeaves = await query.ListAsync<ViewLeave>();
+
+            _logger.LogInformation($"Retrieved {filteredLeaves.Count} filtered leave(s) for employee ID: {empId}");
+            return filteredLeaves;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error retrieving filtered leaves for employee ID: {empId}", empId);
+            throw;
+        }
+    }
+    #endregion
+
+    #region Delete Leave 
+    public async Task DeleteLeaveAsync (int leaveId)
+    {
+        using (var transaction=_session.BeginTransaction())
+        {
+            try
+            {
+                var leave = await _session.GetAsync<Leave>(leaveId);
+                if(leave!=null)
+                {
+                    await _session.DeleteAsync(leave);
+                    await transaction.CommitAsync();
+                }
+                else
+                {
+                    _logger.LogWarning($"Leave with ID {leaveId} not found.");
+                }
+            }
+            catch(Exception ex)
+            {
+                await transaction.RollbackAsync();
+                _logger.LogError(ex, "Failed to delete leave");
+                throw;
+            }
+        }
+    }
+    #endregion
 }

@@ -1,4 +1,4 @@
-﻿@* @model IEnumerable<HrInternWebApp.Models.Identity.ViewEmp>
+﻿@model IEnumerable<HrInternWebApp.Models.Identity.ViewEmp>
 @inject IHttpContextAccessor HttpContextAccessor
 
 <div class="container-fluid" style="background-color: #0E3B31; height: 100vh;">
@@ -46,7 +46,7 @@
                                         Delete
                                     </button>
 
-                                    <!-- Delete Confirmation Modal -->
+                                    @*  Delete Confirmation Modal  *@
                                     <div class="modal fade" id="deleteModal-@employee.empId" tabindex="-1" aria-labelledby="deleteModalLabel-@employee.empId" aria-hidden="true">
                                         <div class="modal-dialog">
                                             <div class="modal-content">
@@ -55,7 +55,7 @@
                                                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                                                 </div>
                                                 <div class="modal-body">
-                                                    Are you sure you want to delete the employee with ID @employee.empId? This action cannot be undone.
+                                                    Are you sure you want to delete the  with ID @employee.empId? This action cannot be undone.
                                                 </div>
                                                 <div class="modal-footer">
                                                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
@@ -74,7 +74,7 @@
     </div>
 </div>
 
-@section Scripts {
+@* @section Scripts {
     <script>
         $(document).ready(function () {
             // Listen for input on the search field and perform search
@@ -85,56 +85,57 @@
                 $.ajax({
                     url: '@Url.Action("SearchEmployee", "Employee")',
                     type: 'GET',
-                    data: { empId: empId }, // Send empId to the server
+                    data: { empId: empId },
                     success: function (data) {
                         $('#employeeList').empty(); // Clear the existing employee list
 
                         if (data && data.length > 0) {
                             $.each(data, function (index, employee) {
+                                console.log(employee);
                                 var profilePic = employee.profilePic ? 'data:image/png;base64,' + employee.profilePic : 'https://via.placeholder.com/100';
 
                                 // Append the employee card with Edit and Delete buttons
                                 $('#employeeList').append(`
-                                                    <div class="col-md-4 mb-4 employee-card" data-empid="${employee.empId}">
-                                                        <div class="card shadow-sm h-100">
-                                                            <div class="card-body text-center">
-                                                                <img src="${profilePic}" alt="Profile Picture" class="rounded-circle mb-3" style="width: 100px; height: 100px; object-fit: cover;" />
-                                                                <h5 class="card-title">Employee ID: ${employee.empId}</h5>
-                                                                <p class="card-text">
-                                                                    <strong>Username:</strong> ${employee.username}<br />
-                                                                    <strong>Role:</strong> ${employee.Role}<br />
-                                                                    <strong>Department:</strong> ${employee.Department}<br />
-                                                                    <strong>Email:</strong> <a href="mailto:${employee.email}">${employee.email}</a>
-                                                                </p>
+                                                            <div class="col-md-4 mb-4 employee-card" data-empid="${employee.empId}">
+                                                                <div class="card shadow-sm h-100">
+                                                                    <div class="card-body text-center">
+                                                                        <img src="${profilePic}" alt="Profile Picture" class="rounded-circle mb-3" style="width: 100px; height: 100px; object-fit: cover;" />
+                                                                        <h5 class="card-title">Employee ID: ${employee.empId}</h5>
+                                                                        <p class="card-text">
+                                                                            <strong>Username:</strong> ${employee.username}<br />
+                                                                            <strong>Role:</strong> ${employee.Role}<br />
+                                                                            <strong>Department:</strong> ${employee.Department}<br />
+                                                                            <strong>Email:</strong> <a href="mailto:${employee.email}">${employee.email}</a>
+                                                                        </p>
 
-                                                                <a href="javascript:void(0);" onclick="window.location.href='@Url.Action("EditEmp", "Employee", new { id = "__empId__" })'.replace('__empId__', ${employee.empId})" class="btn btn-warning btn-sm me-2">Edit</a>
+                                                                        <a href="javascript:void(0);" onclick="window.location.href='@Url.Action("EditEmp", "Employee", new { id = "__empId__" })'.replace('__empId__', ${employee.empId})" class="btn btn-warning btn-sm me-2">Edit</a>
 
-                                                                <button type="button" class="btn btn-danger btn-sm" data-bs-toggle="modal" data-bs-target="#deleteModal-${employee.empId}">
-                                                                    Delete
-                                                                </button>
+                                                                        <button type="button" class="btn btn-danger btn-sm" data-bs-toggle="modal" data-bs-target="#deleteModal-${employee.empId}">
+                                                                            Delete
+                                                                        </button>
 
-                                                                <!-- Delete Confirmation Modal -->
-                                                                <div class="modal fade" id="deleteModal-${employee.empId}" tabindex="-1" aria-labelledby="deleteModalLabel-${employee.empId}" aria-hidden="true">
-                                                                    <div class="modal-dialog">
-                                                                        <div class="modal-content">
-                                                                            <div class="modal-header">
-                                                                                <h5 class="modal-title" id="deleteModalLabel-${employee.empId}">Confirm Delete</h5>
-                                                                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                                                                            </div>
-                                                                            <div class="modal-body">
-                                                                                Are you sure you want to delete the employee with ID ${employee.empId}? This action cannot be undone.
-                                                                            </div>
-                                                                            <div class="modal-footer">
-                                                                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                                                                                <a href="@Url.Action("DeleteEmp", "Employee", new { id = "__empId__" })".replace('__empId__', ${employee.empId}) class="btn btn-danger">Delete</a>
+                                                                        <!-- Delete Confirmation Modal -->
+                                                                        <div class="modal fade" id="deleteModal-${employee.empId}" tabindex="-1" aria-labelledby="deleteModalLabel-${employee.empId}" aria-hidden="true">
+                                                                            <div class="modal-dialog">
+                                                                                <div class="modal-content">
+                                                                                    <div class="modal-header">
+                                                                                        <h5 class="modal-title" id="deleteModalLabel-${employee.empId}">Confirm Delete</h5>
+                                                                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                                                    </div>
+                                                                                    <div class="modal-body">
+                                                                                        Are you sure you want to delete the employee with ID ${employee.empId}? This action cannot be undone.
+                                                                                    </div>
+                                                                                    <div class="modal-footer">
+                                                                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                                                                                        <a href="@Url.Action("DeleteEmp", "Employee", new { id = "__empId__" })".replace('__empId__', ${employee.empId}) class="btn btn-danger">Delete</a>
+                                                                                    </div>
+                                                                                </div>
                                                                             </div>
                                                                         </div>
                                                                     </div>
                                                                 </div>
                                                             </div>
-                                                        </div>
-                                                    </div>
-                                                `);
+                                                        `);
                             });
                         } else {
                             $('#employeeList').append('<p class="text-center">No employee found with this ID.</p>');
@@ -148,149 +149,72 @@
             });
         });
     </script>
-}
- *@
+} *@
 
- @model IEnumerable<HrInternWebApp.Models.Identity.ViewEmp>
-@inject IHttpContextAccessor HttpContextAccessor
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            $('#empIdSearch').on('input', function () {
+                var empId = $(this).val(); 
 
-<div class="container-fluid" style="background-color: #0E3B31; height: 100vh;">
-    <div class="row h-100">
-        <div class="col-md-3 p-3" style="background-color: #1A3E37;">
-            @await Html.PartialAsync("Sidebar")
-        </div>
+                $.ajax({
+                    url: '@Url.Action("SearchEmployee", "Employee")',
+                    type: 'GET',
+                    data: { empId: empId },
+                    success: function (data) {
+                        $('#employeeList').empty(); 
 
-        <div class="col-md-9" style="background-color: white; padding: 20px;">
-            <nav class="navbar navbar-light bg-light justify-content-between">
-                <a class="navbar-brand">Employee Management</a>
+                        if (Array.isArray(data) && data.length > 0) {
+                            $.each(data, function (index, employee) {
+                
+                                // Fallback for role and department, profile pic if they are missing or null
+                                var role = employee.role || 'Unknown';
+                                var department = employee.department || 'Unknown';
+                                var profilePic = employee.profilePic ? 'data:image/png;base64,' + employee.profilePic : 'https://via.placeholder.com/100';
 
-                <form class="form-inline d-flex" id="searchForm" method="get" action="">
-                    <input class="form-control mr-2" type="search" id="empIdSearch" name="empId" placeholder="Search by Employee ID" aria-label="Search">
-                </form>
-            </nav>
 
-            <div id="employeeList" class="row">
-                @foreach (var employee in Model)
-                {
-                    <div class="col-md-4 mb-4 employee-card" data-empid="@employee.empId">
-                        <div class="card shadow-sm h-100">
-                            <div class="card-body text-center">
-                                @if (employee.profilePic != null && employee.profilePic.Length > 0)
-                                {
-                                    <img src="data:image/png;base64,@(Convert.ToBase64String(employee.profilePic))" alt="Profile Picture" class="rounded-circle mb-3" style="width: 100px; height: 100px; object-fit: cover;" />
-                                }
-                                else
-                                {
-                                    <img src="https://via.placeholder.com/100" alt="No Image" class="rounded-circle mb-3" style="width: 100px; height: 100px; object-fit: cover;" />
-                                }
+                                $('#employeeList').append(`
+                                            <div class="col-md-4 mb-4 employee-card" data-empid="${employee.empId}">
+                                                <div class="card shadow-sm h-100">
+                                                    <div class="card-body text-center">
+                                                        <img src="${profilePic}" alt="Profile Picture" class="rounded-circle mb-3" style="width: 100px; height: 100px; object-fit: cover;" />
+                                                        <h5 class="card-title">Employee ID: ${employee.empId}</h5>
+                                                        <p class="card-text">
+                                                            <strong>Username:</strong> ${employee.username}<br />
+                                                            <strong>Role:</strong> ${role}<br />
+                                                            <strong>Department:</strong> ${department}<br />
+                                                            <strong>Email:</strong> <a href="mailto:${employee.email}">${employee.email}</a>
+                                                        </p>
+                                                        <a href="javascript:void(0);" onclick="window.location.href='@Url.Action("EditEmp", "Employee", new { id = "__empId__" })'.replace('__empId__', ${employee.empId})" class="btn btn-warning btn-sm me-2">Edit</a>
+                                                        <button type="button" class="btn btn-danger btn-sm" data-bs-toggle="modal" data-bs-target="#deleteModal-${employee.empId}">Delete</button>
 
-                                <h5 class="card-title">Employee ID: @employee.empId</h5>
-                                <p class="card-text">
-                                    <strong>Username:</strong> @employee.username<br />
-                                    <strong>Role:</strong> @employee.Role<br />
-                                    <strong>Department:</strong> @employee.Department<br />
-                                    <strong>Email:</strong> <a href="mailto:@employee.email">@employee.email</a>
-                                </p>
-
-                                <div class="d-flex justify-content-center mt-3">
-                                    <a href="javascript:void(0);" onclick="window.location.href='@Url.Action("EditEmp", "Employee", new { id = "__empId__"  })'.replace('__empId__', '@employee.empId')" class="btn btn-warning btn-sm me-2">Edit</a>
-
-                                    <button type="button" class="btn btn-danger btn-sm" data-bs-toggle="modal" data-bs-target="#deleteModal-@employee.empId">
-                                        Delete
-                                    </button>
-
-                                    <!-- Delete Confirmation Modal -->
-                                    <div class="modal fade" id="deleteModal-@employee.empId" tabindex="-1" aria-labelledby="deleteModalLabel-@employee.empId" aria-hidden="true">
-                                        <div class="modal-dialog">
-                                            <div class="modal-content">
-                                                <div class="modal-header">
-                                                    <h5 class="modal-title" id="deleteModalLabel-@employee.empId">Confirm Delete</h5>
-                                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                                                </div>
-                                                <div class="modal-body">
-                                                    Are you sure you want to delete the employee with ID @employee.empId? This action cannot be undone.
-                                                </div>
-                                                <div class="modal-footer">
-                                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                                                    <a href="@Url.Action("DeleteEmp", "Employee", new { id = employee.empId })" class="btn btn-danger">Delete</a>
+                                                        <!-- Delete Confirmation Modal -->
+                                                        <div class="modal fade" id="deleteModal-${employee.empId}" tabindex="-1" aria-labelledby="deleteModalLabel-${employee.empId}" aria-hidden="true">
+                                                            <div class="modal-dialog">
+                                                                <div class="modal-content">
+                                                                    <div class="modal-header">
+                                                                        <h5 class="modal-title" id="deleteModalLabel-${employee.empId}">Confirm Delete</h5>
+                                                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                                    </div>
+                                                                    <div class="modal-body">
+                                                                        Are you sure you want to delete the employee with ID ${employee.empId}? This action cannot be undone.
+                                                                    </div>
+                                                                    <div class="modal-footer">
+                                                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                                                                        <a href="@Url.Action("DeleteEmp", "Employee", new { id = "__empId__" })".replace('__empId__', ${employee.empId}) class="btn btn-danger">Delete</a>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
                                                 </div>
                                             </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                }
-            </div>
-        </div>
-    </div>
-</div>
-
-@section Scripts {
-    <script>
-        $(document).ready(function () {
-            // Listen for input on the search field and perform search
-            $('#empIdSearch').on('input', function () {
-                var empId = $(this).val(); // Get the search input value
-
-                // Perform the AJAX request
-                $.ajax({
-                    url: '@Url.Action("SearchEmployee", "Employee")',
-                    type: 'GET',
-                    data: { empId: empId }, // Send empId to the server
-                    success: function (data) {
-                        $('#employeeList').empty(); // Clear the existing employee list
-
-                        if (data && data.length > 0) {
-                            $.each(data, function (index, employee) {
-                                var profilePic = employee.profilePic ? 'data:image/png;base64,' + employee.profilePic : 'https://via.placeholder.com/100';
-
-                                // Append the employee card with Edit and Delete buttons
-                                $('#employeeList').append(`
-                                                    <div class="col-md-4 mb-4 employee-card" data-empid="${employee.empId}">
-                                                        <div class="card shadow-sm h-100">
-                                                            <div class="card-body text-center">
-                                                                <img src="${profilePic}" alt="Profile Picture" class="rounded-circle mb-3" style="width: 100px; height: 100px; object-fit: cover;" />
-                                                                <h5 class="card-title">Employee ID: ${employee.empId}</h5>
-                                                                <p class="card-text">
-                                                                    <strong>Username:</strong> ${employee.username}<br />
-                                                                    <strong>Role:</strong> ${employee.Role}<br />
-                                                                    <strong>Department:</strong> ${employee.Department}<br />
-                                                                    <strong>Email:</strong> <a href="mailto:${employee.email}">${employee.email}</a>
-                                                                </p>
-
-                                                                <a href="javascript:void(0);" onclick="window.location.href='@Url.Action("EditEmp", "Employee", new { id = "__empId__" })'.replace('__empId__', ${employee.empId})" class="btn btn-warning btn-sm me-2">Edit</a>
-
-                                                                <button type="button" class="btn btn-danger btn-sm" data-bs-toggle="modal" data-bs-target="#deleteModal-${employee.empId}">
-                                                                    Delete
-                                                                </button>
-
-                                                                <!-- Delete Confirmation Modal -->
-                                                                <div class="modal fade" id="deleteModal-${employee.empId}" tabindex="-1" aria-labelledby="deleteModalLabel-${employee.empId}" aria-hidden="true">
-                                                                    <div class="modal-dialog">
-                                                                        <div class="modal-content">
-                                                                            <div class="modal-header">
-                                                                                <h5 class="modal-title" id="deleteModalLabel-${employee.empId}">Confirm Delete</h5>
-                                                                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                                                                            </div>
-                                                                            <div class="modal-body">
-                                                                                Are you sure you want to delete the employee with ID ${employee.empId}? This action cannot be undone.
-                                                                            </div>
-                                                                            <div class="modal-footer">
-                                                                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                                                                                <a href="@Url.Action("DeleteEmp", "Employee", new { id = "__empId__" })".replace('__empId__', ${employee.empId}) class="btn btn-danger">Delete</a>
-                                                                            </div>
-                                                                        </div>
-                                                                    </div>
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                `);
+                                        `);
                             });
-                        } else {
+                        } else if (data && data.length === 0) {
                             $('#employeeList').append('<p class="text-center">No employee found with this ID.</p>');
+                        } else {
+                            $('#employeeList').append('<p class="text-center">Error fetching employee details.</p>');
                         }
                     },
                     error: function (xhr, status, error) {
@@ -302,3 +226,4 @@
         });
     </script>
 }
+

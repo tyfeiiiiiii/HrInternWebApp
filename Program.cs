@@ -51,6 +51,7 @@ namespace HrInternWebApp
             // Register the LeaveService for dependency injection
             builder.Services.AddScoped<LeaveService>();
             builder.Services.AddScoped<EmployeeService>();
+            builder.Services.AddMemoryCache();
 
             var app = builder.Build();
 

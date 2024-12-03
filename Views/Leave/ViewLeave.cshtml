@@ -56,6 +56,27 @@
                             <td>@leave.reason</td>
                             <td>@(string.IsNullOrEmpty(leave.status) ? "Pending" : leave.status)</td>
                             <td>@(string.IsNullOrEmpty(leave.approver) ? "N/A" : leave.approver)</td>
+                            <td><button type="button" class="btn btn-danger btn-sm" data-bs-toggle="modal" data-bs-target="#deleteModal-@leave.leaveId">Delete</button>
+
+                            @*  Delete Confirmation Modal  *@
+                            <div class="modal fade" id="deleteModal-@leave.leaveId" tabindex="-1" aria-labelledby="deleteModalLabel-@leave.leaveId" aria-hidden="true">
+                                <div class="modal-dialog">
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <h5 class="modal-title" id="deleteModalLabel-@leave.leaveId">Confirm Delete</h5>
+                                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                        </div>
+                                        <div class="modal-body">
+                                            Are you sure you want to delete the leave with ID @leave.leaveId? This action cannot be undone.
+                                        </div>
+                                        <div class="modal-footer">
+                                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                                            <a href="@Url.Action("DeleteLeave", "Leave", new { leaveId = @leave.leaveId })" class="btn btn-danger">Delete</a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                         </td>
 
                             @if (HttpContextAccessor.HttpContext.Session.GetString("Role") == "Admin")
                             {
