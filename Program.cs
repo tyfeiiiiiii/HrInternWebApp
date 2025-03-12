@@ -1,7 +1,9 @@
-using FluentNHibernate.Cfg;
-using FluentNHibernate.Cfg.Db;
-using NHibernate;
-using HrInternWebApp.Models.Maps;
+using System;
+using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
+using HrInternWebApp.Data;
+using HrInternWebApp.Services;
 
 namespace HrInternWebApp
 {
@@ -11,8 +13,16 @@ namespace HrInternWebApp
         {
             var builder = WebApplication.CreateBuilder(args);
 
+            // Load connection string from appsettings.json
+            var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+
             // Add services to the container.
             builder.Services.AddControllersWithViews();
+
+            // Add DbContext
+            builder.Services.AddDbContext<AppDbContext>(options =>
+                options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+
 
             // Add session and session timeout configurations
             builder.Services.AddHttpContextAccessor();
@@ -22,40 +32,34 @@ namespace HrInternWebApp
                 options.IdleTimeout = TimeSpan.FromMinutes(30);
                 options.Cookie.HttpOnly = true;
                 options.Cookie.IsEssential = true;
-                options.Cookie.SecurePolicy = CookieSecurePolicy.Always; // Enforce HTTPS
+                options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
+                options.Cookie.SameSite = SameSiteMode.Strict;
             });
 
-            // Add cookie-based authentication
-            builder.Services.AddAuthentication("MyCookieAuthenticationScheme")
-                .AddCookie("MyCookieAuthenticationScheme", options =>
+            // Add authentication and cookie settings
+            builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
+                .AddCookie(options =>
                 {
-                    options.LoginPath = "/Authentication/Login"; 
-                    //options.AccessDeniedPath = "/Authentication/AccessDenied"; // Optional: Set access denied path
+                    options.LoginPath = "/Authentication/Login";
                     options.Cookie.HttpOnly = true;
-                    options.Cookie.SecurePolicy = CookieSecurePolicy.Always; 
+                    options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
+                    options.Cookie.SameSite = SameSiteMode.Strict;
                 });
 
-            // Add authorization policies if needed
+            // Add authorization policies
             builder.Services.AddAuthorization(options =>
             {
                 options.AddPolicy("AdminPolicy", policy => policy.RequireRole("Admin"));
             });
 
-            // NHibernate session factory setup
-            var sessionFactory = CreateSessionFactory();
-            builder.Services.AddSingleton<ISessionFactory>(sessionFactory);  // Register session factory as singleton
-
-            // NHibernate session management per request
-            builder.Services.AddScoped(factory => sessionFactory.OpenSession());  // Inject NHibernate session
-
-            // Register the LeaveService for dependency injection
+            // Register services
             builder.Services.AddScoped<LeaveService>();
             builder.Services.AddScoped<EmployeeService>();
             builder.Services.AddMemoryCache();
 
             var app = builder.Build();
 
-            // Configure the HTTP request pipeline.
+            // Configure the HTTP request pipeline
             if (!app.Environment.IsDevelopment())
             {
                 app.UseExceptionHandler("/Home/Error");
@@ -66,36 +70,22 @@ namespace HrInternWebApp
             app.UseStaticFiles();
             app.UseSession();
             app.UseRouting();
-            app.UseAuthentication(); 
-            app.UseAuthorization(); 
-
-            app.MapControllerRoute(
-                name: "login",
-                pattern: "{controller=Authentication}/{action=Login}/{id?}");
+            app.UseAuthentication();
+            app.UseAuthorization();
 
             app.MapControllerRoute(
                 name: "default",
                 pattern: "{controller=Home}/{action=Index}/{id?}");
 
             app.MapControllerRoute(
+                name: "login",
+                pattern: "{controller=Authentication}/{action=Login}/{id?}");
+
+            app.MapControllerRoute(
                 name: "signup",
                 pattern: "{controller=Authentication}/{action=Signup}");
+
             app.Run();
         }
-
-        // Fluent NHibernate configuration for the session factory
-        public static ISessionFactory CreateSessionFactory()
-        {
-            return Fluently.Configure()
-                .Database(MsSqlConfiguration.MsSql2012
-                    .ConnectionString(@"Server=(localdb)\Local;Database=HRManagementSystem;Trusted_Connection=True;"))
-                .Mappings(m =>
-                {
-                    //no need to add on each map file as the n hibernat will combine tgt since th einitial file that stated here
-                    m.FluentMappings.AddFromAssemblyOf<EmployeeMap>();
-                })
-                .BuildSessionFactory();
-
-        }
     }
-    }
+}

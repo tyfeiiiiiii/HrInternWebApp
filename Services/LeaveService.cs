@@ -1,303 +1,155 @@
-﻿using ISession = NHibernate.ISession;
+﻿using HrInternWebApp.Data;
 using HrInternWebApp.Models.Identity;
-using NHibernate;
-using NHibernate.Transform;
+using HrInternWebApp.Entity;
 using Microsoft.Extensions.Logging;
+using Microsoft.EntityFrameworkCore;
+using System;
 using System.Collections.Generic;
 using System.Linq;
-using HrInternWebApp.Entity;
+using System.Threading.Tasks;
 
-public class LeaveService
-{
-    #region Fields
-    private readonly ISession _session;
-    private readonly ILogger<LeaveService> _logger;
-    #endregion
 
-    #region Constructor
-    public LeaveService(ISession session, ILogger<LeaveService> logger)
+namespace HrInternWebApp.Services {
+    public class LeaveService
     {
-        _session = session;
-        _logger = logger;
-    }
-    #endregion
+        private readonly AppDbContext _context;
+        private readonly ILogger<LeaveService> _logger;
 
-    #region Apply Leave
+        public LeaveService(AppDbContext context, ILogger<LeaveService> logger)
+        {
+            _context = context;
+            _logger = logger;
+        }
 
-    public List<string> GetLeaveTypesByGender(string gender)
-    {
-        if (gender == "Male")
+        public List<string> GetLeaveTypesByGender(string gender)
         {
-            return new List<string>
-        {
-            "Medical Leave",
-            "Annual Leave",
-            "Hospitalization",
-            "Examination",
-            "Marriage",
-            "Paternity Leave",
-            "Military Service Leave",
-            "Unpaid Leave",
-            "Emergency Leave"
-        };
-        }
-        else if (gender == "Female")
-        {
-            return new List<string>
-        {
-            "Medical Leave",
-            "Annual Leave",
-            "Hospitalization",
-            "Examination",
-            "Marriage",
-            "Maternity Leave",
-            "Child Care Leave",
-            "Unpaid Leave",
-            "Emergency Leave"
-        };
-        }
-        else
-        {
-            return new List<string> { "Medical Leave", "Annual Leave", "Unpaid Leave" };
-        }
-    }
-
-    public async Task ApplyLeaveAsync(ApplyLeave leaveRequest, int employeeId)
-    {
-        try
-        {
-            Employee employee = await _session.GetAsync<Employee>(employeeId);
-            if (employee == null)
+            return gender switch
             {
-                _logger.LogWarning($"No employee found with ID {employeeId}");
-                throw new InvalidOperationException($"Employee with ID {employeeId} does not exist.");
-            }
-
-            Leave leaveEntity = new Leave
-            {
-                leaveType = leaveRequest.leaveType,
-                startDate = leaveRequest.startDate,
-                endDate = leaveRequest.endDate,
-                reason = leaveRequest.reason,
-                status = "Pending",
-                approver = "Pending",
-                employee = employee 
+                "Male" => new List<string> { "Medical Leave", "Annual Leave", "Hospitalization", "Examination", "Marriage", "Paternity Leave", "Military Service Leave", "Unpaid Leave", "Emergency Leave" },
+                "Female" => new List<string> { "Medical Leave", "Annual Leave", "Hospitalization", "Examination", "Marriage", "Maternity Leave", "Child Care Leave", "Unpaid Leave", "Emergency Leave" },
+                _ => new List<string> { "Medical Leave", "Annual Leave", "Unpaid Leave" },
             };
+        }
 
-            using (var transaction = _session.BeginTransaction())
+        public async Task ApplyLeaveAsync(ApplyLeave leaveRequest, int employeeId)
+        {
+            try
             {
-                try
+                var employee = await _context.Employees.FindAsync(employeeId);
+                if (employee == null)
                 {
-                    await _session.SaveAsync(leaveEntity);
-                    await transaction.CommitAsync();
-                    _logger.LogInformation($"Leave record successfully saved for employee ID {employeeId}");
+                    _logger.LogWarning($"No employee found with ID {employeeId}");
+                    throw new InvalidOperationException($"Employee with ID {employeeId} does not exist.");
                 }
-                catch (Exception ex)
+
+                var leaveEntity = new Leave
                 {
-                    await transaction.RollbackAsync();
-                    _logger.LogError(ex, "Failed to apply leave");
-                    throw new Exception("Failed to apply leave", ex);
-                }
+                    leaveType = leaveRequest.leaveType,
+                    startDate = leaveRequest.startDate,
+                    endDate = leaveRequest.endDate,
+                    reason = leaveRequest.reason,
+                    status = "Pending",
+                    approver = "Pending",
+                    employee = employee
+                };
+
+                _context.Leaves.Add(leaveEntity);
+                await _context.SaveChangesAsync();
+                _logger.LogInformation($"Leave record successfully saved for employee ID {employeeId}");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "An error occurred while applying for leave.");
+                throw;
             }
         }
-        catch (Exception ex)
+
+        public async Task<IList<ViewLeave>> GetLeavesByEmployeeAsync(int employeeId)
         {
-            _logger.LogError(ex, "An error occurred while applying for leave.");
-            throw;
-        }
-    }
-
-    #endregion
-
-    #region Fetch Leaves
-
-    public async Task<IList<ViewLeave>> GetLeavesByEmployeeAsync(int employeeId)
-    {
-        try
-        {
-            Employee employeeAlias = null;
-            Leave leaveAlias = null;
-            ViewLeave viewLeave = null;
-
-            // Use synchronous QueryOver for joins
-            var leaves = await _session.QueryOver(() => leaveAlias)
-                .JoinAlias(() => leaveAlias.employee, () => employeeAlias)
-                .Where(() => employeeAlias.empId == employeeId)
-                .SelectList(list => list
-                    .Select(() => leaveAlias.leaveId).WithAlias(() => viewLeave.leaveId)
-                    .Select(() => leaveAlias.leaveType).WithAlias(() => viewLeave.leaveType)
-                    .Select(() => leaveAlias.startDate).WithAlias(() => viewLeave.startDate)
-                    .Select(() => leaveAlias.endDate).WithAlias(() => viewLeave.endDate)
-                    .Select(() => leaveAlias.reason).WithAlias(() => viewLeave.reason)
-                    .Select(() => leaveAlias.status).WithAlias(() => viewLeave.status)
-                    .Select(() => leaveAlias.approver).WithAlias(() => viewLeave.approver)
-                    .Select(() => employeeAlias.empId).WithAlias(() => viewLeave.empId)
-                    .Select(() => employeeAlias.username).WithAlias(() => viewLeave.username)
-                )
-                .TransformUsing(Transformers.AliasToBean<ViewLeave>())
-                .ListAsync<ViewLeave>();
-
-            _logger.LogInformation($"Retrieved {leaves.Count} leave(s) for employee ID: {employeeId}");
-            return leaves;
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error retrieving leaves for employee ID: {EmployeeId}", employeeId);
-            throw;
-        }
-    }
-
-    public async Task<IList<ViewLeave>> GetAllLeavesAsync()
-    {
-        try
-        {
-            Employee employeeAlias = null;
-            Leave leaveAlias = null;
-            ViewLeave viewLeave = null;
-
-            var leaves = await _session.QueryOver(() => leaveAlias)
-                .JoinAlias(() => leaveAlias.employee, () => employeeAlias)
-                .SelectList(list => list
-                    .Select(() => leaveAlias.leaveId).WithAlias(() => viewLeave.leaveId)
-                    .Select(() => leaveAlias.leaveType).WithAlias(() => viewLeave.leaveType)
-                    .Select(() => leaveAlias.startDate).WithAlias(() => viewLeave.startDate)
-                    .Select(() => leaveAlias.endDate).WithAlias(() => viewLeave.endDate)
-                    .Select(() => leaveAlias.reason).WithAlias(() => viewLeave.reason)
-                    .Select(() => leaveAlias.status).WithAlias(() => viewLeave.status)
-                    .Select(() => leaveAlias.approver).WithAlias(() => viewLeave.approver)
-                    .Select(() => employeeAlias.empId).WithAlias(() => viewLeave.empId)
-                    .Select(() => employeeAlias.username).WithAlias(() => viewLeave.username)
-                )
-                .TransformUsing(Transformers.AliasToBean<ViewLeave>())
-                .ListAsync<ViewLeave>();
-
-            _logger.LogInformation($"Retrieved {leaves.Count} leave(s) for admin view");
-            return leaves;
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error retrieving all leaves for admin");
-            throw;
-        }
-    }
-    #endregion
-
-    #region Update Leave Status
-    public async Task UpdateLeaveStatusAsync(int leaveId, string newStatus, string approver)
-    {
-        try
-        {
-            var leave = await _session.GetAsync<Leave>(leaveId);
-            if (leave != null)
-            {
-                leave.status = newStatus;
-                leave.approver = approver;
-
-                using (var transaction = _session.BeginTransaction())
+            return await _context.Leaves
+                .Where(l => l.employee.empId == employeeId)
+                .Select(l => new ViewLeave
                 {
-                    try
-                    {
-                        await _session.UpdateAsync(leave);
-                        await transaction.CommitAsync();
-                        _logger.LogInformation($"Leave status updated for leave ID {leaveId}");
-                    }
-                    catch (Exception ex)
-                    {
-                        await transaction.RollbackAsync();
-                        _logger.LogError(ex, "Failed to update leave status");
-                        throw new Exception("Failed to update leave status", ex);
-                    }
-                }
-            }
-            else
+                    leaveId = l.leaveId,
+                    leaveType = l.leaveType,
+                    startDate = l.startDate,
+                    endDate = l.endDate,
+                    reason = l.reason,
+                    status = l.status,
+                    approver = l.approver,
+                    empId = l.employee.empId,
+                    username = l.employee.username
+                })
+                .ToListAsync();
+        }
+
+        public async Task<IList<ViewLeave>> GetAllLeavesAsync()
+        {
+            return await _context.Leaves
+                .Select(l => new ViewLeave
+                {
+                    leaveId = l.leaveId,
+                    leaveType = l.leaveType,
+                    startDate = l.startDate,
+                    endDate = l.endDate,
+                    reason = l.reason,
+                    status = l.status,
+                    approver = l.approver,
+                    empId = l.employee.empId,
+                    username = l.employee.username
+                })
+                .ToListAsync();
+        }
+
+        public async Task UpdateLeaveStatusAsync(int leaveId, string newStatus, string approver)
+        {
+            var leave = await _context.Leaves.FindAsync(leaveId);
+            if (leave == null)
             {
                 _logger.LogWarning($"Leave with ID {leaveId} not found.");
                 throw new KeyNotFoundException($"Leave with ID {leaveId} not found.");
             }
+
+            leave.status = newStatus;
+            leave.approver = approver;
+
+            _context.Leaves.Update(leave);
+            await _context.SaveChangesAsync();
+            _logger.LogInformation($"Leave status updated for leave ID {leaveId}");
         }
-        catch (Exception ex)
+
+        public async Task<IList<ViewLeave>> GetFilteredLeavesAsync(string empId)
         {
-            _logger.LogError(ex, "An error occurred while updating leave status.");
-            throw;
+            return await _context.Leaves
+                .Where(l => string.IsNullOrEmpty(empId) || l.employee.empId.ToString().Contains(empId))
+                .Select(l => new ViewLeave
+                {
+                    leaveId = l.leaveId,
+                    leaveType = l.leaveType,
+                    startDate = l.startDate,
+                    endDate = l.endDate,
+                    reason = l.reason,
+                    status = l.status,
+                    approver = l.approver,
+                    empId = l.employee.empId,
+                    username = l.employee.username
+                })
+                .ToListAsync();
+        }
+
+        public async Task DeleteLeaveAsync(int leaveId)
+        {
+            var leave = await _context.Leaves.FindAsync(leaveId);
+            if (leave == null)
+            {
+                _logger.LogWarning($"Leave with ID {leaveId} not found.");
+                return;
+            }
+
+            _context.Leaves.Remove(leave);
+            await _context.SaveChangesAsync();
+            _logger.LogInformation($"Leave with ID {leaveId} deleted.");
         }
     }
-    #endregion
 
-    #region get Filtered Leave
-    public async Task<IList<ViewLeave>> GetFilteredLeavesAsync(string empId)
-    {
-        try
-        {
-            Employee employeeAlias = null;
-            Leave leaveAlias = null;
-            ViewLeave viewLeave = null;
-
-            var query = _session.QueryOver(() => leaveAlias)
-                .JoinAlias(() => leaveAlias.employee, () => employeeAlias)
-                .SelectList(list => list
-                    .Select(() => leaveAlias.leaveId).WithAlias(() => viewLeave.leaveId)
-                    .Select(() => leaveAlias.leaveType).WithAlias(() => viewLeave.leaveType)
-                    .Select(() => leaveAlias.startDate).WithAlias(() => viewLeave.startDate)
-                    .Select(() => leaveAlias.endDate).WithAlias(() => viewLeave.endDate)
-                    .Select(() => leaveAlias.reason).WithAlias(() => viewLeave.reason)
-                    .Select(() => leaveAlias.status).WithAlias(() => viewLeave.status)
-                    .Select(() => leaveAlias.approver).WithAlias(() => viewLeave.approver)
-                    .Select(() => employeeAlias.empId).WithAlias(() => viewLeave.empId)
-                    .Select(() => employeeAlias.username).WithAlias(() => viewLeave.username)
-                )
-                .TransformUsing(Transformers.AliasToBean<ViewLeave>());
-
-            // While enter empId 
-            if (!string.IsNullOrEmpty(empId))
-            {
-                int empIdInt;
-                if (int.TryParse(empId, out empIdInt)) 
-                {
-                    query.Where(() => employeeAlias.empId == empIdInt);
-                }
-                else
-                {
-                    query.Where(() => employeeAlias.empId.ToString().Contains(empId)); 
-                }
-            }
-            var filteredLeaves = await query.ListAsync<ViewLeave>();
-
-            _logger.LogInformation($"Retrieved {filteredLeaves.Count} filtered leave(s) for employee ID: {empId}");
-            return filteredLeaves;
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error retrieving filtered leaves for employee ID: {empId}", empId);
-            throw;
-        }
-    }
-    #endregion
-
-    #region Delete Leave 
-    public async Task DeleteLeaveAsync (int leaveId)
-    {
-        using (var transaction=_session.BeginTransaction())
-        {
-            try
-            {
-                var leave = await _session.GetAsync<Leave>(leaveId);
-                if(leave!=null)
-                {
-                    await _session.DeleteAsync(leave);
-                    await transaction.CommitAsync();
-                }
-                else
-                {
-                    _logger.LogWarning($"Leave with ID {leaveId} not found.");
-                }
-            }
-            catch(Exception ex)
-            {
-                await transaction.RollbackAsync();
-                _logger.LogError(ex, "Failed to delete leave");
-                throw;
-            }
-        }
-    }
-    #endregion
 }

@@ -1,20 +1,21 @@
-﻿using HrInternWebApp.Entity;
+﻿using HrInternWebApp.Data;
 using HrInternWebApp.Models.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Http;
+using Microsoft.EntityFrameworkCore;
 using System.Threading.Tasks;
 
 namespace HrInternWebApp.Controllers
 {
     public class ProfileController : Controller
     {
-        private readonly EmployeeService _employeeService;
+        private readonly AppDbContext _context;
         private readonly IHttpContextAccessor _httpContextAccessor;
 
         #region Constructor
-        public ProfileController(EmployeeService employeeService, IHttpContextAccessor httpContextAccessor)
+        public ProfileController(AppDbContext context, IHttpContextAccessor httpContextAccessor)
         {
-            _employeeService = employeeService;
+            _context = context;
             _httpContextAccessor = httpContextAccessor;
         }
         #endregion
@@ -28,15 +29,17 @@ namespace HrInternWebApp.Controllers
                 TempData["ErrorMessage"] = "You must be logged in to view your profile.";
                 return RedirectToAction("Login", "Authentication");
             }
+
             if (int.TryParse(empId, out int parsedEmpId))
             {
-                var employee = await _employeeService.GetEmployeeByIdAsync(parsedEmpId);
+                var employee = await _context.Employees.FindAsync(parsedEmpId);
 
                 if (employee == null)
                 {
                     TempData["ErrorMessage"] = "Employee not found.";
                     return RedirectToAction("Index", "Home");
                 }
+
                 return View(employee);
             }
 

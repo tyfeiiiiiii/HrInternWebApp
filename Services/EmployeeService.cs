@@ -1,59 +1,58 @@
-﻿using HrInternWebApp.Entity;
+﻿using HrInternWebApp.Data;
 using HrInternWebApp.Models.Identity;
-using NHibernate;
+using HrInternWebApp.Entity;
 using Microsoft.Extensions.Logging;
+using Microsoft.EntityFrameworkCore;
+using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
-using NHibernate.Linq;
-using ISession = NHibernate.ISession;
 
-public class EmployeeService
-{
-    private readonly ISession _session;
-    private readonly ILogger<EmployeeService> _logger;
-
-    public EmployeeService(ISession session, ILogger<EmployeeService> logger)
+namespace HrInternWebApp.Services {
+    public class EmployeeService
     {
-        _session = session;
-        _logger = logger;
-    }
+        private readonly AppDbContext _context;
+        private readonly ILogger<EmployeeService> _logger;
 
-    #region Get All Employees
-    public async Task<IList<ViewEmp>> GetAllEmployeesAsync()
-    {
-        try
+        public EmployeeService(AppDbContext context, ILogger<EmployeeService> logger)
         {
-            var employees = await _session.Query<Employee>()
-                                          .Select(e => new ViewEmp
-                                          {
-                                              empId = e.empId,
-                                              username = e.username,
-                                              Role = e.Role,
-                                              Department = e.Department,
-                                              email = e.email,
-                                              profilePic = e.profilePic
-                                          })
-                                          .ToListAsync();
-            return employees;
+            _context = context;
+            _logger = logger;
         }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error fetching employees.");
-            throw;
-        }
-    }
-    #endregion
 
-    #region Get Employee By ID
-    public async Task<ViewEmp> GetEmployeeByIdAsync(int empId)
-    {
-        try
+        #region Get All Employees
+        public async Task<IList<ViewEmp>> GetAllEmployeesAsync()
         {
-            var employee = await _session.GetAsync<Employee>(empId);
-
-            if (employee != null)
+            try
             {
-                return new ViewEmp
+                return await _context.Employees
+                                     .Select(e => new ViewEmp
+                                     {
+                                         empId = e.empId,
+                                         username = e.username,
+                                         Role = e.Role,
+                                         Department = e.Department,
+                                         email = e.email,
+                                         profilePic = e.profilePic
+                                     })
+                                     .ToListAsync();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error fetching employees.");
+                throw;
+            }
+        }
+        #endregion
+
+        #region Get Employee By ID
+        public async Task<ViewEmp> GetEmployeeByIdAsync(int empId)
+        {
+            try
+            {
+                var employee = await _context.Employees.FindAsync(empId);
+
+                return employee == null ? null : new ViewEmp
                 {
                     empId = employee.empId,
                     username = employee.username,
@@ -63,64 +62,53 @@ public class EmployeeService
                     profilePic = employee.profilePic
                 };
             }
-
-            return null;
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error retrieving employee with ID {EmployeeId}", empId);
+                throw;
+            }
         }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error retrieving employee with ID {EmployeeId}", empId);
-            throw;
-        }
-    }
-    #endregion
+        #endregion
 
-    #region Update Employee
-    public async Task UpdateEmployeeAsync(ViewEmp viewEmp)
-    {
-        using (var transaction = _session.BeginTransaction())
+        #region Update Employee
+        public async Task UpdateEmployeeAsync(ViewEmp viewEmp)
         {
             try
             {
-                var employee = await _session.GetAsync<Employee>(viewEmp.empId);
+                var employee = await _context.Employees.FindAsync(viewEmp.empId);
                 if (employee != null)
                 {
-                    // Update employee properties
                     employee.username = viewEmp.username;
                     employee.email = viewEmp.email;
                     employee.Role = viewEmp.Role;
                     employee.Department = viewEmp.Department;
-                    if (employee.profilePic != null)
+                    if (!string.IsNullOrEmpty(viewEmp.profilePic))
                     {
                         employee.profilePic = viewEmp.profilePic;
                     }
 
-                    // Save the changes
-                    await _session.UpdateAsync(employee);
-                    await transaction.CommitAsync();
+                    _context.Employees.Update(employee);
+                    await _context.SaveChangesAsync();
                 }
             }
             catch (Exception ex)
             {
-                await transaction.RollbackAsync();
                 _logger.LogError(ex, "Failed to update employee");
                 throw;
             }
         }
-    }
-    #endregion
+        #endregion
 
-    #region Delete Employee
-    public async Task DeleteEmployeeAsync(int employeeId)
-    {
-        using (var transaction = _session.BeginTransaction())
+        #region Delete Employee
+        public async Task DeleteEmployeeAsync(int employeeId)
         {
             try
             {
-                var employee = await _session.GetAsync<Employee>(employeeId);
+                var employee = await _context.Employees.FindAsync(employeeId);
                 if (employee != null)
                 {
-                    await _session.DeleteAsync(employee);
-                    await transaction.CommitAsync();
+                    _context.Employees.Remove(employee);
+                    await _context.SaveChangesAsync();
                 }
                 else
                 {
@@ -129,39 +117,37 @@ public class EmployeeService
             }
             catch (Exception ex)
             {
-                await transaction.RollbackAsync();
                 _logger.LogError(ex, "Failed to delete employee");
                 throw;
             }
         }
-    }
-    #endregion
-    #region Get Filtered Employees
-    public async Task<IList<ViewEmp>> GetFilteredEmployeesAsync(string empId)
-    {
-        try
+        #endregion
+
+        #region Get Filtered Employees
+        public async Task<IList<ViewEmp>> GetFilteredEmployeesAsync(string empId)
         {
-            var filteredEmployees = await _session.Query<Employee>()
-                                                   .Where(e => e.empId.ToString().Contains(empId) || e.empId == int.Parse(empId))
-                                                   .Select(e => new ViewEmp
-                                                   {
-                                                       empId = e.empId,
-                                                       username = e.username,
-                                                       Role = e.Role,
-                                                       Department = e.Department,
-                                                       email = e.email,
-                                                       profilePic = e.profilePic
-                                                   })
-                                                   .ToListAsync();
-            return filteredEmployees;
+            try
+            {
+                return await _context.Employees
+                                     .Where(e => e.empId.ToString().Contains(empId) || e.empId == int.Parse(empId))
+                                     .Select(e => new ViewEmp
+                                     {
+                                         empId = e.empId,
+                                         username = e.username,
+                                         Role = e.Role,
+                                         Department = e.Department,
+                                         email = e.email,
+                                         profilePic = e.profilePic
+                                     })
+                                     .ToListAsync();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error filtering employees.");
+                throw;
+            }
         }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error filtering employees.");
-            throw;
-        }
+        #endregion
     }
-    #endregion
+
 }
-
-

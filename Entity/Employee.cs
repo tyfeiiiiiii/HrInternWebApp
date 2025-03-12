@@ -1,23 +1,33 @@
 ﻿
+using System.ComponentModel.DataAnnotations;
+
 namespace HrInternWebApp.Entity
 {
     public class Employee
     {
-        public virtual int empId { get; set; }
+        [Key]
+        public int EmpId { get; set; }
 
-        public virtual string username { get; set; }
+        [Required, MaxLength(50)]
+        public string Username { get; set; }
 
-        public virtual string password { get; set; }
+        [Required, MaxLength(50)]
+        public string Password { get; set; }
 
-        public virtual string Role { get; set; }
+        public string Role { get; set; }
+        public string Department { get; set; }
 
-        public virtual string Department { get; set; }
+        [EmailAddress]
+        public string Email { get; set; }
 
-        public virtual string email { get; set; }
-        public virtual byte[] profilePic { get; set; }
-        public virtual string  Gender{ get; set; }
+        public byte[]? ProfilePic { get; set; }
 
-        public virtual IList<Leave> Leave { get; set; } = new List<Leave>();
+        public string Gender { get; set; }
+
+        // Relationships
+        public virtual ICollection<Leave> Leaves { get; set; }
+        public virtual ICollection<LeaveBalance> LeaveBalances { get; set; }
     }
+
 }
 
