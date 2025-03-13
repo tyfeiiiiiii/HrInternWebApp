@@ -32,7 +32,8 @@ REFERENCES Employee(empId);
 
 
 CREATE TABLE LeaveBalance(
-EmpId INT PRIMARY KEY,
+LeaveBalanceId INT IDENTITY(1,1) PRIMARY KEY,
+EmpId INT NOT NULL,
 medicalLeave INT,
 annualLeave INT,
 hospitalization INT,
@@ -43,7 +44,7 @@ maternityLeave INT,
 childcareLeave INT,
 unpaidLeave INT,
 emergencyLeave INT,
-lastUpdated DATETIME,
-CONSTRAINT FK_LeaveBalance_Employee FOREIGN KEY (empId) REFERENCES Employee (empId)
+lastUpdated DATETIME DEFAULT CURRENT_TIMESTAMP,
+CONSTRAINT FK_LeaveBalance_Employee FOREIGN KEY (EmpId) REFERENCES Employee(empId)
 )
 

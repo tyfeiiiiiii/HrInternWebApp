@@ -1,4 +1,9 @@
 ﻿@model HrInternWebApp.Models.Identity.ApplyLeave
+@using HrInternWebApp.Entity
+
+@{
+    var leaveBalance = ViewData["LeaveBalance"] as LeaveBalance;
+}
 
 <div class="container-fluid" style="background-color: #0E3B31; height: 100vh;">
     <div class="row h-100">
@@ -7,11 +12,118 @@
         </div>
         <div class="col-md-9 d-flex justify-content-center align-items-center" style="background-color: white; padding: 20px;">
             <div class="col-md-8 bg-light p-5 rounded" style="min-height: 70vh;">
+                <!-- Leave Balance Dashboard -->
+                <div class="mb-5">
+                    <h3 class="text-center mb-4">Your Leave Balances</h3>
+                    <div class="row">
+                        <!-- Medical Leave -->
+                        <div class="col-md-3 mb-3">
+                            <div class="card p-2">
+                                <h6 class="card-title text-center">Medical Leave</h6>
+                                <p class="card-text text-center"><small>Owned: @leaveBalance?.MedicalLeave</small></p>
+                                <p class="card-text text-center"><small>Used: 5</small></p> <!-- Replace with actual used days -->
+                                <p class="card-text text-center"><small>Available: @(leaveBalance?.MedicalLeave - 5)</small></p> <!-- Replace with actual calculation -->
+                            </div>
+                        </div>
+
+                        <!-- Annual Leave -->
+                        <div class="col-md-3 mb-3">
+                            <div class="card p-2">
+                                <h6 class="card-title text-center">Annual Leave</h6>
+                                <p class="card-text text-center"><small>Owned: @leaveBalance?.AnnualLeave</small></p>
+                                <p class="card-text text-center"><small>Used: 3</small></p> <!-- Replace with actual used days -->
+                                <p class="card-text text-center"><small>Available: @(leaveBalance?.AnnualLeave - 3)</small></p> <!-- Replace with actual calculation -->
+                            </div>
+                        </div>
+
+                        <!-- Hospitalization -->
+                        <div class="col-md-3 mb-3">
+                            <div class="card p-2">
+                                <h6 class="card-title text-center">Hospitalization</h6>
+                                <p class="card-text text-center"><small>Owned: @leaveBalance?.Hospitalization</small></p>
+                                <p class="card-text text-center"><small>Used: 0</small></p> <!-- Replace with actual used days -->
+                                <p class="card-text text-center"><small>Available: @leaveBalance?.Hospitalization</small></p> <!-- Replace with actual calculation -->
+                            </div>
+                        </div>
+
+                        <!-- Examination -->
+                        <div class="col-md-3 mb-3">
+                            <div class="card p-2">
+                                <h6 class="card-title text-center">Examination</h6>
+                                <p class="card-text text-center"><small>Owned: @leaveBalance?.Examination</small></p>
+                                <p class="card-text text-center"><small>Used: 0</small></p> <!-- Replace with actual used days -->
+                                <p class="card-text text-center"><small>Available: @leaveBalance?.Examination</small></p> <!-- Replace with actual calculation -->
+                            </div>
+                        </div>
+
+                        <!-- Marriage -->
+                        <div class="col-md-3 mb-3">
+                            <div class="card p-2">
+                                <h6 class="card-title text-center">Marriage</h6>
+                                <p class="card-text text-center"><small>Owned: @leaveBalance?.Marriage</small></p>
+                                <p class="card-text text-center"><small>Used: 0</small></p> <!-- Replace with actual used days -->
+                                <p class="card-text text-center"><small>Available: @leaveBalance?.Marriage</small></p> <!-- Replace with actual calculation -->
+                            </div>
+                        </div>
+
+                        <!-- Paternity Leave -->
+                        <div class="col-md-3 mb-3">
+                            <div class="card p-2">
+                                <h6 class="card-title text-center">Paternity Leave</h6>
+                                <p class="card-text text-center"><small>Owned: @leaveBalance?.PaternityLeave</small></p>
+                                <p class="card-text text-center"><small>Used: 0</small></p> <!-- Replace with actual used days -->
+                                <p class="card-text text-center"><small>Available: @leaveBalance?.PaternityLeave</small></p> <!-- Replace with actual calculation -->
+                            </div>
+                        </div>
+
+                        <!-- Maternity Leave -->
+                        <div class="col-md-3 mb-3">
+                            <div class="card p-2">
+                                <h6 class="card-title text-center">Maternity Leave</h6>
+                                <p class="card-text text-center"><small>Owned: @leaveBalance?.MaternityLeave</small></p>
+                                <p class="card-text text-center"><small>Used: 0</small></p> <!-- Replace with actual used days -->
+                                <p class="card-text text-center"><small>Available: @leaveBalance?.MaternityLeave</small></p> <!-- Replace with actual calculation -->
+                            </div>
+                        </div>
+
+                        <!-- Childcare Leave -->
+                        <div class="col-md-3 mb-3">
+                            <div class="card p-2">
+                                <h6 class="card-title text-center">Childcare Leave</h6>
+                                <p class="card-text text-center"><small>Owned: @leaveBalance?.ChildcareLeave</small></p>
+                                <p class="card-text text-center"><small>Used: 0</small></p> <!-- Replace with actual used days -->
+                                <p class="card-text text-center"><small>Available: @leaveBalance?.ChildcareLeave</small></p> <!-- Replace with actual calculation -->
+                            </div>
+                        </div>
+
+                        <!-- Unpaid Leave -->
+                        <div class="col-md-3 mb-3">
+                            <div class="card p-2">
+                                <h6 class="card-title text-center">Unpaid Leave</h6>
+                                <p class="card-text text-center"><small>Owned: @leaveBalance?.UnpaidLeave</small></p>
+                                <p class="card-text text-center"><small>Used: 0</small></p> <!-- Replace with actual used days -->
+                                <p class="card-text text-center"><small>Available: @leaveBalance?.UnpaidLeave</small></p> <!-- Replace with actual calculation -->
+                            </div>
+                        </div>
+
+                        <!-- Emergency Leave -->
+                        <div class="col-md-3 mb-3">
+                            <div class="card p-2">
+                                <h6 class="card-title text-center">Emergency Leave</h6>
+                                <p class="card-text text-center"><small>Owned: @leaveBalance?.EmergencyLeave</small></p>
+                                <p class="card-text text-center"><small>Used: 0</small></p> <!-- Replace with actual used days -->
+                                <p class="card-text text-center"><small>Available: @leaveBalance?.EmergencyLeave</small></p> <!-- Replace with actual calculation -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Apply Leave Form -->
                 <h2 class="text-center mb-5">Request Leave</h2>
                 <form asp-action="ApplyLeave" method="post">
-                   <div class="form-group row mb-5">
-                           <input type="hidden" id="hiddenLeaveTypes" name="HiddenLeaveTypes" />
-        
+                    <div class="form-group row mb-5">
+                        <input type="hidden" id="hiddenLeaveTypes" name="HiddenLeaveTypes" />
+
                         <label asp-for="leaveType" class="col-sm-3 col-form-label">Leave type:</label>
                         <div class="col-sm-9">
                             <select id="leaveType" asp-for="leaveType" class="form-control">
@@ -59,21 +171,19 @@
         </div>
     </div>
 </div>
-
-@* <script type="text/javascript"> 
-
+@* <script type="text/javascript">
     $(document).ready(function () {
-        var gender = '@ViewData["Gender"]';//retrieve user's gender from server-side , assign it to gender
-        alert(gender)
-        if (gender) {//AJAX request only made if gender not empty
+        var gender = '@ViewData["Gender"]'; // Retrieve user's gender from server-side, assign it to gender
+        alert(gender);
+        if (gender) { // AJAX request only made if gender is not empty
             $.ajax({
                 url: '/Leave/GetLeaveTypes',
                 type: 'GET',
-                data: { gender: gender },//data sent to the server
+                data: { gender: gender }, // Data sent to the server
                 success: function (data) {
                     $('#leaveType').append('<option value="">Select leave type</option>');
 
-                    $.each(data, function (index, value) {//iteration here is let the each leave type within the list be shown
+                    $.each(data, function (index, value) { // Iteration here is to let each leave type within the list be shown
                         $('#leaveType').append('<option value="' + value + '">' + value + '</option>');
                     });
                 },
@@ -83,6 +193,4 @@
             });
         }
     });
-
 </script> *@
-

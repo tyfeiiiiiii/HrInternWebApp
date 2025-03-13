@@ -88,7 +88,7 @@ namespace HrInternWebApp
         {
             return Fluently.Configure()
                 .Database(MsSqlConfiguration.MsSql2012
-                    .ConnectionString(@"Server=(localdb)\Local;Database=HRManagementSystem;Trusted_Connection=True;"))
+                    .ConnectionString(@"Server=(localdb)\MSSQLLocalDB;Database=HRManagementSystem;Trusted_Connection=True;"))
                 .Mappings(m =>
                 {
                     //no need to add on each map file as the n hibernat will combine tgt since th einitial file that stated here

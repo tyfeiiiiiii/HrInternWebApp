@@ -18,6 +18,7 @@ namespace HrInternWebApp.Entity
         public virtual string  Gender{ get; set; }
 
         public virtual IList<Leave> Leave { get; set; } = new List<Leave>();
+        public virtual LeaveBalance LeaveBalance { get; set; } // One-to-One Relationship
     }
 }
 
