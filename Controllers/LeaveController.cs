@@ -1,17 +1,27 @@
 ﻿using HrInternWebApp.Entity;
 using HrInternWebApp.Models.Identity;
+using HrInternWebApp.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Caching.Memory;
+using Microsoft.Extensions.Logging;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 
 public class LeaveController : Controller
 {
-    private readonly LeaveService leaveServices;
+    private readonly LeaveService _leaveService;
+    private readonly LeaveBalanceService _leaveBalanceService;
     private readonly IMemoryCache _cache;
     private readonly ILogger<LeaveController> _logger;
 
-    public LeaveController(LeaveService leaveService, IMemoryCache cache, ILogger<LeaveController> logger)
+    public LeaveController(
+        LeaveService leaveService,
+        LeaveBalanceService leaveBalanceService,
+        IMemoryCache cache,
+        ILogger<LeaveController> logger)
     {
-        leaveServices = leaveService;
+        _leaveService = leaveService;
+        _leaveBalanceService = leaveBalanceService;
         _cache = cache;
         _logger = logger;
     }
@@ -26,7 +36,7 @@ public class LeaveController : Controller
         string cacheKey = $"LeaveTypes_{gender}";
         if (!_cache.TryGetValue(cacheKey, out List<string> leaveTypes))
         {
-            leaveTypes = leaveServices.GetLeaveTypesByGender(gender);
+            leaveTypes = _leaveService.GetLeaveTypesByGender(gender);
 
             _cache.Set(cacheKey, leaveTypes, new MemoryCacheEntryOptions
             {
@@ -34,9 +44,52 @@ public class LeaveController : Controller
             });
         }
         ViewData["LeaveTypes"] = leaveTypes;
+
+        // Fetch leave balance for the logged-in employee
+        var employeeIdString = HttpContext.Session.GetString("EmployeeId");
+        if (int.TryParse(employeeIdString, out int employeeId))
+        {
+            var leaveBalance = _leaveBalanceService.GetLeaveBalanceAsync(employeeId).Result;
+            ViewData["LeaveBalance"] = leaveBalance;
+        }
+
         return View();
     }
 
+    //[HttpPost]
+    //public async Task<IActionResult> ApplyLeave(ApplyLeave leave)
+    //{
+    //    var employeeIdString = HttpContext.Session.GetString("EmployeeId");
+
+    //    if (ModelState.IsValid)
+    //    {
+    //        if (string.IsNullOrEmpty(employeeIdString) || !int.TryParse(employeeIdString, out int employeeId))
+    //        {
+    //            ModelState.AddModelError("", "Invalid Employee ID");
+    //            return View(leave);
+    //        }
+
+    //        // Calculate leave days
+    //        var leaveDays = (leave.endDate.Value - leave.startDate.Value).Days + 1;
+
+    //        // Apply leave
+    //        await _leaveService.ApplyLeaveAsync(leave, employeeId);
+
+    //        // Update leave balance
+    //        await _leaveBalanceService.UpdateLeaveBalanceAsync(employeeId, leave.leaveType, leaveDays);
+
+    //        _logger.LogInformation("Leave application submitted for Employee ID: {EmployeeId}.", employeeId);
+    //        return RedirectToAction(nameof(ViewLeave));
+    //    }
+
+    //    var gender = HttpContext.Session.GetString("Gender");
+    //    ViewData["Gender"] = gender;
+
+    //    var leaveTypes = _leaveService.GetLeaveTypesByGender(gender);
+    //    ViewData["LeaveTypes"] = leaveTypes;
+
+    //    return View(leave);
+    //}
     [HttpPost]
     public async Task<IActionResult> ApplyLeave(ApplyLeave leave)
     {
@@ -49,7 +102,10 @@ public class LeaveController : Controller
                 ModelState.AddModelError("", "Invalid Employee ID");
                 return View(leave);
             }
-            await leaveServices.ApplyLeaveAsync(leave, employeeId);
+
+            // Apply leave (this will also update the leave balance)
+            await _leaveService.ApplyLeaveAsync(leave, employeeId);
+
             _logger.LogInformation("Leave application submitted for Employee ID: {EmployeeId}.", employeeId);
             return RedirectToAction(nameof(ViewLeave));
         }
@@ -57,11 +113,11 @@ public class LeaveController : Controller
         var gender = HttpContext.Session.GetString("Gender");
         ViewData["Gender"] = gender;
 
-        var leaveTypes = leaveServices.GetLeaveTypesByGender(gender);
+        var leaveTypes = _leaveService.GetLeaveTypesByGender(gender);
         ViewData["LeaveTypes"] = leaveTypes;
+
         return View(leave);
     }
-
     #endregion
 
     #region View Leave
@@ -75,7 +131,7 @@ public class LeaveController : Controller
 
         if (role == "Admin")
         {
-            leaves = await leaveServices.GetAllLeavesAsync();
+            leaves = await _leaveService.GetAllLeavesAsync();
             if (!string.IsNullOrEmpty(empId) && int.TryParse(empId, out int employeeIdFilter))
             {
                 leaves = leaves.Where(l => l.empId == employeeIdFilter).ToList();
@@ -83,7 +139,7 @@ public class LeaveController : Controller
         }
         else if (int.TryParse(employeeIdString, out int employeeId))
         {
-            leaves = await leaveServices.GetLeavesByEmployeeAsync(employeeId);
+            leaves = await _leaveService.GetLeavesByEmployeeAsync(employeeId);
 
             if (!leaves.Any())
             {
@@ -102,24 +158,6 @@ public class LeaveController : Controller
 
     #region Search Leave by EmpId
 
-    //public async Task<IActionResult> SearchLeave(string empId)
-    //{
-    //    IList<ViewLeave> filteredLeaves;
-
-    //    if (string.IsNullOrEmpty(empId))
-    //    {
-    //        // If no empId is provided, return all leaves
-    //        filteredLeaves = await leaveServices.GetAllLeavesAsync();
-    //    }
-    //    else
-    //    {
-    //        // Filter the leaves based on the provided empId
-    //        filteredLeaves = await leaveServices.GetAllLeavesAsync();
-    //        filteredLeaves = filteredLeaves.Where(l => l.empId.ToString().Contains(empId)).ToList();
-    //    }
-
-    //    return Json(filteredLeaves);
-    //}
     public async Task<IActionResult> SearchLeave(string empId)
     {
         IList<ViewLeave> filteredLeaves;
@@ -127,24 +165,22 @@ public class LeaveController : Controller
         if (string.IsNullOrEmpty(empId))
         {
             // If no empId is provided, return all leaves
-            filteredLeaves = await leaveServices.GetAllLeavesAsync();
+            filteredLeaves = await _leaveService.GetAllLeavesAsync();
         }
         else
         {
             // If empId is provided, filter the leaves
-            filteredLeaves = await leaveServices.GetFilteredLeavesAsync(empId);
+            filteredLeaves = await _leaveService.GetFilteredLeavesAsync(empId);
         }
 
         return Json(filteredLeaves);
     }
 
-
-
     #endregion
 
     #region Update Leave Status
 
-    // only for admins
+    // Only for admins
     public async Task<IActionResult> UpdateLeaveStatusAsync(int leaveId, string status)
     {
         var approver = HttpContext.Session.GetString("Username");
@@ -153,25 +189,39 @@ public class LeaveController : Controller
         {
             return RedirectToAction("Login", "Authentication");
         }
-        await leaveServices.UpdateLeaveStatusAsync(leaveId, status, approver);
 
-        return RedirectToAction(nameof(LeaveController.ViewLeave));
+        await _leaveService.UpdateLeaveStatusAsync(leaveId, status, approver);
+
+        return RedirectToAction(nameof(ViewLeave));
     }
+
     #endregion
 
     #region Delete Leave
-    public async Task<IActionResult> DeleteLeave (int leaveId)
+
+    public async Task<IActionResult> DeleteLeave(int leaveId)
     {
         try
         {
-            await leaveServices.DeleteLeaveAsync(leaveId);
+            await _leaveService.DeleteLeaveAsync(leaveId);
             TempData["SuccessMessage"] = "Leave deleted successfully.";
         }
         catch (Exception ex)
         {
-            TempData["ErrorMessage"] = "Failed tod delete leave" + ex.Message;
+            TempData["ErrorMessage"] = "Failed to delete leave: " + ex.Message;
         }
         return RedirectToAction(nameof(ViewLeave));
+    }
+
+    #endregion
+
+    #region Initialize Leave Balance
+
+    // Initialize leave balance for a new employee
+    public async Task<IActionResult> InitializeLeaveBalance(int empId, string gender)
+    {
+        await _leaveBalanceService.InitializeLeaveBalanceAsync(empId, gender);
+        return Ok("Leave balance initialized.");
     }
 
     #endregion

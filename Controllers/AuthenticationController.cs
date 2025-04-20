@@ -4,20 +4,23 @@ using ISession = NHibernate.ISession;
 using HrInternWebApp.Entity;
 using HrInternWebApp.Controllers;
 using HrInternWebApp.Models.Identity;
+using HrInternWebApp.Services;
 
 public class AuthenticationController : Controller
 {
     #region Fields
     private readonly ISession _session;
+    private readonly ILogger<AuthenticationController> _logger;
+    private readonly LeaveBalanceService _leaveBalanceService; // Inject LeaveBalanceService
     #endregion
 
     #region Constructor
-    private readonly ILogger<AuthenticationController> _logger;
 
-    public AuthenticationController(ISession session, ILogger<AuthenticationController> logger)
+    public AuthenticationController(ISession session, ILogger<AuthenticationController> logger, LeaveBalanceService leaveBalanceService)
     {
         _session = session;
         _logger = logger;
+        _leaveBalanceService = leaveBalanceService;
     }
 
     #endregion
@@ -102,7 +105,7 @@ public class AuthenticationController : Controller
             {
                 using var memoryStream = new MemoryStream();
                 await ProfilePic.CopyToAsync(memoryStream);
-                model.profilePic = memoryStream.ToArray(); 
+                model.profilePic = memoryStream.ToArray();
             }
             if (!ModelState.IsValid)
             {
@@ -113,11 +116,18 @@ public class AuthenticationController : Controller
             _session.Save(model);
             await transaction.CommitAsync();
 
+            _logger.LogInformation("New employee registered with ID: {EmployeeId}", model.empId);
+
+            // **Initialize leave balance after registering employee**
+            await _leaveBalanceService.InitializeLeaveBalanceAsync(model.empId, model.Gender);
+            _logger.LogInformation("Leave balance initialized for Employee ID: {EmployeeId}", model.empId);
+
             TempData["SuccessMessage"] = "Your account has been successfully registered. Please log in.";
             return RedirectToAction(nameof(Login)); // Redirect to login page
         }
         catch (Exception ex)
         {
+            _logger.LogError(ex, "Error during user signup");
             TempData["ErrorMessage"] = "An error occurred while processing your request. Please try again later.";
             return RedirectToAction(nameof(SignUp));
         }

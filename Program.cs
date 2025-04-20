@@ -2,6 +2,8 @@ using FluentNHibernate.Cfg;
 using FluentNHibernate.Cfg.Db;
 using NHibernate;
 using HrInternWebApp.Models.Maps;
+using HrInternWebApp.Services;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace HrInternWebApp
 {
@@ -13,6 +15,13 @@ namespace HrInternWebApp
 
             // Add services to the container.
             builder.Services.AddControllersWithViews();
+
+            // Register HttpClient in DI container
+            builder.Services.AddHttpClient("FlaskAPI", client =>
+            {
+                client.BaseAddress = new Uri("http://localhost:5000"); // Set Flask API base URL
+                client.DefaultRequestHeaders.Add("Accept", "application/json");
+            });
 
             // Add session and session timeout configurations
             builder.Services.AddHttpContextAccessor();
@@ -29,10 +38,9 @@ namespace HrInternWebApp
             builder.Services.AddAuthentication("MyCookieAuthenticationScheme")
                 .AddCookie("MyCookieAuthenticationScheme", options =>
                 {
-                    options.LoginPath = "/Authentication/Login"; 
-                    //options.AccessDeniedPath = "/Authentication/AccessDenied"; // Optional: Set access denied path
+                    options.LoginPath = "/Authentication/Login";
                     options.Cookie.HttpOnly = true;
-                    options.Cookie.SecurePolicy = CookieSecurePolicy.Always; 
+                    options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
                 });
 
             // Add authorization policies if needed
@@ -51,6 +59,7 @@ namespace HrInternWebApp
             // Register the LeaveService for dependency injection
             builder.Services.AddScoped<LeaveService>();
             builder.Services.AddScoped<EmployeeService>();
+            builder.Services.AddScoped<LeaveBalanceService>();
             builder.Services.AddMemoryCache();
 
             var app = builder.Build();
@@ -66,8 +75,8 @@ namespace HrInternWebApp
             app.UseStaticFiles();
             app.UseSession();
             app.UseRouting();
-            app.UseAuthentication(); 
-            app.UseAuthorization(); 
+            app.UseAuthentication();
+            app.UseAuthorization();
 
             app.MapControllerRoute(
                 name: "login",
@@ -91,11 +100,9 @@ namespace HrInternWebApp
                     .ConnectionString(@"Server=(localdb)\MSSQLLocalDB;Database=HRManagementSystem;Trusted_Connection=True;"))
                 .Mappings(m =>
                 {
-                    //no need to add on each map file as the n hibernat will combine tgt since th einitial file that stated here
                     m.FluentMappings.AddFromAssemblyOf<EmployeeMap>();
                 })
                 .BuildSessionFactory();
-
         }
     }
-    }
+}

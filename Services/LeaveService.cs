@@ -62,6 +62,100 @@ public class LeaveService
         }
     }
 
+
+    //    public async Task ApplyLeaveAsync(ApplyLeave leaveRequest, int employeeId)
+    //{
+    //    try
+    //    {
+    //        Employee employee = await _session.GetAsync<Employee>(employeeId);
+    //        if (employee == null)
+    //        {
+    //            _logger.LogWarning($"No employee found with ID {employeeId}");
+    //            throw new InvalidOperationException($"Employee with ID {employeeId} does not exist.");
+    //        }
+
+    //        using (var transaction = _session.BeginTransaction())
+    //        {
+    //            try
+    //            {
+    //                // Save Leave Application
+    //                Leave leaveEntity = new Leave
+    //                {
+    //                    leaveType = leaveRequest.leaveType,
+    //                    startDate = leaveRequest.startDate,
+    //                    endDate = leaveRequest.endDate,
+    //                    reason = leaveRequest.reason,
+    //                    status = "Pending",
+    //                    approver = "Pending",
+    //                    employee = employee
+    //                };
+
+    //                await _session.SaveAsync(leaveEntity);
+
+    //                // Calculate Applied Leave Days
+    //                int appliedLeaveDays = (leaveRequest.endDate.Value - leaveRequest.startDate.Value).Days + 1;
+
+    //                // Update Leave Balance
+    //                var leaveBalance = await _session.QueryOver<LeaveBalance>()
+    //                                                 .Where(x => x.Employee.empId == employeeId)
+    //                                                 .SingleOrDefaultAsync();
+
+    //                if (leaveBalance != null)
+    //                {
+    //                    switch (leaveRequest.leaveType)
+    //                    {
+    //                        case "Medical Leave":
+    //                            leaveBalance.MedicalLeaveUsed += appliedLeaveDays;
+    //                            break;
+    //                        case "Annual Leave":
+    //                            leaveBalance.AnnualLeaveUsed += appliedLeaveDays;
+    //                            break;
+    //                        case "Hospitalization":
+    //                            leaveBalance.HospitalizationUsed += appliedLeaveDays;
+    //                            break;
+    //                        case "Examination":
+    //                            leaveBalance.ExaminationUsed += appliedLeaveDays;
+    //                            break;
+    //                        case "Marriage":
+    //                            leaveBalance.MarriageUsed += appliedLeaveDays;
+    //                            break;
+    //                        case "Paternity Leave":
+    //                            leaveBalance.PaternityLeaveUsed += appliedLeaveDays;
+    //                            break;
+    //                        case "Maternity Leave":
+    //                            leaveBalance.MaternityLeaveUsed += appliedLeaveDays;
+    //                            break;
+    //                        case "Child Care Leave":
+    //                            leaveBalance.ChildcareLeaveUsed += appliedLeaveDays;
+    //                            break;
+    //                        case "Unpaid Leave":
+    //                            leaveBalance.UnpaidLeaveUsed += appliedLeaveDays;
+    //                            break;
+    //                        case "Emergency Leave":
+    //                            leaveBalance.EmergencyLeaveUsed += appliedLeaveDays;
+    //                            break;
+    //                    }
+
+    //                    await _session.UpdateAsync(leaveBalance);
+    //                }
+
+    //                await transaction.CommitAsync();
+    //                _logger.LogInformation($"Leave record successfully saved for employee ID {employeeId}");
+    //            }
+    //            catch (Exception ex)
+    //            {
+    //                await transaction.RollbackAsync();
+    //                _logger.LogError(ex, "Failed to apply leave");
+    //                throw new Exception("Failed to apply leave", ex);
+    //            }
+    //        }
+    //    }
+    //    catch (Exception ex)
+    //    {
+    //        _logger.LogError(ex, "An error occurred while applying for leave.");
+    //        throw;
+    //    }
+    //}
     public async Task ApplyLeaveAsync(ApplyLeave leaveRequest, int employeeId)
     {
         try
@@ -73,22 +167,72 @@ public class LeaveService
                 throw new InvalidOperationException($"Employee with ID {employeeId} does not exist.");
             }
 
-            Leave leaveEntity = new Leave
-            {
-                leaveType = leaveRequest.leaveType,
-                startDate = leaveRequest.startDate,
-                endDate = leaveRequest.endDate,
-                reason = leaveRequest.reason,
-                status = "Pending",
-                approver = "Pending",
-                employee = employee 
-            };
-
             using (var transaction = _session.BeginTransaction())
             {
                 try
                 {
+                    // Save Leave Application
+                    Leave leaveEntity = new Leave
+                    {
+                        leaveType = leaveRequest.leaveType,
+                        startDate = leaveRequest.startDate,
+                        endDate = leaveRequest.endDate,
+                        reason = leaveRequest.reason,
+                        status = "Pending",
+                        approver = "Pending",
+                        employee = employee
+                    };
+
                     await _session.SaveAsync(leaveEntity);
+
+                    // Calculate Applied Leave Days
+                    int appliedLeaveDays = (leaveRequest.endDate.Value - leaveRequest.startDate.Value).Days + 1;
+
+                    // Update Leave Balance
+                    var leaveBalance = await _session.QueryOver<LeaveBalance>()
+                        .Where(x => x.Employee.empId == employeeId)
+                        .SingleOrDefaultAsync();
+
+                    if (leaveBalance != null)
+                    {
+                        switch (leaveRequest.leaveType)
+                        {
+                            case "Medical Leave":
+                                leaveBalance.MedicalLeaveUsed += appliedLeaveDays;
+                                break;
+                            case "Annual Leave":
+                                leaveBalance.AnnualLeaveUsed += appliedLeaveDays;
+                                break;
+                            case "Hospitalization":
+                                leaveBalance.HospitalizationUsed += appliedLeaveDays;
+                                break;
+                            case "Examination":
+                                leaveBalance.ExaminationUsed += appliedLeaveDays;
+                                break;
+                            case "Marriage":
+                                leaveBalance.MarriageUsed += appliedLeaveDays;
+                                break;
+                            case "Paternity Leave":
+                                leaveBalance.PaternityLeaveUsed += appliedLeaveDays;
+                                break;
+                            case "Maternity Leave":
+                                leaveBalance.MaternityLeaveUsed += appliedLeaveDays;
+                                break;
+                            case "Child Care Leave":
+                                leaveBalance.ChildcareLeaveUsed += appliedLeaveDays;
+                                break;
+                            case "Unpaid Leave":
+                                leaveBalance.UnpaidLeaveUsed += appliedLeaveDays;
+                                break;
+                            case "Emergency Leave":
+                                leaveBalance.EmergencyLeaveUsed += appliedLeaveDays;
+                                break;
+                        }
+
+                        leaveBalance.LastUpdated = DateTime.Now;
+                        await _session.UpdateAsync(leaveBalance);
+                    }
+
                     await transaction.CommitAsync();
                     _logger.LogInformation($"Leave record successfully saved for employee ID {employeeId}");
                 }
@@ -106,6 +250,7 @@ public class LeaveService
             throw;
         }
     }
+
 
     #endregion
 

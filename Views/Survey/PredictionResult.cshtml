@@ -1,0 +1,22 @@
+﻿@{
+    ViewData["Title"] = "Prediction Result";
+}
+
+<h2>Prediction Results</h2>
+
+<div>
+    <h4>Set 1 Prediction (Turnover):</h4>
+    <p>@ViewBag.PredictionSet1</p>
+</div>
+
+<div>
+    <h4>Set 2 Prediction (Turnover):</h4>
+    <p>@ViewBag.PredictionSet2</p>
+</div>
+
+<div>
+    @if (ViewBag.ErrorMessage != null)
+    {
+        <p style="color: red">@ViewBag.ErrorMessage</p>
+    }
+</div>

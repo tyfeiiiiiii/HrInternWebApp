@@ -3,6 +3,7 @@
 
 @{
     var leaveBalance = ViewData["LeaveBalance"] as LeaveBalance;
+    var usedLeaveDays = ViewData["UsedLeaveDays"] as Dictionary<string, int> ?? new Dictionary<string, int>();
 }
 
 <div class="container-fluid" style="background-color: #0E3B31; height: 100vh;">
@@ -15,107 +16,34 @@
                 <!-- Leave Balance Dashboard -->
                 <div class="mb-5">
                     <h3 class="text-center mb-4">Your Leave Balances</h3>
-                    <div class="row">
-                        <!-- Medical Leave -->
-                        <div class="col-md-3 mb-3">
-                            <div class="card p-2">
-                                <h6 class="card-title text-center">Medical Leave</h6>
-                                <p class="card-text text-center"><small>Owned: @leaveBalance?.MedicalLeave</small></p>
-                                <p class="card-text text-center"><small>Used: 5</small></p> <!-- Replace with actual used days -->
-                                <p class="card-text text-center"><small>Available: @(leaveBalance?.MedicalLeave - 5)</small></p> <!-- Replace with actual calculation -->
-                            </div>
-                        </div>
 
-                        <!-- Annual Leave -->
-                        <div class="col-md-3 mb-3">
-                            <div class="card p-2">
-                                <h6 class="card-title text-center">Annual Leave</h6>
-                                <p class="card-text text-center"><small>Owned: @leaveBalance?.AnnualLeave</small></p>
-                                <p class="card-text text-center"><small>Used: 3</small></p> <!-- Replace with actual used days -->
-                                <p class="card-text text-center"><small>Available: @(leaveBalance?.AnnualLeave - 3)</small></p> <!-- Replace with actual calculation -->
-                            </div>
-                        </div>
+                    @if (leaveBalance != null)
+                    {
+                        <div class="row">
+                            @foreach (var leaveType in new[] { "Medical Leave", "Annual Leave", "Hospitalization", "Examination", "Marriage", "Paternity Leave", "Maternity Leave", "Childcare Leave", "Unpaid Leave", "Emergency Leave" })
+                            {
+                                var ownedProperty = leaveBalance.GetType().GetProperty(leaveType.Replace(" ", ""));
+                                var usedProperty = leaveBalance.GetType().GetProperty(leaveType.Replace(" ", "") + "Used");
 
-                        <!-- Hospitalization -->
-                        <div class="col-md-3 mb-3">
-                            <div class="card p-2">
-                                <h6 class="card-title text-center">Hospitalization</h6>
-                                <p class="card-text text-center"><small>Owned: @leaveBalance?.Hospitalization</small></p>
-                                <p class="card-text text-center"><small>Used: 0</small></p> <!-- Replace with actual used days -->
-                                <p class="card-text text-center"><small>Available: @leaveBalance?.Hospitalization</small></p> <!-- Replace with actual calculation -->
-                            </div>
-                        </div>
+                                var owned = (int?)ownedProperty?.GetValue(leaveBalance) ?? 0;
+                                var used = (int?)usedProperty?.GetValue(leaveBalance) ?? 0;
+                                var available = owned - used;
 
-                        <!-- Examination -->
-                        <div class="col-md-3 mb-3">
-                            <div class="card p-2">
-                                <h6 class="card-title text-center">Examination</h6>
-                                <p class="card-text text-center"><small>Owned: @leaveBalance?.Examination</small></p>
-                                <p class="card-text text-center"><small>Used: 0</small></p> <!-- Replace with actual used days -->
-                                <p class="card-text text-center"><small>Available: @leaveBalance?.Examination</small></p> <!-- Replace with actual calculation -->
-                            </div>
+                                <div class="col-md-3 mb-3">
+                                    <div class="card p-2">
+                                        <h6 class="card-title text-center">@leaveType</h6>
+                                        <p class="card-text text-center"><small>Owned: @owned</small></p>
+                                        <p class="card-text text-center"><small>Used: @used</small></p>
+                                        <p class="card-text text-center"><small>Available: @available</small></p>
+                                    </div>
+                                </div>
+                            }
                         </div>
-
-                        <!-- Marriage -->
-                        <div class="col-md-3 mb-3">
-                            <div class="card p-2">
-                                <h6 class="card-title text-center">Marriage</h6>
-                                <p class="card-text text-center"><small>Owned: @leaveBalance?.Marriage</small></p>
-                                <p class="card-text text-center"><small>Used: 0</small></p> <!-- Replace with actual used days -->
-                                <p class="card-text text-center"><small>Available: @leaveBalance?.Marriage</small></p> <!-- Replace with actual calculation -->
-                            </div>
-                        </div>
-
-                        <!-- Paternity Leave -->
-                        <div class="col-md-3 mb-3">
-                            <div class="card p-2">
-                                <h6 class="card-title text-center">Paternity Leave</h6>
-                                <p class="card-text text-center"><small>Owned: @leaveBalance?.PaternityLeave</small></p>
-                                <p class="card-text text-center"><small>Used: 0</small></p> <!-- Replace with actual used days -->
-                                <p class="card-text text-center"><small>Available: @leaveBalance?.PaternityLeave</small></p> <!-- Replace with actual calculation -->
-                            </div>
-                        </div>
-
-                        <!-- Maternity Leave -->
-                        <div class="col-md-3 mb-3">
-                            <div class="card p-2">
-                                <h6 class="card-title text-center">Maternity Leave</h6>
-                                <p class="card-text text-center"><small>Owned: @leaveBalance?.MaternityLeave</small></p>
-                                <p class="card-text text-center"><small>Used: 0</small></p> <!-- Replace with actual used days -->
-                                <p class="card-text text-center"><small>Available: @leaveBalance?.MaternityLeave</small></p> <!-- Replace with actual calculation -->
-                            </div>
-                        </div>
-
-                        <!-- Childcare Leave -->
-                        <div class="col-md-3 mb-3">
-                            <div class="card p-2">
-                                <h6 class="card-title text-center">Childcare Leave</h6>
-                                <p class="card-text text-center"><small>Owned: @leaveBalance?.ChildcareLeave</small></p>
-                                <p class="card-text text-center"><small>Used: 0</small></p> <!-- Replace with actual used days -->
-                                <p class="card-text text-center"><small>Available: @leaveBalance?.ChildcareLeave</small></p> <!-- Replace with actual calculation -->
-                            </div>
-                        </div>
-
-                        <!-- Unpaid Leave -->
-                        <div class="col-md-3 mb-3">
-                            <div class="card p-2">
-                                <h6 class="card-title text-center">Unpaid Leave</h6>
-                                <p class="card-text text-center"><small>Owned: @leaveBalance?.UnpaidLeave</small></p>
-                                <p class="card-text text-center"><small>Used: 0</small></p> <!-- Replace with actual used days -->
-                                <p class="card-text text-center"><small>Available: @leaveBalance?.UnpaidLeave</small></p> <!-- Replace with actual calculation -->
-                            </div>
-                        </div>
-
-                        <!-- Emergency Leave -->
-                        <div class="col-md-3 mb-3">
-                            <div class="card p-2">
-                                <h6 class="card-title text-center">Emergency Leave</h6>
-                                <p class="card-text text-center"><small>Owned: @leaveBalance?.EmergencyLeave</small></p>
-                                <p class="card-text text-center"><small>Used: 0</small></p> <!-- Replace with actual used days -->
-                                <p class="card-text text-center"><small>Available: @leaveBalance?.EmergencyLeave</small></p> <!-- Replace with actual calculation -->
-                            </div>
-                        </div>
-                    </div>
+                    }
+                    else
+                    {
+                        <p class="text-center text-danger">No leave balance data available.</p>
+                    }
                 </div>
 
                 <!-- Apply Leave Form -->

@@ -32,6 +32,12 @@
                         </a>
                     </li>
 
+                    <li class="nav-item mb-2">
+                        <a asp-controller="Survey" asp-action="Index" class="nav-link text-white d-flex align-items-center">
+                            <i class="bi bi-clipboard-fill me-2"></i> Survey
+                        </a>
+                    </li>
+
                     @if (HttpContextAccessor.HttpContext.Session.GetString("Role") == "Admin")
                     {
                         <li class="nav-item mb-2">

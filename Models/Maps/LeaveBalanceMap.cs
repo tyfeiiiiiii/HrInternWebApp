@@ -9,16 +9,16 @@ namespace HrInternWebApp.Models.Maps
         {
             Table("LeaveBalance");
 
-            Id(x => x.LeaveBalanceId).GeneratedBy.Identity(); // Primary key
+            Id(x => x.LeaveBalanceId)
+                .GeneratedBy.Identity(); // Auto-increment primary key
 
-            // One-to-One Relationship with Employee
+            // One-to-One Relationship with Employee (Foreign Key)
             References(x => x.Employee)
-                .Column("EmpId")
-                .Unique() // Ensures one-to-one relationship
+                .Column("EmpId") // Foreign key column
                 .Not.Nullable()
-                .Cascade.All();
+                .Cascade.None(); // No cascading to avoid unintended deletes
 
-            // Properties
+            // Leave Balances
             Map(x => x.MedicalLeave).Not.Nullable();
             Map(x => x.AnnualLeave).Not.Nullable();
             Map(x => x.Hospitalization).Not.Nullable();
@@ -29,7 +29,22 @@ namespace HrInternWebApp.Models.Maps
             Map(x => x.ChildcareLeave).Not.Nullable();
             Map(x => x.UnpaidLeave).Not.Nullable();
             Map(x => x.EmergencyLeave).Not.Nullable();
-            Map(x => x.LastUpdated).Not.Nullable();
+
+            // Used Leave Tracking
+            Map(x => x.MedicalLeaveUsed).Not.Nullable().Default("0");
+            Map(x => x.AnnualLeaveUsed).Not.Nullable().Default("0");
+            Map(x => x.HospitalizationUsed).Not.Nullable().Default("0");
+            Map(x => x.ExaminationUsed).Not.Nullable().Default("0");
+            Map(x => x.MarriageUsed).Not.Nullable().Default("0");
+            Map(x => x.PaternityLeaveUsed).Not.Nullable().Default("0");
+            Map(x => x.MaternityLeaveUsed).Not.Nullable().Default("0");
+            Map(x => x.ChildcareLeaveUsed).Not.Nullable().Default("0");
+            Map(x => x.UnpaidLeaveUsed).Not.Nullable().Default("0");
+            Map(x => x.EmergencyLeaveUsed).Not.Nullable().Default("0");
+
+            Map(x => x.LastUpdated)
+                .Not.Nullable()
+                .Default("CURRENT_TIMESTAMP"); // Auto-updating timestamp
         }
     }
 }
