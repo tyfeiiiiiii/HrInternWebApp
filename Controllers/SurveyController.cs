@@ -64,15 +64,28 @@ public class SurveyController : Controller
                 client.BaseAddress = new Uri("http://localhost:5000"); // Flask API URL
                 var json = new
                 {
+                    // Set 1: Features (columns1)
+                    OverTime = survey.OverTime,
+                    MaritalStatus = survey.MaritalStatus,
+                    MonthlyIncome = survey.MonthlyIncome,
+                    StockOptionLevel = survey.StockOptionLevel,
+                    BusinessTravel = survey.BusinessTravel,
+                    TotalWorkingYears = survey.TotalWorkingYears,
+                    JobInvolvement = survey.JobInvolvement,
+                    YearsAtCompany = survey.YearsAtCompany,
+                    Age = survey.Age,
+                    DistanceFromHome = survey.DistanceFromHome,
+
+                    // Set 2: Features (columns2)
                     SatisfactionLevel = survey.SatisfactionLevel,
                     LastEvaluation = survey.LastEvaluation,
                     NumberProject = survey.NumberProject,
                     AverageMonthlyHours = survey.AverageMonthlyHours,
                     TimeSpendCompany = survey.TimeSpendCompany,
-                    WorkAccident = survey.WorkAccident ? 1 : 0,
-                    PromotionLast5Years = survey.PromotionLast5Years ? 1 : 0,
+                    WorkAccident = survey.WorkAccident ? 1 : 0,  // Convert boolean to int (1 or 0)
+                    PromotionLast5Years = survey.PromotionLast5Years ? 1 : 0,  // Convert boolean to int (1 or 0)
                     Department = survey.Department,
-                    Salary = survey.Salary
+                    Salary = survey.Salary,
                 };
 
                 // Make a POST request to Flask server

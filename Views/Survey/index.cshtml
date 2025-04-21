@@ -1,4 +1,4 @@
-﻿<div class="container-fluid" style="background-color: #0E3B31; height: 100vh;">
+﻿@* <div class="container-fluid" style="background-color: #0E3B31; height: 100vh;">
     <div class="row h-100">
         <div class="col-md-3 p-3" style="background-color: #1A3E37;">
             @await Html.PartialAsync("Sidebar")
@@ -69,4 +69,130 @@
 
         </div>
      </div>
+</div>
+ *@
+
+<div class="container-fluid" style="background-color: #0E3B31; height: 100vh;">
+    <div class="row h-100">
+        <div class="col-md-3 p-3" style="background-color: #1A3E37;">
+            @await Html.PartialAsync("Sidebar")
+        </div>
+
+        <div class="col-md-9" style="background-color: white; padding: 20px;">
+            <nav class="navbar navbar-light bg-light justify-content-between">
+                <a class="navbar-brand">Employee Management</a>
+
+                <form class="form-inline d-flex" id="searchForm" method="get" action="">
+                    <input class="form-control mr-2" type="search" id="empIdSearch" name="empId" placeholder="Search by Employee ID" aria-label="Search">
+                </form>
+            </nav>
+            <form method="post" action="http://127.0.0.1:5000/predict">
+                <!-- Set 1 Features -->
+                <div class="form-group">
+                    <label for="overTime">OverTime</label>
+                    <select class="form-control" id="overTime" name="OverTime" required>
+                        <option value="1">Yes</option>
+                        <option value="0">No</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="maritalStatus">Marital Status</label>
+                    <select class="form-control" id="maritalStatus" name="MaritalStatus" required>
+                        <option value="0">Single</option>
+                        <option value="1">Married</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="monthlyIncome">Monthly Income</label>
+                    <input type="number" class="form-control" id="monthlyIncome" name="MonthlyIncome" required>
+                </div>
+                <div class="form-group">
+                    <label for="stockOptionLevel">Stock Option Level</label>
+                    <input type="number" class="form-control" id="stockOptionLevel" name="StockOptionLevel" required>
+                </div>
+                <div class="form-group">
+                    <label for="businessTravel">Business Travel</label>
+                    <select class="form-control" id="businessTravel" name="BusinessTravel" required>
+                        <option value="0">Travel Rarely</option>
+                        <option value="1">Travel Frequently</option>
+                        <option value="2">Non-Travel</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="totalWorkingYears">Total Working Years</label>
+                    <input type="number" class="form-control" id="totalWorkingYears" name="TotalWorkingYears" required>
+                </div>
+                <div class="form-group">
+                    <label for="jobInvolvement">Job Involvement</label>
+                    <input type="number" class="form-control" id="jobInvolvement" name="JobInvolvement" required>
+                </div>
+                <div class="form-group">
+                    <label for="yearsAtCompany">Years at Company</label>
+                    <input type="number" class="form-control" id="yearsAtCompany" name="YearsAtCompany" required>
+                </div>
+                <div class="form-group">
+                    <label for="age">Age</label>
+                    <input type="number" class="form-control" id="age" name="Age" required>
+                </div>
+                <div class="form-group">
+                    <label for="distanceFromHome">Distance from Home</label>
+                    <input type="number" class="form-control" id="distanceFromHome" name="DistanceFromHome" required>
+                </div>
+
+                <!-- Set 2 Features -->
+                <div class="form-group">
+                    <label for="satisfactionLevel">Satisfaction Level</label>
+                    <input type="number" step="0.01" class="form-control" id="satisfactionLevel" name="satisfactionLevel" required>
+                </div>
+                <div class="form-group">
+                    <label for="lastEvaluation">Last Evaluation</label>
+                    <input type="number" step="0.01" class="form-control" id="lastEvaluation" name="lastEvaluation" required>
+                </div>
+                <div class="form-group">
+                    <label for="numberProject">Number of Projects</label>
+                    <input type="number" class="form-control" id="numberProject" name="numberProject" required>
+                </div>
+                <div class="form-group">
+                    <label for="averageMonthlyHours">Average Monthly Hours</label>
+                    <input type="number" class="form-control" id="averageMonthlyHours" name="averageMonthlyHours" required>
+                </div>
+                <div class="form-group">
+                    <label for="timeSpendCompany">Time Spent at Company (Years)</label>
+                    <input type="number" class="form-control" id="timeSpendCompany" name="timeSpendCompany" required>
+                </div>
+                <div class="form-group">
+                    <label for="workAccident">Work Accident</label>
+                    <select class="form-control" id="workAccident" name="workAccident" required>
+                        <option value="0">No</option>
+                        <option value="1">Yes</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="promotionLast5Years">Promotion in Last 5 Years</label>
+                    <select class="form-control" id="promotionLast5Years" name="promotionLast5Years" required>
+                        <option value="0">No</option>
+                        <option value="1">Yes</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="department">Department</label>
+                    <select class="form-control" id="department" name="department" required>
+                        <option value="sales">Sales</option>
+                        <option value="technical">Technical</option>
+                        <option value="support">Support</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="salary">Salary Level</label>
+                    <select class="form-control" id="salary" name="salary" required>
+                        <option value="low">Low</option>
+                        <option value="medium">Medium</option>
+                        <option value="high">High</option>
+                    </select>
+                </div>
+                <button type="submit" class="btn btn-primary">Submit</button>
+            </form>
+
+        </div>
+    </div>
 </div>
