@@ -1,22 +1,12 @@
-﻿@{
-    ViewData["Title"] = "Prediction Result";
-}
+﻿@model HrInternWebApp.Entity.Survey
 
-<h2>Prediction Results</h2>
-
-<div>
-    <h4>Set 1 Prediction (Turnover):</h4>
-    <p>@ViewBag.PredictionSet1</p>
-</div>
-
-<div>
-    <h4>Set 2 Prediction (Turnover):</h4>
-    <p>@ViewBag.PredictionSet2</p>
-</div>
-
-<div>
-    @if (ViewBag.ErrorMessage != null)
-    {
-        <p style="color: red">@ViewBag.ErrorMessage</p>
-    }
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-md-12">
+            <h3>Prediction Report for Employee: @Model.Employee.empId</h3>
+            <hr />
+            <p><b>Model 1 Prediction:</b> @ViewBag.PredictionModel1</p>
+            <p><b>Model 2 Prediction:</b> @ViewBag.PredictionModel2</p>
+        </div>
+    </div>
 </div>

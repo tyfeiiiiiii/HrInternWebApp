@@ -21,9 +21,15 @@ namespace HrInternWebApp.Models.Maps
         HasMany(x => x.Leave).KeyColumn("empId").Inverse().Cascade.All();
 
             // One-to-One Relationship with LeaveBalance
-            HasOne(x => x.LeaveBalance)
+          HasOne(x => x.LeaveBalance)
          .ForeignKey("EmpId") // Ensures FK is mapped correctly
          .Cascade.All();
+
+            HasMany(x => x.SurveyPredictionResults)
+        .KeyColumn("EmpId")
+        .Inverse()
+        .Cascade.All();
+
         }
     }
 }

@@ -63,17 +63,40 @@ ADD MedicalLeaveUsed INT DEFAULT 0,
 
 CREATE TABLE Survey (
     SurveyId INT IDENTITY(1,1) PRIMARY KEY,
-    EmployeeId INT NOT NULL,
-    SatisfactionLevel FLOAT NOT NULL,
-    LastEvaluation FLOAT NOT NULL,
-    NumberProject INT NOT NULL,
-    AverageMonthlyHours INT NOT NULL,
-    TimeSpendCompany INT NOT NULL,
-    WorkAccident BIT NOT NULL,
-    PromotionLast5Years BIT NOT NULL,
-    Department NVARCHAR(100) NOT NULL,
-    Salary NVARCHAR(50) NOT NULL,
-    SubmissionDate DATETIME NOT NULL,
-    CONSTRAINT FK_Survey_Employee FOREIGN KEY (EmployeeId) REFERENCES Employee(empId)
+    empId INT NOT NULL,
+    OverTime VARCHAR(50),
+    MaritalStatus VARCHAR(50),
+    MonthlyIncome FLOAT,
+    StockOptionLevel INT,
+    BusinessTravel VARCHAR(50),
+    TotalWorkingYears INT,
+    JobInvolvement INT,
+    YearsAtCompany INT,
+    Age INT,
+    DistanceFromHome INT,
+    SatisfactionLevel FLOAT,
+    LastEvaluation FLOAT,
+    NumberProject INT,
+    AverageMonthlyHours INT,
+    TimeSpendCompany INT,
+    WorkAccident BIT,
+    PromotionLast5Years BIT,
+    Department VARCHAR(50),
+    Salary VARCHAR(50),
+    SubmissionDate DATETIME
 );
 
+
+CREATE TABLE SurveyPredictionResults (
+    Id INT IDENTITY(1,1) PRIMARY KEY,
+    EmpId INT NOT NULL,
+    PredictionModel1 INT,
+    PredictionModel2 INT,
+    CreatedAt DATETIME DEFAULT GETDATE(),
+    FOREIGN KEY (EmpId) REFERENCES Employee(empId)
+);
+
+
+USE [HRManagementSystem]
+select * from SurveyPredictionResults
+select * from Survey

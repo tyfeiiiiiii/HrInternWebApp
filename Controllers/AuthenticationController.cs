@@ -73,6 +73,7 @@ public class AuthenticationController : Controller
         ViewBag.RememberMeName = Request.Cookies["RememberMeName"];
         ViewBag.RememberMeId = Request.Cookies["RememberMeId"];
         TempData["ErrorMessage"] = "Invalid username, id or password";
+        HttpContext.Session.SetString("EmployeeId", employee.empId.ToString());
         return View(loginModel);
     }
     #endregion

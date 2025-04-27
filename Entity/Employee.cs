@@ -19,6 +19,7 @@ namespace HrInternWebApp.Entity
 
         public virtual IList<Leave> Leave { get; set; } = new List<Leave>();
         public virtual LeaveBalance LeaveBalance { get; set; } // One-to-One Relationship
+        public virtual IList<SurveyPredictionResults> SurveyPredictionResults { get; set; } = new List<SurveyPredictionResults>();  // One-to-Many Relationship
     }
 }
 

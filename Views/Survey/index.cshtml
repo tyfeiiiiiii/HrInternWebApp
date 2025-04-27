@@ -1,4 +1,4 @@
-﻿@* <div class="container-fluid" style="background-color: #0E3B31; height: 100vh;">
+﻿<div class="container-fluid" style="background-color: #0E3B31; height: 100vh;">
     <div class="row h-100">
         <div class="col-md-3 p-3" style="background-color: #1A3E37;">
             @await Html.PartialAsync("Sidebar")
@@ -12,81 +12,8 @@
                     <input class="form-control mr-2" type="search" id="empIdSearch" name="empId" placeholder="Search by Employee ID" aria-label="Search">
                 </form>
             </nav>
-            <form method="post" action="http://127.0.0.1:5000/predict">
-                <div class="form-group">
-                    <label for="satisfactionLevel">Satisfaction Level</label>
-                    <input type="number" step="0.01" class="form-control" id="satisfactionLevel" name="satisfactionLevel" required>
-                </div>
-                <div class="form-group">
-                    <label for="lastEvaluation">Last Evaluation</label>
-                    <input type="number" step="0.01" class="form-control" id="lastEvaluation" name="lastEvaluation" required>
-                </div>
-                <div class="form-group">
-                    <label for="numberProject">Number of Projects</label>
-                    <input type="number" class="form-control" id="numberProject" name="numberProject" required>
-                </div>
-                <div class="form-group">
-                    <label for="averageMonthlyHours">Average Monthly Hours</label>
-                    <input type="number" class="form-control" id="averageMonthlyHours" name="averageMonthlyHours" required>
-                </div>
-                <div class="form-group">
-                    <label for="timeSpendCompany">Time Spent at Company (Years)</label>
-                    <input type="number" class="form-control" id="timeSpendCompany" name="timeSpendCompany" required>
-                </div>
-                <div class="form-group">
-                    <label for="workAccident">Work Accident</label>
-                    <select class="form-control" id="workAccident" name="workAccident" required>
-                        <option value="0">No</option>
-                        <option value="1">Yes</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label for="promotionLast5Years">Promotion in Last 5 Years</label>
-                    <select class="form-control" id="promotionLast5Years" name="promotionLast5Years" required>
-                        <option value="0">No</option>
-                        <option value="1">Yes</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label for="department">Department</label>
-                    <select class="form-control" id="department" name="department" required>
-                        <option value="sales">Sales</option>
-                        <option value="technical">Technical</option>
-                        <option value="support">Support</option>
-                        <!-- Add other departments as needed -->
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label for="salary">Salary Level</label>
-                    <select class="form-control" id="salary" name="salary" required>
-                        <option value="low">Low</option>
-                        <option value="medium">Medium</option>
-                        <option value="high">High</option>
-                    </select>
-                </div>
-                <button type="submit" class="btn btn-primary">Submit</button>
-            </form>
-
-        </div>
-     </div>
-</div>
- *@
-
-<div class="container-fluid" style="background-color: #0E3B31; height: 100vh;">
-    <div class="row h-100">
-        <div class="col-md-3 p-3" style="background-color: #1A3E37;">
-            @await Html.PartialAsync("Sidebar")
-        </div>
-
-        <div class="col-md-9" style="background-color: white; padding: 20px;">
-            <nav class="navbar navbar-light bg-light justify-content-between">
-                <a class="navbar-brand">Employee Management</a>
-
-                <form class="form-inline d-flex" id="searchForm" method="get" action="">
-                    <input class="form-control mr-2" type="search" id="empIdSearch" name="empId" placeholder="Search by Employee ID" aria-label="Search">
-                </form>
-            </nav>
-            <form method="post" action="http://127.0.0.1:5000/predict">
+            @* <form method="post" action="http://127.0.0.1:5000/predict"> *@
+            <form id="predictForm" method="post"action="/Survey/Submit">
                 <!-- Set 1 Features -->
                 <div class="form-group">
                     <label for="overTime">OverTime</label>
@@ -163,15 +90,15 @@
                 <div class="form-group">
                     <label for="workAccident">Work Accident</label>
                     <select class="form-control" id="workAccident" name="workAccident" required>
-                        <option value="0">No</option>
-                        <option value="1">Yes</option>
+                        <option value="false">No</option>
+                        <option value="true">Yes</option>
                     </select>
                 </div>
                 <div class="form-group">
                     <label for="promotionLast5Years">Promotion in Last 5 Years</label>
                     <select class="form-control" id="promotionLast5Years" name="promotionLast5Years" required>
-                        <option value="0">No</option>
-                        <option value="1">Yes</option>
+                        <option value="false">No</option>
+                        <option value="true">Yes</option>
                     </select>
                 </div>
                 <div class="form-group">
@@ -196,3 +123,90 @@
         </div>
     </div>
 </div>
+<script>
+    // document.addEventListener('DOMContentLoaded', function () {
+    //     const form = document.getElementById('predictForm');
+    //     form.addEventListener('submit', async function (e) {
+    //         e.preventDefault(); // Stop normal form submit
+
+    //         const formData = new FormData(form);
+    //         const jsonData = {};
+    //         formData.forEach((value, key) => {
+    //             jsonData[key] = value;
+    //         });
+
+    //         try {
+    //             const response = await fetch('http://127.0.0.1:5000/predict', {
+    //                 method: 'POST',
+    //                 headers: { 'Content-Type': 'application/json' },
+    //                 body: JSON.stringify(jsonData)
+    //             });
+
+    //             const result = await response.json();
+    //             console.log(result);
+
+    //             // Check if user is Admin (example)
+    //             const isAdmin = @User.IsInRole("Admin").ToString().ToLower(); // true or false
+
+    //             if (isAdmin === 'true') {
+    //                 let reportText = generateReport(result);
+    //                 document.getElementById('reportSection').innerHTML = reportText;
+    //                 document.getElementById('reportSection').style.display = 'block';
+    //             } else {
+    //                 alert("Thank you for your time in completing the survey! The data will be reviewed by an admin.");
+    //             }
+
+    //         } catch (error) {
+    //             console.error('Error:', error);
+    //             alert('Failed to predict.');
+    //         }
+    //     });
+
+    //     function generateReport(prediction) {
+    //         let report = "<h3>Prediction Report:</h3>";
+    //         if (prediction.prediction_model1 == 1) {
+    //             report += "<p><b>Model 1:</b> High chance of employee turnover.</p>";
+    //         } else {
+    //             report += "<p><b>Model 1:</b> Low chance of employee turnover.</p>";
+    //         }
+    //         if (prediction.prediction_model2 == 1) {
+    //             report += "<p><b>Model 2:</b> Employee is likely to resign soon.</p>";
+    //         } else {
+    //             report += "<p><b>Model 2:</b> Employee likely to stay.</p>";
+    //         }
+    //         return report;
+    //     }
+    // });
+        document.addEventListener('DOMContentLoaded', function () {
+        const form = document.getElementById('predictForm');
+        form.addEventListener('submit', async function (e) {
+            // Remove e.preventDefault() so that the form submits the normal way to the server
+            // e.preventDefault(); <-- REMOVE THIS LINE!
+
+            const formData = new FormData(form);
+            const jsonData = {};
+            formData.forEach((value, key) => {
+                jsonData[key] = value;
+            });
+
+            try {
+                // Send the data to Flask for prediction (this part can be kept)
+                const response = await fetch('http://127.0.0.1:5000/predict', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(jsonData)
+                });
+
+                const result = await response.json();
+                console.log(result);
+
+                // Continue handling the prediction results for display if needed
+                alert("Prediction received! The data will be reviewed by an admin.");
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Failed to predict.');
+            }
+        });
+    });
+
+</script>
