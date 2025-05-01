@@ -41,65 +41,6 @@ namespace HrInternWebApp.Services
             await _session.SaveOrUpdateAsync(leaveBalance);
         }
 
-        // Apply leave and update used/available leave
-        //public async Task ApplyLeaveAsync(int empId, string leaveType, int days)
-        //{
-        //    _logger.LogInformation("Applying leave for Employee ID: {EmployeeId}, Leave Type: {LeaveType}, Days: {Days}", empId, leaveType, days);
-
-        //    using (ITransaction transaction = _session.BeginTransaction())
-        //    {
-        //        var leaveBalance = await _session.QueryOver<LeaveBalance>()
-        //            .Where(lb => lb.Employee.empId == empId) // Use Employee.EmpId
-        //            .SingleOrDefaultAsync();
-
-        //        if (leaveBalance == null)
-        //        {
-        //            _logger.LogWarning("No leave balance found for Employee ID: {EmployeeId}", empId);
-        //            throw new InvalidOperationException("Leave balance not found.");
-        //        }
-
-        //        switch (leaveType)
-        //        {
-        //            case "Medical Leave":
-        //                leaveBalance.MedicalLeaveUsed += days;
-        //                break;
-        //            case "Annual Leave":
-        //                leaveBalance.AnnualLeaveUsed += days;
-        //                break;
-        //            case "Hospitalization":
-        //                leaveBalance.HospitalizationUsed += days;
-        //                break;
-        //            case "Examination":
-        //                leaveBalance.ExaminationUsed += days;
-        //                break;
-        //            case "Marriage":
-        //                leaveBalance.MarriageUsed += days;
-        //                break;
-        //            case "Paternity Leave":
-        //                leaveBalance.PaternityLeaveUsed += days;
-        //                break;
-        //            case "Maternity Leave":
-        //                leaveBalance.MaternityLeaveUsed += days;
-        //                break;
-        //            case "Childcare Leave":
-        //                leaveBalance.ChildcareLeaveUsed += days;
-        //                break;
-        //            case "Unpaid Leave":
-        //                leaveBalance.UnpaidLeaveUsed += days;
-        //                break;
-        //            case "Emergency Leave":
-        //                leaveBalance.EmergencyLeaveUsed += days;
-        //                break;
-        //            default:
-        //                throw new InvalidOperationException("Invalid leave type.");
-        //        }
-
-        //        leaveBalance.LastUpdated = DateTime.Now;
-        //        await _session.SaveOrUpdateAsync(leaveBalance);
-        //        await transaction.CommitAsync();
-        //        _logger.LogInformation("Leave applied for Employee ID: {EmployeeId}", empId);
-        //    }
-        //}
         public async Task ApplyLeaveAsync(ApplyLeave leaveRequest, int employeeId)
         {
             try

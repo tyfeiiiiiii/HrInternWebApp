@@ -76,13 +76,10 @@ CREATE TABLE Survey (
     DistanceFromHome INT,
     SatisfactionLevel FLOAT,
     LastEvaluation FLOAT,
-    NumberProject INT,
     AverageMonthlyHours INT,
-    TimeSpendCompany INT,
     WorkAccident BIT,
     PromotionLast5Years BIT,
     Department VARCHAR(50),
-    Salary VARCHAR(50),
     SubmissionDate DATETIME
 );
 
@@ -90,13 +87,18 @@ CREATE TABLE Survey (
 CREATE TABLE SurveyPredictionResults (
     Id INT IDENTITY(1,1) PRIMARY KEY,
     EmpId INT NOT NULL,
+    SurveyId INT NOT NULL,
     PredictionModel1 INT,
     PredictionModel2 INT,
     CreatedAt DATETIME DEFAULT GETDATE(),
-    FOREIGN KEY (EmpId) REFERENCES Employee(empId)
+    FOREIGN KEY (EmpId) REFERENCES Employee(empId),
+    FOREIGN KEY (SurveyId) REFERENCES Survey(SurveyId)
 );
 
 
 USE [HRManagementSystem]
 select * from SurveyPredictionResults
 select * from Survey
+
+DROP TABLE SurveyPredictionResults
+DROP TABLE Survey

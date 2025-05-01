@@ -30,39 +30,90 @@ public class AuthenticationController : Controller
         ViewBag.RememberMeName = Request.Cookies["RememberMeName"];
         ViewBag.RememberMeId = Request.Cookies["RememberMeId"];
         return View();
-    } 
+    }
 
+    //[HttpPost]
+    //public IActionResult Login(LogIn loginModel, bool RememberMe)
+    //{
+    //    if(string.IsNullOrWhiteSpace(loginModel.Username) || string.IsNullOrWhiteSpace(loginModel.Password))
+    //    {
+    //        ViewBag.RememberMeName = Request.Cookies["RememberMeName"];
+    //        ViewBag.RememberMeId = Request.Cookies["RememberMeId"];
+    //        TempData["ErrorMessage"] = "All fields are required";
+    //        return View(loginModel);
+    //    }
+    //    var employee = _session.Query<Employee>().FirstOrDefault(e => e.username == loginModel.Username && e.empId == loginModel.empId && e.password == loginModel.Password);
+    //    if (employee != null)
+    //    {
+    //        _logger.LogInformation("User {Username} authenticated successfully", employee.username);
+
+    //        HttpContext.Session.SetString("Username", employee.username);
+    //        HttpContext.Session.SetString("Role", employee.Role);
+    //        HttpContext.Session.SetString("EmployeeId", employee.empId.ToString());
+    //        HttpContext.Session.SetString("Gender", employee.Gender);
+
+    //        // If "Remember Me" is clicked, create cookie 
+    //        if (RememberMe)
+    //        {
+    //            _logger.LogInformation("Setting Remember Me cookies for user {Username}", employee.username);
+
+    //            CookieOptions options = new CookieOptions
+    //            {
+    //                HttpOnly = true, 
+    //                Secure = true,
+    //                Expires = DateTime.Now.AddDays(30),
+    //                Path = "/" 
+    //            };
+    //            Response.Cookies.Append("RememberMeName", employee.username, options);
+    //            Response.Cookies.Append("RememberMeId", employee.empId.ToString(), options);
+    //        }
+
+    //        return RedirectToAction("Index", "Home");
+    //    }
+    //    ViewBag.RememberMeName = Request.Cookies["RememberMeName"];
+    //    ViewBag.RememberMeId = Request.Cookies["RememberMeId"];
+    //    TempData["ErrorMessage"] = "Invalid username, id or password";
+    //    HttpContext.Session.SetString("EmployeeId", employee.empId.ToString());
+    //    return View(loginModel);
+    //}
     [HttpPost]
     public IActionResult Login(LogIn loginModel, bool RememberMe)
     {
-        if(string.IsNullOrWhiteSpace(loginModel.Username) || string.IsNullOrWhiteSpace(loginModel.Password))
+        if (string.IsNullOrWhiteSpace(loginModel.Username) || string.IsNullOrWhiteSpace(loginModel.Password))
         {
             ViewBag.RememberMeName = Request.Cookies["RememberMeName"];
             ViewBag.RememberMeId = Request.Cookies["RememberMeId"];
             TempData["ErrorMessage"] = "All fields are required";
             return View(loginModel);
         }
-        var employee = _session.Query<Employee>().FirstOrDefault(e => e.username == loginModel.Username && e.empId == loginModel.empId && e.password == loginModel.Password);
+
+        // Check if employee exists with provided username, empId, and password
+        var employee = _session.Query<Employee>()
+                               .FirstOrDefault(e => e.username == loginModel.Username
+                                                  && e.empId == loginModel.empId
+                                                  && e.password == loginModel.Password);
+
         if (employee != null)
         {
             _logger.LogInformation("User {Username} authenticated successfully", employee.username);
 
+            // Set session values
             HttpContext.Session.SetString("Username", employee.username);
             HttpContext.Session.SetString("Role", employee.Role);
             HttpContext.Session.SetString("EmployeeId", employee.empId.ToString());
             HttpContext.Session.SetString("Gender", employee.Gender);
 
-            // If "Remember Me" is clicked, create cookie 
+            // If "Remember Me" is clicked, create cookie
             if (RememberMe)
             {
                 _logger.LogInformation("Setting Remember Me cookies for user {Username}", employee.username);
 
                 CookieOptions options = new CookieOptions
                 {
-                    HttpOnly = true, 
+                    HttpOnly = true,
                     Secure = true,
                     Expires = DateTime.Now.AddDays(30),
-                    Path = "/" 
+                    Path = "/"
                 };
                 Response.Cookies.Append("RememberMeName", employee.username, options);
                 Response.Cookies.Append("RememberMeId", employee.empId.ToString(), options);
@@ -70,12 +121,16 @@ public class AuthenticationController : Controller
 
             return RedirectToAction("Index", "Home");
         }
-        ViewBag.RememberMeName = Request.Cookies["RememberMeName"];
-        ViewBag.RememberMeId = Request.Cookies["RememberMeId"];
-        TempData["ErrorMessage"] = "Invalid username, id or password";
-        HttpContext.Session.SetString("EmployeeId", employee.empId.ToString());
-        return View(loginModel);
+        else
+        {
+            // If employee not found, show error message and return the view
+            ViewBag.RememberMeName = Request.Cookies["RememberMeName"];
+            ViewBag.RememberMeId = Request.Cookies["RememberMeId"];
+            TempData["ErrorMessage"] = "Invalid username, ID, or password";
+            return View(loginModel);
+        }
     }
+
     #endregion
 
     #region log out

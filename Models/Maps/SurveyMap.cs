@@ -25,13 +25,10 @@ namespace HrInternWebApp.Models.Maps
             Map(x => x.DistanceFromHome);
             Map(x => x.SatisfactionLevel);
             Map(x => x.LastEvaluation);
-            Map(x => x.NumberProject);
             Map(x => x.AverageMonthlyHours);
-            Map(x => x.TimeSpendCompany);
             Map(x => x.WorkAccident);
             Map(x => x.PromotionLast5Years);
             Map(x => x.Department);
-            Map(x => x.Salary);
             Map(x => x.SubmissionDate);
         }
     }

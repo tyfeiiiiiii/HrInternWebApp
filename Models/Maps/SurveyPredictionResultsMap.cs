@@ -15,6 +15,12 @@ namespace HrInternWebApp.Models.Maps
                 .Not.Nullable()
                 .Cascade.None(); // don't cascade Employee changes from here
 
+            References(x => x.Survey, "SurveyId") // 👈 foreign key to Survey
+             .Not.Nullable()
+             .Cascade.None();
+            //References(x => x.Survey).Not.Nullable();  // Ensure Survey is not nullable
+            //References(x => x.Employee).Not.Nullable();
+
             Map(x => x.PredictionModel1).Not.Nullable();
             Map(x => x.PredictionModel2).Not.Nullable();
             Map(x => x.CreatedAt).Not.Nullable()

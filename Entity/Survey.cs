@@ -20,13 +20,10 @@
         // Features from columns2 (Set 2)
         public virtual double SatisfactionLevel { get; set; }  // Double
         public virtual double LastEvaluation { get; set; }  // Double
-        public virtual int NumberProject { get; set; }  // Integer
         public virtual int AverageMonthlyHours { get; set; }  // Integer
-        public virtual int TimeSpendCompany { get; set; }  // Integer (years)
         public virtual bool WorkAccident { get; set; }  // Boolean
         public virtual bool PromotionLast5Years { get; set; }  // Boolean
         public virtual string Department { get; set; }  // String (department name)
-        public virtual string Salary { get; set; }  // String (salary level)
 
         public virtual DateTime SubmissionDate { get; set; } = DateTime.Now;  // Automatically set current time for submission
     }
