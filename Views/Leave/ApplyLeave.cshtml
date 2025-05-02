@@ -121,7 +121,7 @@
 @{
     var leaveBalance = ViewData["LeaveBalance"] as LeaveBalance;
     var usedLeaveDays = ViewData["UsedLeaveDays"] as Dictionary<string, int> ?? new Dictionary<string, int>();
-} 
+}
 
 <div class="container-fluid" style="background-color: #0E3B31; height: 100vh;">
     <div class="row h-100">
@@ -130,8 +130,19 @@
         </div>
         <div class="col-md-9 d-flex justify-content-start align-items-start p-4" style="background-color: #f4f4f4;">
             <div class="col-md-12 bg-light p-5 rounded shadow-sm" style="min-height: 70vh; background-color: #ffffff; border-radius: 8px;">
+                <!-- Display ModelState Errors -->
+                @if (!ViewData.ModelState.IsValid)
+                {
+                    <div class="alert alert-danger">
+                        <ul>
+                            @foreach (var error in ViewData.ModelState.Values.SelectMany(v => v.Errors))
+                            {
+                                <li>@error.ErrorMessage</li>
+                            }
+                        </ul>
+                    </div>
+                }
 
-                
                 <!-- Leave Balance Dashboard -->
                 <div class="mb-5">
                     <h3 class="text-center mb-4" style="color: #1A3E37; font-weight: bold;">Your Leave Balances</h3>

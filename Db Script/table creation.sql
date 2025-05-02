@@ -95,6 +95,7 @@ CREATE TABLE SurveyPredictionResults (
     FOREIGN KEY (SurveyId) REFERENCES Survey(SurveyId)
 );
 
+EXEC sp_rename 'LeaveBalance.EmpId', 'empId', 'COLUMN';
 
 USE [HRManagementSystem]
 select * from SurveyPredictionResults

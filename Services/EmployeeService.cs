@@ -110,31 +110,95 @@ public class EmployeeService
     #endregion
 
     #region Delete Employee
+    //public async Task DeleteEmployeeAsync(int employeeId)
+    //{
+    //    using (var transaction = _session.BeginTransaction())
+    //    {
+    //        try
+    //        {
+    //            var employee = await _session.GetAsync<Employee>(employeeId);
+    //            if (employee != null)
+    //            {
+    //                await _session.DeleteAsync(employee);
+    //                await transaction.CommitAsync();
+    //            }
+    //            else
+    //            {
+    //                _logger.LogWarning($"Employee with ID {employeeId} not found.");
+    //            }
+    //        }
+    //        catch (Exception ex)
+    //        {
+    //            await transaction.RollbackAsync();
+    //            _logger.LogError(ex, "Failed to delete employee");
+    //            throw;
+    //        }
+    //    }
+    //}
+
     public async Task DeleteEmployeeAsync(int employeeId)
     {
         using (var transaction = _session.BeginTransaction())
         {
             try
             {
+                // 1. Delete Leave records
+                var leaves = await _session.Query<Leave>()
+                    .Where(l => l.employee.empId == employeeId)
+                    .ToListAsync();
+
+                foreach (var leave in leaves)
+                {
+                    await _session.DeleteAsync(leave);
+                }
+
+                // 2. Delete LeaveBalance record
+                var leaveBalance = await _session.Query<LeaveBalance>()
+                    .FirstOrDefaultAsync(lb => lb.Employee.empId == employeeId);
+
+                if (leaveBalance != null)
+                {
+                    await _session.DeleteAsync(leaveBalance);
+                }
+
+                // 3. Optional: Delete SurveyPredictionResults
+                var surveyResults = await _session.Query<SurveyPredictionResults>()
+                   .Where(sr => sr.Employee.empId == employeeId)
+                    .ToListAsync();
+
+                foreach (var result in surveyResults)
+                {
+                    await _session.DeleteAsync(result);
+                }
+
+                // 4. Optional: Delete Surveys
+                var surveys = await _session.Query<Survey>()
+                    .Where(s => s.Employee.empId == employeeId)
+                    .ToListAsync();
+
+                foreach (var survey in surveys)
+                {
+                    await _session.DeleteAsync(survey);
+                }
+
+                // 5. Delete Employee
                 var employee = await _session.GetAsync<Employee>(employeeId);
                 if (employee != null)
                 {
                     await _session.DeleteAsync(employee);
-                    await transaction.CommitAsync();
                 }
-                else
-                {
-                    _logger.LogWarning($"Employee with ID {employeeId} not found.");
-                }
+
+                await transaction.CommitAsync();
             }
             catch (Exception ex)
             {
                 await transaction.RollbackAsync();
-                _logger.LogError(ex, "Failed to delete employee");
+                _logger.LogError(ex, "Failed to delete employee and related data");
                 throw;
             }
         }
     }
+
     #endregion
     #region Get Filtered Employees
     public async Task<IList<ViewEmp>> GetFilteredEmployeesAsync(string empId)
