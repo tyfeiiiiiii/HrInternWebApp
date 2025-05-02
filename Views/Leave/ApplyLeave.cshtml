@@ -1,4 +1,6 @@
-﻿@model HrInternWebApp.Models.Identity.ApplyLeave
+﻿@* 
+
+@model HrInternWebApp.Models.Identity.ApplyLeave
 @using HrInternWebApp.Entity
 
 @{
@@ -13,10 +15,22 @@
         </div>
         <div class="col-md-9 d-flex justify-content-center align-items-center" style="background-color: white; padding: 20px;">
             <div class="col-md-8 bg-light p-5 rounded" style="min-height: 70vh;">
+
+                <!-- Display ModelState Errors -->
+                @if (!ViewData.ModelState.IsValid)
+                {
+                    <div class="alert alert-danger">
+                        <ul>
+                            @foreach (var error in ViewData.ModelState.Values.SelectMany(v => v.Errors))
+                            {
+                                <li>@error.ErrorMessage</li>
+                            }
+                        </ul>
+                    </div>
+                }
                 <!-- Leave Balance Dashboard -->
                 <div class="mb-5">
                     <h3 class="text-center mb-4">Your Leave Balances</h3>
-
                     @if (leaveBalance != null)
                     {
                         <div class="row">
@@ -99,26 +113,107 @@
         </div>
     </div>
 </div>
-@* <script type="text/javascript">
-    $(document).ready(function () {
-        var gender = '@ViewData["Gender"]'; // Retrieve user's gender from server-side, assign it to gender
-        alert(gender);
-        if (gender) { // AJAX request only made if gender is not empty
-            $.ajax({
-                url: '/Leave/GetLeaveTypes',
-                type: 'GET',
-                data: { gender: gender }, // Data sent to the server
-                success: function (data) {
-                    $('#leaveType').append('<option value="">Select leave type</option>');
+ *@
 
-                    $.each(data, function (index, value) { // Iteration here is to let each leave type within the list be shown
-                        $('#leaveType').append('<option value="' + value + '">' + value + '</option>');
-                    });
-                },
-                error: function () {
-                    alert('Error fetching leave types. Please try again.');
-                }
-            });
-        }
-    });
-</script> *@
+@model HrInternWebApp.Models.Identity.ApplyLeave
+@using HrInternWebApp.Entity
+
+@{
+    var leaveBalance = ViewData["LeaveBalance"] as LeaveBalance;
+    var usedLeaveDays = ViewData["UsedLeaveDays"] as Dictionary<string, int> ?? new Dictionary<string, int>();
+} 
+
+<div class="container-fluid" style="background-color: #0E3B31; height: 100vh;">
+    <div class="row h-100">
+        <div class="col-md-3 p-3" style="background-color: #1A3E37; border-right: 2px solid #fff;">
+            @await Html.PartialAsync("Sidebar")
+        </div>
+        <div class="col-md-9 d-flex justify-content-start align-items-start p-4" style="background-color: #f4f4f4;">
+            <div class="col-md-12 bg-light p-5 rounded shadow-sm" style="min-height: 70vh; background-color: #ffffff; border-radius: 8px;">
+
+                
+                <!-- Leave Balance Dashboard -->
+                <div class="mb-5">
+                    <h3 class="text-center mb-4" style="color: #1A3E37; font-weight: bold;">Your Leave Balances</h3>
+                    @if (leaveBalance != null)
+                    {
+                        <div class="row">
+                            @foreach (var leaveType in new[] { "Medical Leave", "Annual Leave", "Hospitalization", "Examination", "Marriage", "Paternity Leave", "Maternity Leave", "Childcare Leave", "Unpaid Leave", "Emergency Leave" })
+                            {
+                                var ownedProperty = leaveBalance.GetType().GetProperty(leaveType.Replace(" ", ""));
+                                var usedProperty = leaveBalance.GetType().GetProperty(leaveType.Replace(" ", "") + "Used");
+
+                                var owned = (int?)ownedProperty?.GetValue(leaveBalance) ?? 0;
+                                var used = (int?)usedProperty?.GetValue(leaveBalance) ?? 0;
+                                var available = owned - used;
+
+                                <div class="col-md-3 mb-3">
+                                    <div class="card p-3" style="background-color: #f7f7f7; border-radius: 8px;">
+                                        <h6 class="card-title text-center" style="color: #1A3E37;">@leaveType</h6>
+                                        <p class="card-text text-center"><small>Owned: @owned</small></p>
+                                        <p class="card-text text-center"><small>Used: @used</small></p>
+                                        <p class="card-text text-center"><small>Available: @available</small></p>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    }
+                    else
+                    {
+                        <p class="text-center text-danger">No leave balance data available.</p>
+                    }
+                </div>
+
+                <!-- Apply Leave Form -->
+                <h2 class="text-center mb-5" style="color: #1A3E37; font-weight: bold;">Request Leave</h2>
+                <form asp-action="ApplyLeave" method="post">
+                    <div class="form-group row mb-5">
+                        <input type="hidden" id="hiddenLeaveTypes" name="HiddenLeaveTypes" />
+
+                        <label asp-for="leaveType" class="col-sm-3 col-form-label" style="color: #1A3E37;">Leave type:</label>
+                        <div class="col-sm-9">
+                            <select id="leaveType" asp-for="leaveType" class="form-control" style="border-radius: 8px;">
+                                <option value="">Select leave type</option>
+                                @if (ViewData["LeaveTypes"] != null)
+                                {
+                                    var leaveTypes = ViewData["LeaveTypes"] as List<string>;
+                                    foreach (var type in leaveTypes)
+                                    {
+                                        <option value="@type">@type</option>
+                                    }
+                                }
+                            </select>
+                            <span asp-validation-for="leaveType" class="text-danger"></span>
+                        </div>
+                    </div>
+
+                    <div class="form-group row mb-5">
+                        <label asp-for="startDate" class="col-sm-3 col-form-label" style="color: #1A3E37;">Duration:</label>
+                        <div class="col-sm-4">
+                            <input asp-for="startDate" class="form-control" type="date" id="startDate" style="border-radius: 8px;" />
+                            <span asp-validation-for="startDate" class="text-danger"></span>
+                        </div>
+                        <div class="col-sm-1 text-center" style="font-size: 18px; color: #1A3E37;">to</div>
+                        <div class="col-sm-4">
+                            <input asp-for="endDate" class="form-control" type="date" id="endDate" style="border-radius: 8px;" />
+                            <span asp-validation-for="endDate" class="text-danger"></span>
+                        </div>
+                    </div>
+
+                    <div class="form-group row mb-5">
+                        <label asp-for="reason" class="col-sm-3 col-form-label" style="color: #1A3E37;">Description:</label>
+                        <div class="col-sm-9">
+                            <textarea asp-for="reason" class="form-control" placeholder="Type your description here" style="height: 150px; border-radius: 8px;"></textarea>
+                            <span asp-validation-for="reason" class="text-danger"></span>
+                        </div>
+                    </div>
+
+                    <div class="d-flex justify-content-between">
+                        <a href="/Home" class="btn btn-success" style="background-color: #1A3E37; border-color: #1A3E37; color: #fff;">Back to Home</a>
+                        <button type="submit" class="btn btn-primary" style="background-color: #1A3E37; border-color: #1A3E37;">Save & Submit</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

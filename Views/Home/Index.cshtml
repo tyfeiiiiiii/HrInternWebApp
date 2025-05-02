@@ -1,21 +1,92 @@
 ﻿@inject IHttpContextAccessor HttpContextAccessor
 
-<div class="container-fluid" style="background-color: #0E3B31; height: 100vh;">
+<div class="container-fluid" style="background-color: #0E3B31; height: 100vh; font-family: 'Arial', sans-serif;">
     <div class="row h-100">
 
+        <!-- Sidebar -->
         <div class="col-md-3 p-3" style="background-color: #1A3E37;">
             @await Html.PartialAsync("Sidebar")
         </div>
 
-        <div class="col-md-9 d-flex justify-content-center align-items-center" style="background-color: white; padding: 20px;">
-            <div class="col-md-8 bg-light p-5 rounded" style="min-height: 70vh;">
-                <h2 class="text-center">Welcome, @HttpContextAccessor.HttpContext.Session.GetString("Username")</h2>
+        <!-- Main Content -->
+        <div class="col-md-9 d-flex justify-content-center align-items-center" style="background-color: #ffffff; padding: 20px;">
+            <div class="col-md-8 bg-light p-5 rounded shadow-lg" style="min-height: 70vh;">
+
+                <!-- Welcome Section -->
+                <h2 class="text-center text-dark mb-4" style="font-size: 2.5rem; font-weight: 700;">Welcome, @HttpContextAccessor.HttpContext.Session.GetString("Username")</h2>
+
+                <!-- Message Section -->
+                <p class="text-center" style="font-size: 1.2rem; font-weight: 500; color: #555;">It's great to have you back! Let’s keep things organized and efficient as we move forward with your leave applications and management. <br> Please choose an option below to get started:</p>
+
+                <!-- Action Buttons -->
                 <div class="d-flex justify-content-center mt-4">
-                    <a class="btn btn-primary me-3" href="/Leave/ApplyLeave">Apply for Leave</a>
-                    <a class="btn btn-secondary" href="/Leave/ViewLeave">View Leave Applications</a>
+                    <a class="btn btn-lg btn-dark-green me-4 px-5 py-3 rounded-pill shadow-sm" href="/Leave/ApplyLeave" style="background-color: #1A3E37; border-color: #1A3E37; font-weight: 600; transition: all 0.3s ease;">Apply for Leave</a>
+                    <a class="btn btn-lg btn-outline-dark-green px-5 py-3 rounded-pill shadow-sm" href="/Leave/ViewLeave" style="border-color: #1A3E37; color: #1A3E37; font-weight: 600; transition: all 0.3s ease;">View Leave Applications</a>
                 </div>
+
             </div>
         </div>
 
     </div>
 </div>
+
+@section Styles {
+    <style>
+        /* Dark Green Button Styles */
+        .btn-dark-green {
+            background-color: #1A3E37;
+            color: #ffffff;
+            font-weight: 600;
+            border: none;
+            border-radius: 8px;
+            padding: 12px 24px;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+        }
+
+            .btn-dark-green:hover {
+                background-color: #16332e;
+                transform: scale(1.05);
+                box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+                color: #e8f5f2;
+            }
+
+            .btn-dark-green:focus,
+            .btn-dark-green:active {
+                outline: none;
+                box-shadow: 0 0 0 2px rgba(26, 62, 55, 0.5);
+            }
+
+        /* Outline Button for View Leave Applications */
+        .btn-outline-dark-green {
+            border-color: #1A3E37;
+            color: #1A3E37;
+            font-weight: 600;
+            border-radius: 8px;
+            padding: 12px 24px;
+            transition: all 0.3s ease;
+        }
+
+            .btn-outline-dark-green:hover {
+                background-color: #fff;
+                color: #fff;
+                transform: scale(1.05);
+                box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+            }
+
+        /* Custom shadow for cards and buttons */
+        .shadow-lg {
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Text Adjustments */
+        h2 {
+            letter-spacing: 0.5px;
+            color: #333;
+        }
+
+        p {
+            color: #555;
+        }
+    </style>
+}

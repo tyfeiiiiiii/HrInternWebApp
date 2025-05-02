@@ -1,141 +1,133 @@
-﻿@* @model List<HrInternWebApp.Entity.SurveyPredictionResults>
-@{
-    var empId = ViewBag.EmpId;
-    var username = ViewBag.Username;
-}
-
-<div class="container-fluid" style="background-color: #0E3B31; height: 100vh;">
-    <div class="row h-100">
-        <div class="col-md-3 p-3" style="background-color: #1A3E37;">
-            @await Html.PartialAsync("Sidebar")
-        </div>
-
-        <div class="col-md-9" style="background-color: white; padding: 20px;">
-            <h3>Prediction History for Employee: @username (@empId) </h3>
-            <hr />
-            <table class="table table-bordered table-striped">
-                <thead>
-                    <tr>
-                        <th>#</th>
-                        <th>Model 1 Prediction</th>
-                        <th>Model 2 Prediction</th>
-                        <th>Created At</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @if (Model != null && Model.Any())
-                    {
-                        int count = 1;
-                        foreach (var result in Model)
-                        {
-                            <tr>
-                                <td>@count</td>
-                                <td>@result.PredictionModel1</td>
-                                <td>@result.PredictionModel2</td>
-                                <td>@result.CreatedAt.ToString("yyyy-MM-dd HH:mm:ss")</td>
-                            </tr>
-                            count++;
-                        }
-                    }
-                    else
-                    {
-                        <tr>
-                            <td colspan="4" class="text-center">No prediction results for this employee.</td>
-                        </tr>
-                    }
-                </tbody>
-            </table>
-            <a asp-action="DisplayPredictionResult" class="btn btn-secondary">Back to All Predictions</a>
-        </div>
-    </div>
-</div>
- *@
-
-@model List<HrInternWebApp.Entity.SurveyPredictionResults>
+﻿@model List<HrInternWebApp.Entity.SurveyPredictionResults>
 @{
     var empId = ViewBag.EmpId;
     var username = ViewBag.Username;
     int index = 0;
 }
 
-<!-- Add this in the <head> or layout if not already -->
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
 
-<div class="container-fluid" style="background-color: #0E3B31; height: 100vh;">
+<div class="container-fluid" style="background-color: #f8f9fa; height: 100vh;">
     <div class="row h-100">
         <div class="col-md-3 p-3" style="background-color: #1A3E37;">
             @await Html.PartialAsync("Sidebar")
         </div>
 
         <div class="col-md-9" style="background-color: white; padding: 20px;">
-            <h3>Prediction History for Employee: @username (@empId) </h3>
+            <h3>Prediction History for Employee: @username (@empId)</h3>
             <hr />
-            <table class="table table-bordered table-striped">
-                <thead>
-                    <tr>
-                        <th>#</th>
-                        <th>Model 1</th>
-                        <th>Model 2</th>
-                        <th>Created At</th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @if (Model != null && Model.Any())
-                    {
-                        int count = 1;
-                        foreach (var result in Model)
-                        {
-                            var survey = result.Survey;
+            <!-- Prediction Table Section -->
+            <div class="mb-5">
+                <h4 class="fw-bold mb-3">📊 Prediction History</h4>
+                <div class="table-responsive rounded shadow-sm bg-white p-3">
+                    <table class="table table-hover align-middle">
+                        <thead class="table-light">
                             <tr>
-                                <td>@count</td>
-                                <td>@result.PredictionModel1</td>
-                                <td>@result.PredictionModel2</td>
-                                <td>@result.CreatedAt.ToString("yyyy-MM-dd HH:mm:ss")</td>
-                                <td>
-                                    <button class="btn btn-info btn-sm" type="button" data-bs-toggle="collapse" data-bs-target="#details-@index">
-                                        View Details
-                                    </button>
-                                </td>
+                                <th>#</th>
+                                <th>Model 1 Prediction</th>
+                                <th>Model 2 Prediction</th>
+                                <th>Created At</th>
+                                <th>Actions</th>
                             </tr>
-                            <tr class="collapse" id="details-@index">
-                                <td colspan="5">
-                                    <div class="card card-body bg-light">
-                                        <p><strong>OverTime:</strong> @survey.OverTime</p>
-                                        <p><strong>Marital Status:</strong> @survey.MaritalStatus</p>
-                                        <p><strong>Monthly Income:</strong> @survey.MonthlyIncome</p>
-                                        <p><strong>Stock Option Level:</strong> @survey.StockOptionLevel</p>
-                                        <p><strong>Business Travel:</strong> @survey.BusinessTravel</p>
-                                        <p><strong>Total Working Years:</strong> @survey.TotalWorkingYears</p>
-                                        <p><strong>Job Involvement:</strong> @survey.JobInvolvement</p>
-                                        <p><strong>Years At Company:</strong> @survey.YearsAtCompany</p>
-                                        <p><strong>Age:</strong> @survey.Age</p>
-                                        <p><strong>Distance From Home:</strong> @survey.DistanceFromHome</p>
-                                        <p><strong>Satisfaction Level:</strong> @survey.SatisfactionLevel</p>
-                                        <p><strong>Last Evaluation:</strong> @survey.LastEvaluation</p>
-                                        <p><strong>Average Monthly Hours:</strong> @survey.AverageMonthlyHours</p>
-                                        <p><strong>Work Accident:</strong> @(survey.WorkAccident ? "Yes" : "No")</p>
-                                        <p><strong>Promotion Last 5 Years:</strong> @(survey.PromotionLast5Years ? "Yes" : "No")</p>
-                                        <p><strong>Department:</strong> @survey.Department</p>
-                                        <p><strong>Submitted At:</strong> @survey.SubmissionDate</p>
-                                    </div>
-                                </td>
-                            </tr>
-                            count++;
-                            index++;
-                        }
-                    }
-                    else
-                    {
-                        <tr>
-                            <td colspan="5" class="text-center">No prediction results for this employee.</td>
-                        </tr>
-                    }
-                </tbody>
-            </table>
-            <a asp-action="DisplayPredictionResult" class="btn btn-secondary">Back to All Predictions</a>
+                        </thead>
+                        <tbody>
+                            @if (Model != null && Model.Any())
+                            {
+                                int count = 1;
+                                foreach (var result in Model)
+                                {
+                                    var survey = result.Survey;
+                                    <tr>
+                                        <td>@count</td>
+                                        <td>@result.PredictionModel1</td>
+                                        <td>@result.PredictionModel2</td>
+                                        <td>@result.CreatedAt.ToString("yyyy-MM-dd HH:mm:ss")</td>
+                                        <td>
+                                            <button class="btn btn-dark-green btn-sm" type="button" data-bs-toggle="collapse" data-bs-target="#details-@index">
+                                                View Details
+                                            </button>
+                                        </td>
+                                    </tr>
+                                    <tr class="collapse" id="details-@index">
+                                        <td colspan="5">
+                                            <div class="card card-body bg-light">
+                                                <p><strong>OverTime:</strong> @survey.OverTime</p>
+                                                <p><strong>Marital Status:</strong> @survey.MaritalStatus</p>
+                                                <p><strong>Monthly Income:</strong> @survey.MonthlyIncome</p>
+                                                <p><strong>Stock Option Level:</strong> @survey.StockOptionLevel</p>
+                                                <p><strong>Business Travel:</strong> @survey.BusinessTravel</p>
+                                                <p><strong>Total Working Years:</strong> @survey.TotalWorkingYears</p>
+                                                <p><strong>Job Involvement:</strong> @survey.JobInvolvement</p>
+                                                <p><strong>Years At Company:</strong> @survey.YearsAtCompany</p>
+                                                <p><strong>Age:</strong> @survey.Age</p>
+                                                <p><strong>Distance From Home:</strong> @survey.DistanceFromHome</p>
+                                                <p><strong>Satisfaction Level:</strong> @survey.SatisfactionLevel</p>
+                                                <p><strong>Last Evaluation:</strong> @survey.LastEvaluation</p>
+                                                <p><strong>Average Monthly Hours:</strong> @survey.AverageMonthlyHours</p>
+                                                <p><strong>Work Accident:</strong> @(survey.WorkAccident ? "Yes" : "No")</p>
+                                                <p><strong>Promotion Last 5 Years:</strong> @(survey.PromotionLast5Years ? "Yes" : "No")</p>
+                                                <p><strong>Department:</strong> @survey.Department</p>
+                                                <p><strong>Submitted At:</strong> @survey.SubmissionDate</p>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    count++;
+                                    index++;
+                                }
+                            }
+                            else
+                            {
+                                <tr>
+                                    <td colspan="5" class="text-center">No prediction results for this employee.</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <!-- Back Button -->
+            <a asp-action="DisplayPredictionResult" class="btn btn-dark-green">Back to All Predictions</a>
         </div>
     </div>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+@section Styles {
+    <style>
+        .btn-dark-green {
+            background-color: #16332e; /* Dark green */
+            color: #ffffff;
+            font-weight: 600;
+            border: none;
+            border-radius: 8px;
+            padding: 8px 16px;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+        }
+
+            .btn-dark-green:hover {
+                background-color: #1A3E37; /* Slightly lighter green */
+                transform: scale(1.05);
+                box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+                color: #ffffff;
+            }
+
+            .btn-dark-green:focus,
+            .btn-dark-green:active {
+                outline: none;
+                box-shadow: 0 0 0 2px rgba(26, 62, 55, 0.5);
+            }
+
+        .table-responsive {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .table-hover tbody tr:hover {
+            background-color: #f1f1f1;
+        }
+
+        .table th {
+            font-weight: 600;
+        }
+    </style>
+}

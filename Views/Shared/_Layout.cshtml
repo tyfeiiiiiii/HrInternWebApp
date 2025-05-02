@@ -1,15 +1,48 @@
-﻿
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>@ViewData["Title"] - HrInternWebApp</title>
+
+    <!-- Default CSS files -->
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/HrInternWebApp.styles.css" asp-append-version="true" />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css">
 
+    <style>
+        .nav-link {
+            color: #ffffff !important;
+            transition: all 0.3s ease-in-out;
+            padding: 12px 18px;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            text-decoration: none !important;
+        }
+
+            .nav-link:hover,
+            .nav-item:hover .nav-link {
+                background-color: #2b5c52 !important;
+                color: #e8f5f2 !important;
+                font-weight: 600;
+                transform: scale(1.05);
+            }
+
+            .nav-link i {
+                transition: transform 0.3s ease-in-out;
+            }
+
+            .nav-link:hover i {
+                transform: translateX(6px);
+            }
+    </style>
+
+    <!-- Render Styles Section -->
+    @RenderSection("Styles", required: false)
+
+    <!-- Default JavaScript files -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="~/lib/jquery/dist/jquery.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
@@ -17,14 +50,16 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.19.5/jquery.validate.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validation-unobtrusive/3.2.12/jquery.validate.unobtrusive.min.js"></script>
+
     @await RenderSectionAsync("Scripts", required: false)
+
+
 </head>
 <body>
     <div class="container-fluid">
         <main role="main" class="pb-3">
-            @RenderBody()
+            @RenderBody()  <!-- Render content from views -->
         </main>
     </div>
-
 </body>
 </html>

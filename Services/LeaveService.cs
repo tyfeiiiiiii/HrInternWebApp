@@ -6,19 +6,22 @@ using Microsoft.Extensions.Logging;
 using System.Collections.Generic;
 using System.Linq;
 using HrInternWebApp.Entity;
+using HrInternWebApp.Services;
 
 public class LeaveService
 {
     #region Fields
     private readonly ISession _session;
-    private readonly ILogger<LeaveService> _logger;
+    private readonly ILogger<LeaveService> _logger; 
+    private readonly EmailService _emailService;
     #endregion
 
     #region Constructor
-    public LeaveService(ISession session, ILogger<LeaveService> logger)
+    public LeaveService(ISession session, ILogger<LeaveService> logger, EmailService emailService)
     {
         _session = session;
         _logger = logger;
+        _emailService = emailService;
     }
     #endregion
 
@@ -61,7 +64,7 @@ public class LeaveService
             return new List<string> { "Medical Leave", "Annual Leave", "Unpaid Leave" };
         }
     }
-    public async Task ApplyLeaveAsync(ApplyLeave leaveRequest, int employeeId)
+    public async Task<bool> ApplyLeaveAsync(ApplyLeave leaveRequest, int employeeId)
     {
         try
         {
@@ -69,7 +72,7 @@ public class LeaveService
             if (employee == null)
             {
                 _logger.LogWarning($"No employee found with ID {employeeId}");
-                throw new InvalidOperationException($"Employee with ID {employeeId} does not exist.");
+                return false;
             }
 
             using (var transaction = _session.BeginTransaction())
@@ -136,25 +139,34 @@ public class LeaveService
 
                         leaveBalance.LastUpdated = DateTime.Now;
                         await _session.UpdateAsync(leaveBalance);
+                        await _session.FlushAsync(); // Ensure changes are persisted
+
+                        _logger.LogInformation($"Updated leave balance for employee ID {employeeId}");
+                    }
+                    else
+                    {
+                        _logger.LogWarning($"Leave balance not found for employee ID {employeeId}");
                     }
 
                     await transaction.CommitAsync();
-                    _logger.LogInformation($"Leave record successfully saved for employee ID {employeeId}");
+                    _logger.LogInformation($"Leave application submitted for employee ID {employeeId}");
+                    return true;
                 }
                 catch (Exception ex)
                 {
                     await transaction.RollbackAsync();
                     _logger.LogError(ex, "Failed to apply leave");
-                    throw new Exception("Failed to apply leave", ex);
+                    return false;
                 }
             }
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "An error occurred while applying for leave.");
-            throw;
+            return false;
         }
     }
+
 
 
     #endregion
@@ -233,7 +245,45 @@ public class LeaveService
     #endregion
 
     #region Update Leave Status
-    public async Task UpdateLeaveStatusAsync(int leaveId, string newStatus, string approver)
+    //public async Task UpdateLeaveStatusAsync(int leaveId, string newStatus, string approver)
+    //{
+    //    try
+    //    {
+    //        var leave = await _session.GetAsync<Leave>(leaveId);
+    //        if (leave != null)
+    //        {
+    //            leave.status = newStatus;
+    //            leave.approver = approver;
+
+    //            using (var transaction = _session.BeginTransaction())
+    //            {
+    //                try
+    //                {
+    //                    await _session.UpdateAsync(leave);
+    //                    await transaction.CommitAsync();
+    //                    _logger.LogInformation($"Leave status updated for leave ID {leaveId}");
+    //                }
+    //                catch (Exception ex)
+    //                {
+    //                    await transaction.RollbackAsync();
+    //                    _logger.LogError(ex, "Failed to update leave status");
+    //                    throw new Exception("Failed to update leave status", ex);
+    //                }
+    //            }
+    //        }
+    //        else
+    //        {
+    //            _logger.LogWarning($"Leave with ID {leaveId} not found.");
+    //            throw new KeyNotFoundException($"Leave with ID {leaveId} not found.");
+    //        }
+    //    }
+    //    catch (Exception ex)
+    //    {
+    //        _logger.LogError(ex, "An error occurred while updating leave status.");
+    //        throw;
+    //    }
+    //}
+    public async Task<Leave> UpdateLeaveStatusAsync(int leaveId, string newStatus, string approver)
     {
         try
         {
@@ -250,6 +300,20 @@ public class LeaveService
                         await _session.UpdateAsync(leave);
                         await transaction.CommitAsync();
                         _logger.LogInformation($"Leave status updated for leave ID {leaveId}");
+
+                        // Ensure Employee object is loaded for email
+                        NHibernateUtil.Initialize(leave.employee);
+
+                        if (leave.employee != null && !string.IsNullOrEmpty(leave.employee.email))
+                        {
+                            _emailService.SendEmail(
+                                leave.employee.email,
+                                "Leave Request Status Update",
+                                $"<p>Dear {leave.employee.username},<br>Your leave request has been <b>{newStatus}</b> by {approver}.</p>"
+                            );
+                        }
+
+                        return leave;
                     }
                     catch (Exception ex)
                     {
@@ -271,6 +335,7 @@ public class LeaveService
             throw;
         }
     }
+
     #endregion
 
     #region get Filtered Leave
@@ -324,30 +389,75 @@ public class LeaveService
     #endregion
 
     #region Delete Leave 
-    public async Task DeleteLeaveAsync (int leaveId)
+    public async Task DeleteLeaveAsync(int leaveId)
     {
-        using (var transaction=_session.BeginTransaction())
+        using (var transaction = _session.BeginTransaction())
         {
             try
             {
                 var leave = await _session.GetAsync<Leave>(leaveId);
-                if(leave!=null)
+                if (leave != null)
                 {
+                    // Get the Employee ID associated with this leave
+                    var employeeId = leave.employee.empId;
+
+                    // Get the leave balance of the employee
+                    var leaveBalance = await _session.QueryOver<LeaveBalance>()
+                        .Where(lb => lb.Employee.empId == employeeId)
+                        .SingleOrDefaultAsync();
+
+                    if (leaveBalance != null)
+                    {
+                        // Calculate the number of leave days used for this leave request
+                        int usedLeaveDays = (leave.endDate.Value - leave.startDate.Value).Days + 1;
+
+                        // Add back the leave days to the leave balance
+                        AddLeaveBackToBalance(leaveBalance, leave.leaveType, usedLeaveDays);
+
+                        // Save the updated leave balance
+                        leaveBalance.LastUpdated = DateTime.Now;
+                        await _session.UpdateAsync(leaveBalance);
+                    }
+
+                    // Now delete the leave record
                     await _session.DeleteAsync(leave);
                     await transaction.CommitAsync();
+
+                    _logger.LogInformation($"Leave with ID {leaveId} successfully deleted and balance updated.");
                 }
                 else
                 {
                     _logger.LogWarning($"Leave with ID {leaveId} not found.");
                 }
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 await transaction.RollbackAsync();
-                _logger.LogError(ex, "Failed to delete leave");
+                _logger.LogError(ex, "Failed to delete leave and update balance.");
                 throw;
             }
         }
     }
+
+    private void AddLeaveBackToBalance(LeaveBalance leaveBalance, string leaveType, int days)
+    {
+        switch (leaveType)
+        {
+            case "Medical Leave": leaveBalance.MedicalLeaveUsed -= days; break;
+            case "Annual Leave": leaveBalance.AnnualLeaveUsed -= days; break;
+            case "Hospitalization": leaveBalance.HospitalizationUsed -= days; break;
+            case "Examination": leaveBalance.ExaminationUsed -= days; break;
+            case "Marriage": leaveBalance.MarriageUsed -= days; break;
+            case "Paternity Leave": leaveBalance.PaternityLeaveUsed -= days; break;
+            case "Maternity Leave": leaveBalance.MaternityLeaveUsed -= days; break;
+            case "Childcare Leave": leaveBalance.ChildcareLeaveUsed -= days; break;
+            case "Unpaid Leave": leaveBalance.UnpaidLeaveUsed -= days; break;
+            case "Emergency Leave": leaveBalance.EmergencyLeaveUsed -= days; break;
+            default:
+                throw new InvalidOperationException("Invalid leave type.");
+        }
+    }
+
     #endregion
+
 }

@@ -1,7 +1,13 @@
 ﻿@model IEnumerable<HrInternWebApp.Models.Identity.ViewLeave>
 @inject IHttpContextAccessor HttpContextAccessor
+@{
+    var pendingLeaves = Model.Where(l => string.IsNullOrEmpty(l.status) || l.status == "Pending").ToList();
+    var processedLeaves = Model.Where(l => l.status == "Approved" || l.status == "Rejected").ToList();
+    var currentRole = HttpContextAccessor.HttpContext.Session.GetString("Role");
+    var currentUsername = HttpContextAccessor.HttpContext.Session.GetString("Username");
+}
 
-<div class="container-fluid" style="background-color: #0E3B31; height: 100vh;">
+<div class="container-fluid" style="background-color: #f8f9fa; height: 100vh">
     <div class="row h-100">
         <div class="col-md-3 p-3" style="background-color: #1A3E37;">
             @await Html.PartialAsync("Sidebar")
@@ -10,7 +16,7 @@
         <div class="col-md-9" style="background-color: white; padding: 20px;">
             <nav class="navbar navbar-light bg-light justify-content-between">
                 <a class="navbar-brand">Leave Applications</a>
-                @if (HttpContextAccessor.HttpContext.Session.GetString("Role") == "Admin")
+                @if (currentRole == "Admin")
                 {
                     <form class="form-inline d-flex" id="searchForm" method="get" action="javascript:void(0)">
                         <input class="form-control mr-2" type="search" id="empIdSearch" name="empId" placeholder="Search by Employee ID" aria-label="Search">
@@ -25,154 +31,220 @@
                 </div>
             }
 
-            <table class="table table-bordered">
-                <thead>
-                    <tr>
-                        <th>Leave ID</th>
-                        <th>Employee ID</th>
-                        <th>Username</th>
-                        <th>Leave Type</th>
-                        <th>Start Date</th>
-                        <th>End Date</th>
-                        <th>Reason</th>
-                        <th>Status</th>
-                        <th>Approver</th>
-                        @if (HttpContextAccessor.HttpContext.Session.GetString("Role") == "Admin")
-                        {
-                            <th>Action</th>
-                        }
-                    </tr>
-                </thead>
-                <tbody id="leaveTableBody">
-                    @foreach (var leave in Model)
-                    {
-                        <tr>
-                            <td>@leave.leaveId</td>
-                            <td>@leave.empId</td>
-                            <td>@leave.username</td>
-                            <td>@leave.leaveType</td>
-                            <td>@leave.startDate?.ToString("dd/MM/yyyy")</td>
-                            <td>@leave.endDate?.ToString("dd/MM/yyyy")</td>
-                            <td>@leave.reason</td>
-                            <td>@(string.IsNullOrEmpty(leave.status) ? "Pending" : leave.status)</td>
-                            <td>@(string.IsNullOrEmpty(leave.approver) ? "N/A" : leave.approver)</td>
-                            <td><button type="button" class="btn btn-danger btn-sm" data-bs-toggle="modal" data-bs-target="#deleteModal-@leave.leaveId">Delete</button>
-
-                            @*  Delete Confirmation Modal  *@
-                            <div class="modal fade" id="deleteModal-@leave.leaveId" tabindex="-1" aria-labelledby="deleteModalLabel-@leave.leaveId" aria-hidden="true">
-                                <div class="modal-dialog">
-                                    <div class="modal-content">
-                                        <div class="modal-header">
-                                            <h5 class="modal-title" id="deleteModalLabel-@leave.leaveId">Confirm Delete</h5>
-                                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                                        </div>
-                                        <div class="modal-body">
-                                            Are you sure you want to delete the leave with ID @leave.leaveId? This action cannot be undone.
-                                        </div>
-                                        <div class="modal-footer">
-                                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                                            <a href="@Url.Action("DeleteLeave", "Leave", new { leaveId = @leave.leaveId })" class="btn btn-danger">Delete</a>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                         </td>
-
-                            @if (HttpContextAccessor.HttpContext.Session.GetString("Role") == "Admin")
+            <!-- Pending Leaves Section -->
+            <div class="mb-5">
+                <h4 class="fw-bold mb-3">🕒 Pending Leave Applications</h4>
+                <div class="table-responsive rounded shadow-sm bg-white p-3">
+                    <table class="table table-hover align-middle">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Leave ID</th>
+                                <th>Employee ID</th>
+                                <th>Username</th>
+                                <th>Leave Type</th>
+                                <th>Start Date</th>
+                                <th>End Date</th>
+                                <th>Reason</th>
+                                <th>Status</th>
+                                <th>Approver</th>
+                                @if (currentRole == "Admin")
+                                {
+                                    <th>Action</th>
+                                }
+                                <th>Delete</th>
+                            </tr>
+                        </thead>
+                        <tbody id="leaveTableBody">
+                            @foreach (var leave in pendingLeaves)
                             {
-                                <td>
-                                    <form asp-action="UpdateLeaveStatus" method="post">
-                                        <input type="hidden" name="leaveId" value="@leave.leaveId" />
-                                        <select name="status" class="form-select">
-                                            @if (leave.status == "Approved")
-                                            {
-                                                <option value="Approved" selected>Approved</option>
-                                            }
-                                            else
-                                            {
-                                                <option value="Approved">Approved</option>
-                                            }
+                                <tr>
+                                    <td>@leave.leaveId</td>
+                                    <td>@leave.empId</td>
+                                    <td>@leave.username</td>
+                                    <td>@leave.leaveType</td>
+                                    <td>@leave.startDate?.ToString("dd/MM/yyyy")</td>
+                                    <td>@leave.endDate?.ToString("dd/MM/yyyy")</td>
+                                    <td>@leave.reason</td>
+                                    <td><span class="badge bg-warning text-dark">Pending</span></td>
+                                    <td>N/A</td>
+                                    @if (currentRole == "Admin")
+                                    {
+                                        <td>
+                                            <form asp-action="UpdateLeaveStatus" method="post" class="mb-2">
+                                                <input type="hidden" name="leaveId" value="@leave.leaveId" />
+                                                <select name="status" class="form-select form-select-sm rounded-pill mb-1 shadow-sm">
+                                                    <option value="Approved">Approve</option>
+                                                    <option value="Rejected">Reject</option>
+                                                </select>
+                                                <button type="submit" class="btn btn-sm btn-outline-primary rounded-pill w-100">Update</button>
+                                            </form>
+                                        </td>
+                                    }
+                                    <td>
+                                        @if (currentRole == "Admin" || leave.username == currentUsername)
+                                        {
+                                            <button type="button" class="btn btn-sm btn-outline-danger rounded-pill w-100" data-bs-toggle="modal" data-bs-target="#deleteModal-@leave.leaveId">Delete</button>
 
-                                            @if (leave.status == "Rejected")
-                                            {
-                                                <option value="Rejected" selected>Rejected</option>
-                                            }
-                                            else
-                                            {
-                                                <option value="Rejected">Rejected</option>
-                                            }
-
-                                            @if (leave.status == "Pending" || string.IsNullOrEmpty(leave.status))
-                                            {
-                                                <option value="Pending" selected>Pending</option>
-                                            }
-                                            else
-                                            {
-                                                <option value="Pending">Pending</option>
-                                            }
-                                        </select>
-
-
-                                        <button type="submit" class="btn btn-primary mt-2">Update Status</button>
-                                    </form>
-                                </td>
+                                            <!-- Delete Modal -->
+                                            <div class="modal fade" id="deleteModal-@leave.leaveId" tabindex="-1" aria-labelledby="deleteModalLabel-@leave.leaveId" aria-hidden="true">
+                                                <div class="modal-dialog">
+                                                    <div class="modal-content">
+                                                        <div class="modal-header">
+                                                            <h5 class="modal-title" id="deleteModalLabel-@leave.leaveId">Confirm Delete</h5>
+                                                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                        </div>
+                                                        <div class="modal-body">
+                                                            Are you sure you want to delete the leave with ID @leave.leaveId? This action cannot be undone.
+                                                        </div>
+                                                        <div class="modal-footer">
+                                                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                                                            <a href="@Url.Action("DeleteLeave", "Leave", new { leaveId = leave.leaveId })" class="btn btn-danger">Delete</a>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        }
+                                    </td>
+                                </tr>
                             }
-                        </tr>
-                    }
-                </tbody>
-            </table>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Processed Leaves Section -->
+            <div>
+                <h4 class="fw-bold mb-3">✅ Processed Leave Applications</h4>
+                <div class="table-responsive rounded shadow-sm bg-white p-3">
+                    <table class="table table-hover align-middle">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Leave ID</th>
+                                <th>Employee ID</th>
+                                <th>Username</th>
+                                <th>Leave Type</th>
+                                <th>Start Date</th>
+                                <th>End Date</th>
+                                <th>Reason</th>
+                                <th>Status</th>
+                                <th>Approver</th>
+                            </tr>
+                        </thead>
+                        <tbody id="processedLeaveTableBody">
+                            @foreach (var leave in processedLeaves)
+                            {
+                                <tr>
+                                    <td>@leave.leaveId</td>
+                                    <td>@leave.empId</td>
+                                    <td>@leave.username</td>
+                                    <td>@leave.leaveType</td>
+                                    <td>@leave.startDate?.ToString("dd/MM/yyyy")</td>
+                                    <td>@leave.endDate?.ToString("dd/MM/yyyy")</td>
+                                    <td>@leave.reason</td>
+                                    <td>
+                                        <span class="badge bg-@(leave.status == "Approved" ? "success" : "danger")">@leave.status</span>
+                                    </td>
+                                    <td>@(string.IsNullOrEmpty(leave.approver) ? "N/A" : leave.approver)</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
         </div>
     </div>
 </div>
 
 <script>
-    // Prevent the default form submission trigger AJAX
     $("#searchForm").on("input", function (e) {
-        e.preventDefault(); // Prevent the form from submitting normally
-        
-        var empId = $("#empIdSearch").val(); // Get the empId from the input field
+        e.preventDefault();
+
+        var empId = $("#empIdSearch").val();
 
         $.ajax({
             url: '@Url.Action("SearchLeave", "Leave")',
             type: 'GET',
-            data: { empId: empId }, 
+            data: { empId: empId },
             success: function (data) {
-                var tableBody = $('#leaveTableBody');
-                tableBody.empty(); // Clear the existing table rows
+                var pendingBody = $('#leaveTableBody');
+                var processedBody = $('#processedLeaveTableBody'); // ✅ use specific ID
+
+                pendingBody.empty();
+                processedBody.empty();
+
+                var currentRole = '@currentRole';
+                var currentUsername = '@currentUsername';
 
                 $.each(data, function (index, leave) {
-                    var row = '<tr>' +
-                        '<td>' + leave.leaveId + '</td>' +
-                        '<td>' + leave.empId + '</td>' +
-                        '<td>' + leave.username + '</td>' +
-                        '<td>' + leave.leaveType + '</td>' +
-                        '<td>' + new Date(leave.startDate).toLocaleDateString() + '</td>' +
-                        '<td>' + new Date(leave.endDate).toLocaleDateString() + '</td>' +
-                        '<td>' + leave.reason + '</td>' +
-                        '<td>' + (leave.status || 'Pending') + '</td>' +
-                        '<td>' + (leave.approver || 'N/A') + '</td>';
+                    var isPending = !leave.status || leave.status === "Pending";
 
-                    // Only show action buttons if the user is an admin
-                    if ('@HttpContextAccessor.HttpContext.Session.GetString("Role")' === "Admin") {
-                        row += '<td>' +
-                            '<form method="post" action="/Leave/UpdateLeaveStatus">' +
-                            '<input type="hidden" name="leaveId" value="' + leave.leaveId + '" />' +
-                            '<select name="status" class="form-select">' +
-                            '<option value="Approved"' + (leave.status === "Approved" ? " selected" : "") + '>Approved</option>' +
-                            '<option value="Rejected"' + (leave.status === "Rejected" ? " selected" : "") + '>Rejected</option>' +
-                            '<option value="Pending"' + (leave.status === "Pending" ? " selected" : "") + '>Pending</option>' +
-                            '</select>' +
-                            '<button type="submit" class="btn btn-primary mt-2">Update Status</button>' +
-                            '</form>' +
-                            '</td>';
+                    var actionHtml = '';
+                    var deleteHtml = '';
+
+                    // Admin actions (only for pending)
+                    if (currentRole === "Admin" && isPending) {
+                        actionHtml = `
+                            <form method="post" action="/Leave/UpdateLeaveStatus" class="mb-2">
+                                <input type="hidden" name="leaveId" value="${leave.leaveId}" />
+                                <select name="status" class="form-select form-select-sm rounded-pill mb-1 shadow-sm">
+                                    <option value="Approved">Approve</option>
+                                    <option value="Rejected">Reject</option>
+                                </select>
+                                <button type="submit" class="btn btn-sm btn-outline-primary rounded-pill w-100">Update</button>
+                            </form>`;
                     }
 
-                    row += '</tr>';
-                    tableBody.append(row);
+                    // Delete button: only for Admin or owner, and only if leave is pending
+                    if (isPending && (currentRole === "Admin" || leave.username === currentUsername)) {
+                        deleteHtml = `
+                            <button type="button" class="btn btn-sm btn-outline-danger rounded-pill w-100" data-bs-toggle="modal" data-bs-target="#deleteModal-${leave.leaveId}">Delete</button>
+
+                            <div class="modal fade" id="deleteModal-${leave.leaveId}" tabindex="-1" aria-labelledby="deleteModalLabel-${leave.leaveId}" aria-hidden="true">
+                                <div class="modal-dialog">
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <h5 class="modal-title">Confirm Delete</h5>
+                                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                        </div>
+                                        <div class="modal-body">
+                                            Are you sure you want to delete the leave with ID ${leave.leaveId}? This action cannot be undone.
+                                        </div>
+                                        <div class="modal-footer">
+                                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                                            <a href="/Leave/DeleteLeave?leaveId=${leave.leaveId}" class="btn btn-danger">Delete</a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>`;
+                    }
+
+                    var row = `
+                        <tr>
+                            <td>${leave.leaveId}</td>
+                            <td>${leave.empId}</td>
+                            <td>${leave.username}</td>
+                            <td>${leave.leaveType}</td>
+                            <td>${new Date(leave.startDate).toLocaleDateString()}</td>
+                            <td>${new Date(leave.endDate).toLocaleDateString()}</td>
+                            <td>${leave.reason}</td>
+                            <td>
+                                <span class="badge bg-${leave.status === "Approved" ? "success" : leave.status === "Rejected" ? "danger" : "warning text-dark"}">${leave.status || "Pending"}</span>
+                            </td>
+                            <td>${leave.approver || "N/A"}</td>
+                            ${currentRole === "Admin" ? `<td>${actionHtml}</td>` : ""}
+                            <td>${deleteHtml}</td>
+                        </tr>`;
+
+                    if (isPending) {
+                        pendingBody.append(row);
+                    } else {
+                        processedBody.append(row); // ✅ processed table now gets updated
+                    }
                 });
             },
             error: function (xhr, status, error) {
-                console.log("Error:", error); // Log the error message
+                console.log("Error:", error);
                 alert('Error fetching search results.');
             }
         });

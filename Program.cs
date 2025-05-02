@@ -4,6 +4,7 @@ using NHibernate;
 using HrInternWebApp.Models.Maps;
 using HrInternWebApp.Services;
 using Microsoft.Extensions.DependencyInjection;
+using HrInternWebApp.Entity;
 
 namespace HrInternWebApp
 {
@@ -61,6 +62,10 @@ namespace HrInternWebApp
             builder.Services.AddScoped<EmployeeService>();
             builder.Services.AddScoped<LeaveBalanceService>();
             builder.Services.AddMemoryCache();
+
+            builder.Services.Configure<EmailSettings>(builder.Configuration.GetSection("EmailSettings"));
+            builder.Services.AddTransient<EmailService>();
+
 
             var app = builder.Build();
 
