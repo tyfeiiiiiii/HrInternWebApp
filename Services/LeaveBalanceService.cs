@@ -26,15 +26,15 @@ namespace HrInternWebApp.Services
             {
                 Employee = await _session.GetAsync<Employee>(empId),
                 MedicalLeave = 14,
-                AnnualLeave = 14,
+                AnnualLeave = 12,
                 Hospitalization = 60,
                 Examination = 5,
-                Marriage = 3,
+                Marriage = 7,
                 PaternityLeave = gender == "Male" ? 7 : 0,
-                MaternityLeave = gender == "Female" ? 98 : 0,
-                ChildcareLeave = gender == "Female" ? 6 : 0,
-                UnpaidLeave = 365,
-                EmergencyLeave = 5,
+                MaternityLeave = gender == "Female" ? 90 : 0,
+                ChildcareLeave = gender == "Female" ? 14 : 0,
+                UnpaidLeave = 60,
+                EmergencyLeave = 10,
                 LastUpdated = DateTime.Now
             };
 

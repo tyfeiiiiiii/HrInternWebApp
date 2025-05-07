@@ -1,120 +1,5 @@
 ﻿@* @model List<HrInternWebApp.Entity.SurveyPredictionResults>
 
-<div class="container-fluid" style="background-color: #0E3B31; height: 100vh;">
-    <div class="row h-100">
-        <div class="col-md-3 p-3" style="background-color: #1A3E37;">
-            @await Html.PartialAsync("Sidebar")
-        </div>
-
-        <div class="col-md-9" style="background-color: white; padding: 20px;">
-            <nav class="navbar navbar-light bg-light justify-content-between">
-                <a class="navbar-brand">Prediction Result</a>
-
-                <form class="form-inline d-flex" id="searchForm" method="get" action="">
-                    <input class="form-control mr-2" type="search" id="empIdSearch" name="empId" placeholder="Search by Employee ID" aria-label="Search">
-                </form>
-            </nav>
-
-            <table class="table table-bordered table-striped">
-                <thead>
-                    <tr>
-                        <th>Survey ID</th>
-                        <th>Employee ID</th>
-                        <th>Username</th>
-                        <th>Model 1</th>
-                        <th>Model 2</th>
-                        <th>Created At</th>
-                        <th>Action</th>
-                    </tr>
-                </thead>
-                <tbody id="predictionResults">
-                    @if (Model != null && Model.Any())
-                    {
-                        int count = 1;
-                        foreach (var result in Model)
-                        {
-                            <tr>
-                                <td>@count</td>
-                                <td>@result.Employee.empId</td>
-                                <td>@result.Employee.username</td>
-                                <td>@result.PredictionModel1</td>
-                                <td>@result.PredictionModel2</td>
-                                <td>@result.CreatedAt.ToString("yyyy-MM-dd HH:mm:ss")</td>
-                                <td>
-                                    <a asp-action="PredictionByEmployee" asp-route-empId="@result.Employee.empId" asp-route-username="@result.Employee.username" class="btn btn-primary btn-sm">View All</a>
-                                </td>
-                            </tr>
-                            count++;
-                        }
-                    }
-                    else
-                    {
-                        <tr>
-                            <td colspan="7" class="text-center">No prediction results available.</td>
-                        </tr>
-                    }
-                </tbody>
-            </table>
-        </div>
-    </div>
-</div>
-
-@section Scripts {
-    <script>
-                $(document).ready(function () {
-
-            // Function to fetch predictions from the server
-            function fetchPredictions(empId = '') {
-                $.ajax({
-                    url: '@Url.Action("SearchPredictionByEmpId", "Survey")',
-                    type: 'GET',
-                    data: { empId: empId }, // Send the empId if available
-                    success: function (data) {
-                        $('#predictionResults').empty();
-
-                        if (Array.isArray(data) && data.length > 0) {
-                            $.each(data, function (index, result) {
-                                var viewUrl = `/Survey/PredictionByEmployee?empId=${encodeURIComponent(result.employee.empId)}&username=${encodeURIComponent(result.employee.username)}`;
-
-                                $('#predictionResults').append(`
-                                    <tr>
-                                        <td>${index + 1}</td>
-                                        <td>${result.employee.empId}</td>
-                                        <td>${result.employee.username}</td>
-                                        <td>${result.predictionModel1}</td>
-                                        <td>${result.predictionModel2}</td>
-                                        <td>${new Date(result.createdAt).toLocaleString()}</td>
-                                        <td>
-                                            <a href="${viewUrl}" class="btn btn-primary btn-sm">View All</a>
-                                        </td>
-                                    </tr>
-                                `);
-                            });
-                        } else {
-                            $('#predictionResults').append('<tr><td colspan="7" class="text-center">No results found for this Employee ID.</td></tr>');
-                        }
-                    },
-                    error: function () {
-                        alert('Error retrieving prediction results. Please try again.');
-                    }
-                });
-            }
-
-            // Load all predictions on page load
-            fetchPredictions();
-
-            // Search predictions when the input changes
-            $('#empIdSearch').on('input', function () {
-                var empId = $(this).val();
-                fetchPredictions(empId);  // Fetch predictions based on search input
-            });
-        });
-
-    </script>
-}
- *@
-@model List<HrInternWebApp.Entity.SurveyPredictionResults>
-
 <div class="container-fluid" style="background-color: #f8f9fa; height: 100vh;">
     <div class="row h-100">
         <div class="col-md-3 p-3" style="background-color: #1A3E37;">
@@ -290,6 +175,163 @@
             $('#empIdSearch').on('input', function () {
                 var empId = $(this).val();
                 fetchPredictions(empId);  // Fetch predictions based on search input
+            });
+        });
+    </script>
+}
+ *@
+ @model List<HrInternWebApp.Entity.SurveyPredictionResults>
+
+<div class="container-fluid" style="background-color: #f8f9fa; height: 100vh;">
+    <div class="row h-100">
+        <div class="col-md-3 p-3" style="background-color: #1A3E37;">
+            @await Html.PartialAsync("Sidebar")
+        </div>
+
+        <div class="col-md-9" style="background-color: white; padding: 20px;">
+            <nav class="navbar navbar-light bg-light justify-content-between">
+                <a class="navbar-brand">Prediction Result</a>
+                <form class="form-inline d-flex" id="searchForm" method="get" action="javascript:void(0)">
+                    <input class="form-control mr-2" type="search" id="empIdSearch" name="empId" placeholder="Search by Employee ID" aria-label="Search">
+                </form>
+            </nav>
+
+            @if (TempData["ErrorMessage"] != null)
+            {
+                <div class="alert alert-danger mt-3">
+                    @TempData["ErrorMessage"]
+                </div>
+            }
+            <!-- Prediction Table Section -->
+            <div class="mb-5">
+                <h4 class="fw-bold mb-3">📊 Employee Turnover Predictions</h4>
+                <div class="alert alert-info mb-3">
+                    <strong>Model Information:</strong>
+                    <ul class="mb-0">
+                        <li><strong>IBM HR Analytics Model:</strong> Predicts attrition based on employee demographics and work conditions</li>
+                        <li><strong>Employee Satisfaction Model:</strong> Predicts attrition based on job satisfaction and performance metrics</li>
+                    </ul>
+                </div>
+
+                <div class="table-responsive rounded shadow-sm bg-white p-3">
+                    <table class="table table-hover align-middle">
+                        <thead class="table-light">
+                            <tr>
+                                <th>#</th>
+                                <th>Employee ID</th>
+                                <th>Name</th>
+                                <th>IBM Prediction</th>
+                                <th>Satisfaction Prediction</th>
+                                <th>Created At</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="predictionResults">
+                            @if (Model != null && Model.Any())
+                            {
+                                int count = 1;
+                                foreach (var result in Model)
+                                {
+                                    <tr>
+                                        <td>@count</td>
+                                        <td>@result.Employee.empId</td>
+                                        <td>@result.Employee.username</td>
+                                        <td>
+                                            <span class="badge @(result.PredictionModel1 == 1 ? "bg-danger" : "bg-success")">
+                                                @(result.PredictionModel1 == 1 ? "Will Leave" : "Will Stay")
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <span class="badge @(result.PredictionModel2 == 1 ? "bg-danger" : "bg-success")">
+                                                @(result.PredictionModel2 == 1 ? "Will Leave" : "Will Stay")
+                                            </span>
+                                        </td>
+                                        <td>@result.CreatedAt.ToString("MMM dd, yyyy")</td>
+                                        <td>
+                                            <a asp-action="PredictionByEmployee"
+                                               asp-route-empId="@result.Employee.empId"
+                                               asp-route-username="@result.Employee.username"
+                                               class="btn btn-sm btn-dark-green">Details</a>
+                                        </td>
+                                    </tr>
+                                    count++;
+                                }
+                            }
+                            else
+                            {
+                                <tr>
+                                    <td colspan="7" class="text-center">No prediction results available.</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Styles {
+    <style>
+        .badge {
+            padding: 0.5em 0.75em;
+            font-weight: 600;
+            min-width: 80px;
+            display: inline-block;
+            text-align: center;
+        }
+        /* Keep existing button styles */
+    </style>
+}
+
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            function fetchPredictions(empId = '') {
+                $.ajax({
+                    url: '@Url.Action("SearchPredictionByEmpId", "Survey")',
+                    type: 'GET',
+                    data: { empId: empId },
+                    success: function (data) {
+                        $('#predictionResults').empty();
+
+                        if (Array.isArray(data) && data.length > 0) {
+                            $.each(data, function (index, result) {
+                                var viewUrl = `/Survey/PredictionByEmployee?empId=${encodeURIComponent(result.employee.empId)}&username=${encodeURIComponent(result.employee.username)}`;
+
+                                $('#predictionResults').append(`
+                                    <tr>
+                                        <td>${index + 1}</td>
+                                        <td>${result.employee.empId}</td>
+                                        <td>${result.employee.username}</td>
+                                        <td>
+                                            <span class="badge ${result.predictionModel1 == 1 ? 'bg-danger' : 'bg-success'}">
+                                                ${result.predictionModel1 == 1 ? 'Will Leave' : 'Will Stay'}
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <span class="badge ${result.predictionModel2 == 1 ? 'bg-danger' : 'bg-success'}">
+                                                ${result.predictionModel2 == 1 ? 'Will Leave' : 'Will Stay'}
+                                            </span>
+                                        </td>
+                                        <td>${new Date(result.createdAt).toLocaleDateString()}</td>
+                                        <td><a href="${viewUrl}" class="btn btn-dark-green btn-sm">Details</a></td>
+                                    </tr>
+                                `);
+                            });
+                        } else {
+                            $('#predictionResults').append('<tr><td colspan="7" class="text-center">No results found.</td></tr>');
+                        }
+                    },
+                    error: function () {
+                        alert('Error retrieving data. Please try again.');
+                    }
+                });
+            }
+
+            fetchPredictions();
+            $('#empIdSearch').on('input', function () {
+                fetchPredictions($(this).val());
             });
         });
     </script>

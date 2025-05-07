@@ -76,13 +76,14 @@ CREATE TABLE Survey (
     DistanceFromHome INT,
     SatisfactionLevel FLOAT,
     LastEvaluation FLOAT,
+    NumberProject INT,
     AverageMonthlyHours INT,
     WorkAccident BIT,
     PromotionLast5Years BIT,
     Department VARCHAR(50),
+    Salary VARCHAR(50),
     SubmissionDate DATETIME
 );
-
 
 CREATE TABLE SurveyPredictionResults (
     Id INT IDENTITY(1,1) PRIMARY KEY,
@@ -97,9 +98,9 @@ CREATE TABLE SurveyPredictionResults (
 
 EXEC sp_rename 'LeaveBalance.EmpId', 'empId', 'COLUMN';
 
-USE [HRManagementSystem]
-select * from SurveyPredictionResults
-select * from Survey
+--USE [HRManagementSystem]
+--select * from SurveyPredictionResults
+--select * from Survey
 
-DROP TABLE SurveyPredictionResults
-DROP TABLE Survey
+--DROP TABLE SurveyPredictionResults
+--DROP TABLE Survey

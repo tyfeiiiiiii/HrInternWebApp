@@ -46,8 +46,8 @@
                                         <div class="form-group">
                                             <label for="maritalStatus" class="font-weight-bold" style="color: #2c3e50;">Marital Status</label>
                                             <select class="form-control" id="maritalStatus" name="MaritalStatus" required style="border-radius: 8px; border: 1px solid #ddd;">
-                                                <option value="0">Single</option>
-                                                <option value="1">Married</option>
+                                                <option value="Single">Single</option>
+                                                <option value="Married">Married</option>
                                             </select>
                                         </div>
                                     </div>
@@ -69,6 +69,14 @@
                                             <input type="number" class="form-control" id="monthlyIncome" name="MonthlyIncome" required style="border-radius: 8px; border: 1px solid #ddd;">
                                         </div>
                                     </div>
+                                    <div class="form-group">
+                                        <label for="salaryLevel" class="font-weight-bold" style="color: #2c3e50;">Salary Level<small class="text-muted">(Choose the range that matches your current salary)</small></label>
+                                        <select class="form-control" id="salaryLevel" name="Salary" required style="border-radius: 8px; border: 1px solid #ddd;">
+                                            <option value="Low">Low</option>
+                                            <option value="Medium">Medium</option>
+                                            <option value="High">High</option>
+                                        </select>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -85,17 +93,17 @@
                                     <div class="col-md-6">
                                         <div class="form-group">
                                             <label for="department" class="font-weight-bold" style="color: #2c3e50;">Department</label>
-                                            <select class="form-control" id="department" name="department" required style="border-radius: 8px; border: 1px solid #ddd;">
-                                                <option value="sales">Sales</option>
-                                                <option value="technical">Technical</option>
-                                                <option value="support">Support</option>
-                                                <option value="hr">Human Resources</option>
-                                                <option value="management">Management</option>
-                                                <option value="product_mng">Product Management</option>
-                                                <option value="marketing">Marketing</option>
+                                            <select class="form-control" id="department" name="Department" required style="border-radius: 8px; border: 1px solid #ddd;">
+                                                <option value="Sales">Sales</option>
+                                                <option value="Technical">Technical</option>
+                                                <option value="Support">Support</option>
+                                                <option value="Hr">Human Resources</option>
+                                                <option value="Management">Management</option>
+                                                <option value="Product_mng">Product Management</option>
+                                                <option value="Marketing">Marketing</option>
                                                 <option value="IT">IT</option>
                                                 <option value="RandD">Research and Development</option>
-                                                <option value="accounting">Accounting</option>
+                                                <option value="Accounting">Accounting</option>
                                             </select>
                                         </div>
                                     </div>
@@ -103,9 +111,9 @@
                                         <div class="form-group">
                                             <label for="businessTravel" class="font-weight-bold" style="color: #2c3e50;">Business Travel</label>
                                             <select class="form-control" id="businessTravel" name="BusinessTravel" required style="border-radius: 8px; border: 1px solid #ddd;">
-                                                <option value="0">Travel Rarely</option>
-                                                <option value="1">Travel Frequently</option>
-                                                <option value="2">Non-Travel</option>
+                                                <option value="Travel_Rarely">Travel Rarely</option>
+                                                <option value="Travel_Frequently">Travel Frequently</option>
+                                                <option value="Non-Travel">Non-Travel</option>
                                             </select>
                                         </div>
                                     </div>
@@ -132,11 +140,17 @@
                                             </label>
                                             <input type="number" class="form-control" id="jobInvolvement" name="JobInvolvement" required style="border-radius: 8px; border: 1px solid #ddd;">
                                         </div>
+                                        <div class="form-group">
+                                            <label for="numberOfProjects" class="font-weight-bold" style="color: #2c3e50;">Number of Projects<small class="form-text text-muted"> (Number of projects involved)</small></label>
+                                            <input type="number" class="form-control" id="numberOfProjects" name="NumberProject" required style="border-radius: 8px; border: 1px solid #ddd;">
+                                        </div>
                                     </div>
                                     <div class="col-md-6">
                                         <div class="form-group">
                                             <label for="stockOptionLevel" class="font-weight-bold" style="color: #2c3e50;">
-                                                Stock Option Level <small class="text-muted">(0 = No options, Higher = More options)</small>
+                                                Stock Option Level    <small class="form-text text-muted">
+                                                    (Your company stock option level (0=no, 1=yes) as per your compensation package)
+                                                </small>
                                             </label>
                                             <input type="number" class="form-control" id="stockOptionLevel" name="StockOptionLevel" required style="border-radius: 8px; border: 1px solid #ddd;">
                                         </div>
@@ -181,7 +195,7 @@
                                     <div class="input-group">
                                         <input type="number" step="0.01" min="0" max="1"
                                                class="form-control" id="lastEvaluation"
-                                               name="lastEvaluation" required
+                                               name="LastEvaluation" required
                                                placeholder="0.00 to 1.00 (e.g., 0.85 = 85%)"
                                                style="border-radius: 8px; border: 1px solid #ddd;">
                                         <div class="input-group-append">
@@ -209,15 +223,15 @@
                                     <div class="col-md-6">
                                         <div class="form-group">
                                             <label for="averageMonthlyHours" class="font-weight-bold" style="color: #2c3e50;">Average Monthly Hours</label>
-                                            <input type="number" class="form-control" id="averageMonthlyHours" name="averageMonthlyHours" required style="border-radius: 8px; border: 1px solid #ddd;">
+                                            <input type="number" class="form-control" id="averageMonthlyHours" name="AverageMonthlyHours" required style="border-radius: 8px; border: 1px solid #ddd;">
                                         </div>
                                     </div>
                                     <div class="col-md-6">
                                         <div class="form-group">
                                             <label for="overTime" class="font-weight-bold" style="color: #2c3e50;">OverTime</label>
                                             <select class="form-control" id="overTime" name="OverTime" required style="border-radius: 8px; border: 1px solid #ddd;">
-                                                <option value="1">Yes</option>
-                                                <option value="0">No</option>
+                                                <option value="Yes">Yes</option>
+                                                <option value="No">No</option>
                                             </select>
                                         </div>
                                     </div>
@@ -227,18 +241,22 @@
                                         <div class="form-group">
                                             <label for="workAccident" class="font-weight-bold" style="color: #2c3e50;">Work Accident</label>
                                             <select class="form-control" id="workAccident" name="workAccident" required style="border-radius: 8px; border: 1px solid #ddd;">
-                                                <option value="false">No</option>
-                                                <option value="true">Yes</option>
+                                                <option value="0">No</option>
+                                                <option value="1">Yes</option>
                                             </select>
                                         </div>
                                     </div>
                                     <div class="col-md-6">
                                         <div class="form-group">
                                             <label for="promotionLast5Years" class="font-weight-bold" style="color: #2c3e50;">Promotion in Last 5 Years</label>
+                                            <small class="form-text text-muted">
+                                                (Have you been promoted within the last 5 years? )
+                                            </small>
                                             <select class="form-control" id="promotionLast5Years" name="promotionLast5Years" required style="border-radius: 8px; border: 1px solid #ddd;">
-                                                <option value="false">No</option>
-                                                <option value="true">Yes</option>
+                                                <option value="0">No</option>
+                                                <option value="1">Yes</option>
                                             </select>
+                             
                                         </div>
                                     </div>
                                 </div>

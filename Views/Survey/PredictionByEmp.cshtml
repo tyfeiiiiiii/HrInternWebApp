@@ -14,78 +14,190 @@
         </div>
 
         <div class="col-md-9" style="background-color: white; padding: 20px;">
-            <h3>Prediction History for Employee: @username (@empId)</h3>
-            <hr />
-            <!-- Prediction Table Section -->
-            <div class="mb-5">
-                <h4 class="fw-bold mb-3">📊 Prediction History</h4>
-                <div class="table-responsive rounded shadow-sm bg-white p-3">
-                    <table class="table table-hover align-middle">
-                        <thead class="table-light">
-                            <tr>
-                                <th>#</th>
-                                <th>Model 1 Prediction</th>
-                                <th>Model 2 Prediction</th>
-                                <th>Created At</th>
-                                <th>Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @if (Model != null && Model.Any())
-                            {
-                                int count = 1;
-                                foreach (var result in Model)
-                                {
-                                    var survey = result.Survey;
-                                    <tr>
-                                        <td>@count</td>
-                                        <td>@result.PredictionModel1</td>
-                                        <td>@result.PredictionModel2</td>
-                                        <td>@result.CreatedAt.ToString("yyyy-MM-dd HH:mm:ss")</td>
-                                        <td>
-                                            <button class="btn btn-dark-green btn-sm" type="button" data-bs-toggle="collapse" data-bs-target="#details-@index">
-                                                View Details
-                                            </button>
-                                        </td>
-                                    </tr>
-                                    <tr class="collapse" id="details-@index">
-                                        <td colspan="5">
-                                            <div class="card card-body bg-light">
-                                                <p><strong>OverTime:</strong> @survey.OverTime</p>
-                                                <p><strong>Marital Status:</strong> @survey.MaritalStatus</p>
-                                                <p><strong>Monthly Income:</strong> @survey.MonthlyIncome</p>
-                                                <p><strong>Stock Option Level:</strong> @survey.StockOptionLevel</p>
-                                                <p><strong>Business Travel:</strong> @survey.BusinessTravel</p>
-                                                <p><strong>Total Working Years:</strong> @survey.TotalWorkingYears</p>
-                                                <p><strong>Job Involvement:</strong> @survey.JobInvolvement</p>
-                                                <p><strong>Years At Company:</strong> @survey.YearsAtCompany</p>
-                                                <p><strong>Age:</strong> @survey.Age</p>
-                                                <p><strong>Distance From Home:</strong> @survey.DistanceFromHome</p>
-                                                <p><strong>Satisfaction Level:</strong> @survey.SatisfactionLevel</p>
-                                                <p><strong>Last Evaluation:</strong> @survey.LastEvaluation</p>
-                                                <p><strong>Average Monthly Hours:</strong> @survey.AverageMonthlyHours</p>
-                                                <p><strong>Work Accident:</strong> @(survey.WorkAccident ? "Yes" : "No")</p>
-                                                <p><strong>Promotion Last 5 Years:</strong> @(survey.PromotionLast5Years ? "Yes" : "No")</p>
-                                                <p><strong>Department:</strong> @survey.Department</p>
-                                                <p><strong>Submitted At:</strong> @survey.SubmissionDate</p>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                    count++;
-                                    index++;
-                                }
-                            }
-                            else
-                            {
-                                <tr>
-                                    <td colspan="5" class="text-center">No prediction results for this employee.</td>
-                                </tr>
-                            }
-                        </tbody>
-                    </table>
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h3>Turnover Predictions for: @username (@empId)</h3>
+                <a asp-action="DisplayPredictionResult" class="btn btn-dark-green">Back to All</a>
+            </div>
+
+            <div class="row mb-4">
+                <div class="col-md-6">
+                    <div class="card h-100 border-primary">
+                        <div class="card-header bg-primary text-white">
+                            <h5 class="mb-0">IBM HR Analytics Model</h5>
+                        </div>
+                        <div class="card-body">
+                            <p class="mb-2">Predicts whether an employee <strong>will leave</strong> based on:</p>
+                            <ul>
+                                <li>Work conditions (overtime, travel)</li>
+                                <li>Compensation (income, stock options)</li>
+                                <li>Tenure (years at company, total working years)</li>
+                                <li>Personal factors (age, marital status, distance from home)</li>
+                                <li>Job involvement level</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="card h-100 border-info">
+                        <div class="card-header bg-info text-white">
+                            <h5 class="mb-0">Employee Satisfaction Model</h5>
+                        </div>
+                        <div class="card-body">
+                            <p class="mb-2">Predicts whether an employee <strong>will leave</strong> based on:</p>
+                            <ul>
+                                <li>Job satisfaction level</li>
+                                <li>Performance evaluation</li>
+                                <li>Workload (monthly hours, number of project)</li>
+                                <li>Career growth (promotions)</li>
+                                <li>Work accidents history</li>
+                                <li>Salary range</li>
+                                <li>Department</li>
+                            </ul>
+                        </div>
+                    </div>
                 </div>
             </div>
-            <!-- Back Button -->
+
+            <div class="table-responsive rounded shadow-sm bg-white p-3">
+                <table class="table table-hover align-middle">
+                    <thead class="table-light">
+                        <tr>
+                            <th>#</th>
+                            <th>IBM Prediction</th>
+                            <th>Satisfaction Prediction</th>
+                            <th>Date</th>
+                            <th>Details</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (Model != null && Model.Any())
+                        {
+                            int count = 1;
+                            foreach (var result in Model)
+                            {
+                                var survey = result.Survey;
+                                <tr>
+                                    <td>@count</td>
+                                    <td>
+                                        <span class="badge @(result.PredictionModel1 == 1 ? "bg-danger" : "bg-success")">
+                                            @(result.PredictionModel1 == 1 ? "Will Leave" : "Will Stay")
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <span class="badge @(result.PredictionModel2 == 1 ? "bg-danger" : "bg-success")">
+                                            @(result.PredictionModel2 == 1 ? "Will Leave" : "Will Stay")
+                                        </span>
+                                    </td>
+                                    <td>@result.CreatedAt.ToString("MMM dd, yyyy")</td>
+                                    <td>
+                                        <button class="btn btn-dark-green btn-sm"
+                                                type="button"
+                                                data-bs-toggle="collapse"
+                                                data-bs-target="#details-@index">
+                                            Show Factors
+                                        </button>
+                                    </td>
+                                </tr>
+                                <tr class="collapse" id="details-@index">
+                                    <td colspan="5">
+                                        <div class="card card-body bg-light p-0">
+                                            <div class="row g-0">
+                                                <!-- IBM Model Factors -->
+                                                <div class="col-md-6 p-4 border-end">
+                                                    <div class="d-flex align-items-center mb-3">
+                                                        <div class="bg-primary p-2 rounded me-3">
+                                                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="white" class="bi bi-bar-chart-line" viewBox="0 0 16 16">
+                                                                <path d="M11 2a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v12h.5a.5.5 0 0 1 0 1H.5a.5.5 0 0 1 0-1H1v-3a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v3h1V7a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v7h1V2zm1 12h2V2h-2v12zm-3 0V7H7v7h2zm-5 0v-3H2v3h2z" />
+                                                            </svg>
+                                                        </div>
+                                                        <h4 class="m-0 text-primary">IBM Model Factors</h4>
+                                                    </div>
+                                                    <div class="row">
+                                                        <div class="col-md-6">
+                                                            <div class="factor-item mb-3">
+                                                                <h6 class="text-muted mb-1">Work Conditions</h6>
+                                                                <p class="mb-1"><strong>OverTime:</strong> @survey.OverTime</p>
+                                                                <p class="mb-1"><strong>Business Travel:</strong> @survey.BusinessTravel</p>
+                                                                <p class="mb-1"><strong>Job Involvement:</strong> @survey.JobInvolvement</p>
+                                                            </div>
+                                                            <div class="factor-item mb-3">
+                                                                <h6 class="text-muted mb-1">Compensation</h6>
+                                                                <p class="mb-1"><strong>Monthly Income:</strong> @survey.MonthlyIncome</p>
+                                                                <p class="mb-1"><strong>Stock Option:</strong> @survey.StockOptionLevel</p>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-6">
+                                                            <div class="factor-item mb-3">
+                                                                <h6 class="text-muted mb-1">Tenure</h6>
+                                                                <p class="mb-1"><strong>Total Working Years:</strong> @survey.TotalWorkingYears</p>
+                                                                <p class="mb-1"><strong>Years At Company:</strong> @survey.YearsAtCompany</p>
+                                                            </div>
+                                                            <div class="factor-item mb-3">
+                                                                <h6 class="text-muted mb-1">Personal Factors</h6>
+                                                                <p class="mb-1"><strong>Age:</strong> @survey.Age</p>
+                                                                <p class="mb-1"><strong>Marital Status:</strong> @survey.MaritalStatus</p>
+                                                                <p class="mb-1"><strong>Distance From Home:</strong> @survey.DistanceFromHome</p>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                                <!-- Satisfaction Model Factors -->
+                                                <div class="col-md-6 p-4">
+                                                    <div class="d-flex align-items-center mb-3">
+                                                        <div class="bg-info p-2 rounded me-3">
+                                                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="white" class="bi bi-emoji-smile" viewBox="0 0 16 16">
+                                                                <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z" />
+                                                                <path d="M4.285 9.567a.5.5 0 0 1 .683.183A3.498 3.498 0 0 0 8 11.5a3.498 3.498 0 0 0 3.032-1.75.5.5 0 1 1 .866.5A4.498 4.498 0 0 1 8 12.5a4.498 4.498 0 0 1-3.898-2.25.5.5 0 0 1 .183-.683zM7 6.5C7 7.328 6.552 8 6 8s-1-.672-1-1.5S5.448 5 6 5s1 .672 1 1.5zm4 0c0 .828-.448 1.5-1 1.5s-1-.672-1-1.5S9.448 5 10 5s1 .672 1 1.5z" />
+                                                            </svg>
+                                                        </div>
+                                                        <h4 class="m-0 text-info">Satisfaction Model Factors</h4>
+                                                    </div>
+                                                    <div class="row">
+                                                        <div class="col-md-6">
+                                                            <div class="factor-item mb-3">
+                                                                <h6 class="text-muted mb-1">Job Satisfaction</h6>
+                                                                <p class="mb-1"><strong>Satisfaction Level:</strong> @(survey.SatisfactionLevel.ToString("P1"))</p>
+                                                                <p class="mb-1"><strong>Last Evaluation:</strong> @(survey.LastEvaluation.ToString("P1"))</p>
+                                                                <p class="mb-1"><strong>Salary:</strong> @survey.Salary</p>
+                                                            </div>
+                                                            <div class="factor-item mb-3">
+                                                                <h6 class="text-muted mb-1">Workload</h6>
+                                                                <p class="mb-1"><strong>Monthly Hours:</strong> @survey.AverageMonthlyHours</p>
+                                                                <p class="mb-1"><strong>Number of Projects:</strong> @survey.NumberProject</p>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-6">
+                                                            <div class="factor-item mb-3">
+                                                                <h6 class="text-muted mb-1">Career Growth</h6>
+                                                                <p class="mb-1"><strong>Last Promotion:</strong> @(survey.PromotionLast5Years)</p>
+                                                            </div>
+                                                            <div class="factor-item mb-3">
+                                                                <h6 class="text-muted mb-1">Other Factors</h6>
+                                                                <p class="mb-1"><strong>Work Accident:</strong> @(survey.WorkAccident)</p>
+                                                                <p class="mb-1"><strong>Department:</strong> @survey.Department</p>
+                                                                <p class="mb-1"><strong>Submitted At:</strong> @survey.SubmissionDate.ToString("MMM dd, yyyy HH:mm")</p>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                </tr>
+                                count++;
+                                index++;
+                            }
+                        }
+                        else
+                        {
+                            <tr>
+                                <td colspan="5" class="text-center">No prediction history found.</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
             <a asp-action="DisplayPredictionResult" class="btn btn-dark-green">Back to All Predictions</a>
         </div>
     </div>
@@ -94,7 +206,7 @@
 @section Styles {
     <style>
         .btn-dark-green {
-            background-color: #16332e; /* Dark green */
+            background-color: #16332e;
             color: #ffffff;
             font-weight: 600;
             border: none;
@@ -105,7 +217,7 @@
         }
 
             .btn-dark-green:hover {
-                background-color: #1A3E37; /* Slightly lighter green */
+                background-color: #1A3E37;
                 transform: scale(1.05);
                 box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
                 color: #ffffff;
@@ -129,5 +241,46 @@
         .table th {
             font-weight: 600;
         }
+
+        .card {
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .card-header {
+            border-radius: 10px 10px 0 0 !important;
+        }
+
+        .bg-primary {
+            background-color: #0d6efd !important;
+        }
+
+        .bg-info {
+            background-color: #0dcaf0 !important;
+        }
+
+        /* New styles for factor details */
+        .factor-item {
+            background-color: rgba(248, 249, 250, 0.5);
+            padding: 12px;
+            border-radius: 8px;
+            border-left: 3px solid #dee2e6;
+            transition: all 0.2s ease;
+        }
+
+            .factor-item:hover {
+                background-color: rgba(233, 236, 239, 0.7);
+                border-left-color: #0d6efd;
+            }
+
+            .factor-item h6 {
+                font-size: 0.8rem;
+                letter-spacing: 0.5px;
+            }
+
+            .factor-item p {
+                font-size: 0.9rem;
+                margin-bottom: 0.25rem;
+            }
     </style>
 }
