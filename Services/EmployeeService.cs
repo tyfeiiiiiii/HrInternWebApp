@@ -110,32 +110,6 @@ public class EmployeeService
     #endregion
 
     #region Delete Employee
-    //public async Task DeleteEmployeeAsync(int employeeId)
-    //{
-    //    using (var transaction = _session.BeginTransaction())
-    //    {
-    //        try
-    //        {
-    //            var employee = await _session.GetAsync<Employee>(employeeId);
-    //            if (employee != null)
-    //            {
-    //                await _session.DeleteAsync(employee);
-    //                await transaction.CommitAsync();
-    //            }
-    //            else
-    //            {
-    //                _logger.LogWarning($"Employee with ID {employeeId} not found.");
-    //            }
-    //        }
-    //        catch (Exception ex)
-    //        {
-    //            await transaction.RollbackAsync();
-    //            _logger.LogError(ex, "Failed to delete employee");
-    //            throw;
-    //        }
-    //    }
-    //}
-
     public async Task DeleteEmployeeAsync(int employeeId)
     {
         using (var transaction = _session.BeginTransaction())
