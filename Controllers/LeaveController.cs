@@ -205,24 +205,6 @@ public class LeaveController : Controller
 
     #endregion
 
-    //#region Update Leave Status
-
-    //// Only for admins
-    //public async Task<IActionResult> UpdateLeaveStatusAsync(int leaveId, string status)
-    //{
-    //    var approver = HttpContext.Session.GetString("Username");
-
-    //    if (string.IsNullOrEmpty(approver))
-    //    {
-    //        return RedirectToAction("Login", "Authentication");
-    //    }
-
-    //    await _leaveService.UpdateLeaveStatusAsync(leaveId, status, approver);
-
-    //    return RedirectToAction(nameof(ViewLeave));
-    //}
-
-    //#endregion
     #region Update Leave Status
 
     // Only for admins
