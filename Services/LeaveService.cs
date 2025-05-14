@@ -245,44 +245,6 @@ public class LeaveService
     #endregion
 
     #region Update Leave Status
-    //public async Task UpdateLeaveStatusAsync(int leaveId, string newStatus, string approver)
-    //{
-    //    try
-    //    {
-    //        var leave = await _session.GetAsync<Leave>(leaveId);
-    //        if (leave != null)
-    //        {
-    //            leave.status = newStatus;
-    //            leave.approver = approver;
-
-    //            using (var transaction = _session.BeginTransaction())
-    //            {
-    //                try
-    //                {
-    //                    await _session.UpdateAsync(leave);
-    //                    await transaction.CommitAsync();
-    //                    _logger.LogInformation($"Leave status updated for leave ID {leaveId}");
-    //                }
-    //                catch (Exception ex)
-    //                {
-    //                    await transaction.RollbackAsync();
-    //                    _logger.LogError(ex, "Failed to update leave status");
-    //                    throw new Exception("Failed to update leave status", ex);
-    //                }
-    //            }
-    //        }
-    //        else
-    //        {
-    //            _logger.LogWarning($"Leave with ID {leaveId} not found.");
-    //            throw new KeyNotFoundException($"Leave with ID {leaveId} not found.");
-    //        }
-    //    }
-    //    catch (Exception ex)
-    //    {
-    //        _logger.LogError(ex, "An error occurred while updating leave status.");
-    //        throw;
-    //    }
-    //}
     public async Task<Leave> UpdateLeaveStatusAsync(int leaveId, string newStatus, string approver)
     {
         try
